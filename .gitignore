@@ -1,0 +1,134 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log Files
+*.log
+
+# Android Studio Navigation editor temp files
+.navigation/
+
+# Android Studio captures folder
+captures/
+
+# IntelliJ IDEA
+*.iml
+.idea/
+.idea/caches/
+.idea/caches/builds/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/datasources.xml
+.idea/dataSources.ids
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
+.idea/libraries/
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild
+.cxx/
+
+# Google Services (e.g., APIs or Firebase)
+google-services.json
+
+# Android Patch
+*.orig
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Linux
+*~
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+# Version control
+vcs.xml
+
+# lint
+lint/intermediates/
+lint/outputs/
+lint/reports/
+lint/tmp/
+
+# Kotlin
+*.kotlin_module
+
+# Kapt
+kapt3/
+
+# Annotation Processors
+.apt_generated
+
+# Obfuscation
+proguard/
+proguard_logs/
+
+# APK Size
+app/release/output.json
+
+# Debug
+app/debug/
+
+# Release
+app/release/
+
+# Profiles
+app/profile/
+
+# Android Bundle
+*.ids
+*.pb
+*.bin
+*.zip
+*.blob
+
+# Uncomment if you use CMake
+# cmake-build-*/
+
+# Uncomment if you use NDK
+# src/main/jniLibs/
+# *.so
+
+# Uncomment if you use Firebase
+# google-services.json
+# GoogleService-Info.plist
+
+# Uncomment if you use Crashlytics
+# crashlytics-build.properties
+# com_crashlytics_export_strings.xml
