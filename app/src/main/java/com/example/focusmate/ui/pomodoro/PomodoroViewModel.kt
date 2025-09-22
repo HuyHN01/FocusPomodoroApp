@@ -5,46 +5,54 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
+enum class TimerState {
+    IDLE, RUNNING, PAUSED
+}
+
 class PomodoroViewModel : ViewModel() {
 
-    private var totalTime = 25 * 60   // 25 phút
+    private var totalTime = 25 * 60
     private var timer: CountDownTimer? = null
 
     private val _timeLeft = MutableLiveData(totalTime)
     val timeLeft: LiveData<Int> = _timeLeft
 
-    private val _isRunning = MutableLiveData(false)
-    val isRunning: LiveData<Boolean> = _isRunning
+    private val _state = MutableLiveData(TimerState.IDLE)
+    val state: LiveData<TimerState> = _state
 
     fun startTimer() {
-        if (_isRunning.value == true) return
+        if (_state.value == TimerState.RUNNING) return
 
-        _isRunning.value = true
+        _state.value = TimerState.RUNNING
         timer = object : CountDownTimer(_timeLeft.value!! * 1000L, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 _timeLeft.value = (millisUntilFinished / 1000).toInt()
             }
             override fun onFinish() {
                 _timeLeft.value = 0
-                _isRunning.value = false
+                _state.value = TimerState.IDLE
             }
         }.start()
     }
 
     fun pauseTimer() {
         timer?.cancel()
-        _isRunning.value = false
+        _state.value = TimerState.PAUSED
     }
 
-    fun resetTimer() {
+    fun resumeTimer() {
+        startTimer()
+    }
+
+    fun stopTimer() {
         timer?.cancel()
         _timeLeft.value = totalTime
-        _isRunning.value = false
+        _state.value = TimerState.IDLE
     }
 
     fun setDuration(minutes: Int) {
         totalTime = minutes * 60
-        resetTimer()
+        stopTimer()
     }
 
     override fun onCleared() {

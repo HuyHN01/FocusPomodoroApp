@@ -1,6 +1,7 @@
 package com.example.focusmate.ui.pomodoro
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.focusmate.databinding.ActivityPomodoroBinding
@@ -10,7 +11,7 @@ class PomodoroActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPomodoroBinding
     private val viewModel: PomodoroViewModel by viewModels()
 
-    private val defaultTotalTime = 25 * 60 // 25 phút
+    private val defaultTotalTime = 25 * 60
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,35 +23,44 @@ class PomodoroActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        // Quan sát thời gian
         viewModel.timeLeft.observe(this) { seconds ->
             val minutes = seconds / 60
             val sec = seconds % 60
             binding.tvTimer.text = String.format("%02d:%02d", minutes, sec)
 
-            // Cập nhật progress
             binding.cpvTimerProgress.setMaxProgress(defaultTotalTime.toFloat())
             binding.cpvTimerProgress.setProgress((defaultTotalTime - seconds).toFloat())
         }
 
-        // Quan sát trạng thái chạy
-        viewModel.isRunning.observe(this) { running ->
-            binding.btnStartPause.text = if (running) "Tạm dừng" else "▶ Bắt đầu tập trung"
+        viewModel.state.observe(this) { state ->
+            when (state) {
+                TimerState.IDLE -> {
+                    binding.btnStart.visibility = View.VISIBLE
+                    binding.btnResume.visibility = View.GONE
+                    binding.btnStop.visibility = View.GONE
+                    binding.btnPause.visibility = View.GONE
+                }
+                TimerState.RUNNING -> {
+                    binding.btnStart.visibility = View.GONE
+                    binding.btnResume.visibility = View.GONE
+                    binding.btnStop.visibility = View.GONE
+                    binding.btnPause.visibility = View.VISIBLE
+                }
+                TimerState.PAUSED -> {
+                    binding.btnStart.visibility = View.GONE
+                    binding.btnPause.visibility = View.GONE
+                    binding.btnResume.visibility = View.VISIBLE
+                    binding.btnStop.visibility = View.VISIBLE
+                }
+            }
         }
     }
 
     private fun setupListeners() {
-        binding.btnStartPause.setOnClickListener {
-            if (viewModel.isRunning.value == true) {
-                viewModel.pauseTimer()
-            } else {
-                viewModel.startTimer()
-            }
-        }
-
-        // Ví dụ: nếu muốn có nút reset
-        // binding.btnReset.setOnClickListener {
-        //     viewModel.resetTimer()
-        // }
+        binding.btnStart.setOnClickListener { viewModel.startTimer() }
+        binding.btnPause.setOnClickListener { viewModel.pauseTimer() }
+        binding.btnResume.setOnClickListener { viewModel.resumeTimer() }
+        binding.btnStop.setOnClickListener { viewModel.stopTimer() }
     }
 }
+
