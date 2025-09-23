@@ -28,18 +28,22 @@ class PomodoroActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        // Quan sát thời gian
+        // thời gian
         viewModel.timeLeft.observe(this) { seconds ->
             val minutes = seconds / 60
             val sec = seconds % 60
             binding.tvTimer.text = String.format("%02d:%02d", minutes, sec)
 
-            // Cập nhật progress vòng tròn
-            binding.cpvTimerProgress.setMaxProgress(defaultTotalTime.toFloat())
-            binding.cpvTimerProgress.setProgress((defaultTotalTime - seconds).toFloat())
+            // cập nhật progress max theo session total (hỗ trợ +1 min)
+            viewModel.sessionTotal.observe(this) { total ->
+                binding.cpvTimerProgress.setMaxProgress(total.toFloat())
+            }
+            // set progress
+            val total = viewModel.sessionTotal.value ?: defaultTotalTime
+            binding.cpvTimerProgress.setProgress((total - seconds).toFloat())
         }
 
-        // Quan sát trạng thái Timer
+        // trạng thái
         viewModel.state.observe(this) { state ->
             when (state) {
                 TimerState.IDLE -> {
@@ -47,31 +51,64 @@ class PomodoroActivity : AppCompatActivity() {
                     binding.btnPause.visibility = View.GONE
                     binding.btnResume.visibility = View.GONE
                     binding.btnStop.visibility = View.GONE
+                    binding.btnStartBreak.visibility = View.GONE
+                    binding.btnSkipBreak.visibility = View.GONE
                 }
                 TimerState.RUNNING -> {
                     binding.btnStart.visibility = View.GONE
                     binding.btnPause.visibility = View.VISIBLE
                     binding.btnResume.visibility = View.GONE
                     binding.btnStop.visibility = View.GONE
+                    binding.btnStartBreak.visibility = View.GONE
+                    binding.btnSkipBreak.visibility = View.GONE
                 }
                 TimerState.PAUSED -> {
                     binding.btnStart.visibility = View.GONE
                     binding.btnPause.visibility = View.GONE
                     binding.btnResume.visibility = View.VISIBLE
                     binding.btnStop.visibility = View.VISIBLE
+                    binding.btnStartBreak.visibility = View.GONE
+                    binding.btnSkipBreak.visibility = View.GONE
+                }
+                TimerState.BREAK_READY -> {
+                    // show start break and skip
+                    binding.btnStart.visibility = View.GONE
+                    binding.btnPause.visibility = View.GONE
+                    binding.btnResume.visibility = View.GONE
+                    binding.btnStop.visibility = View.GONE
+                    binding.btnStartBreak.visibility = View.VISIBLE
+                    binding.btnSkipBreak.visibility = View.GONE
+                }
+                TimerState.BREAK_RUNNING -> {
+                    // show pause + skip (per requirement)
+                    binding.btnStart.visibility = View.GONE
+                    binding.btnPause.visibility = View.GONE
+                    binding.btnResume.visibility = View.GONE
+                    binding.btnStop.visibility = View.GONE
+                    binding.btnStartBreak.visibility = View.GONE
+                    binding.btnSkipBreak.visibility = View.VISIBLE
+                }
+                TimerState.BREAK_PAUSED -> {
+                    binding.btnStart.visibility = View.GONE
+                    binding.btnPause.visibility = View.GONE
+                    binding.btnResume.visibility = View.GONE
+                    binding.btnStop.visibility = View.GONE
+                    binding.btnStartBreak.visibility = View.GONE
+                    binding.btnSkipBreak.visibility = View.VISIBLE
                 }
             }
         }
     }
 
     private fun setupListeners() {
-        // Điều khiển Timer
-        binding.btnStart.setOnClickListener { viewModel.startTimer() }
+        binding.btnStart.setOnClickListener { viewModel.startTimer() }         // start pomodoro
         binding.btnPause.setOnClickListener { viewModel.pauseTimer() }
         binding.btnResume.setOnClickListener { viewModel.resumeTimer() }
         binding.btnStop.setOnClickListener { viewModel.resetTimer() }
 
-        // Mở chế độ toàn màn hình
+        binding.btnStartBreak.setOnClickListener { viewModel.startBreak() }    // start break
+        binding.btnSkipBreak.setOnClickListener { viewModel.skipBreak() }      // skip break
+
         binding.llFocus.setOnClickListener { openFullscreenTimer() }
     }
 

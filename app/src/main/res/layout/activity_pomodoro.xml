@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background">
@@ -121,6 +120,31 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:visibility="gone" />
+
+        <!-- Start Break button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_start_break"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:background="@drawable/button_background"
+            android:text="▶ Bắt đầu giải lao"
+            android:textColor="@color/dark_blue"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+
+        <!-- Skip Break button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_skip_break"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:background="@drawable/transparent_button_background"
+            android:text="Bỏ qua giải lao"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+
     </LinearLayout>
 
 

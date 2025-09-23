@@ -36,40 +36,58 @@ class FullscreenTimerActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        // Cập nhật đồng hồ
         viewModel.timeLeft.observe(this) { seconds ->
             val minutes = seconds / 60
             val sec = seconds % 60
-            binding.tvMinutes?.text = String.format("%02d", minutes)
-            binding.tvSeconds?.text = String.format("%02d", sec)
+            binding.tvMinutes.text = String.format("%02d", minutes)
+            binding.tvSeconds.text = String.format("%02d", sec)
         }
 
         // Cập nhật thanh control theo state
         viewModel.state.observe(this) { state ->
             when (state) {
                 TimerState.IDLE -> {
-                    // Trường hợp 1: mặc định hiển thị duy nhất Play
-                    binding.btnPlay?.visibility = View.VISIBLE
-                    binding.btnAddOne?.visibility = View.GONE
-                    binding.divider?.visibility = View.GONE
-                    binding.btnPause?.visibility = View.GONE
-                    binding.btnStop?.visibility = View.GONE
+                    // only show play
+                    binding.btnPlay.visibility = View.VISIBLE
+                    binding.btnAddOne.visibility = View.GONE
+                    binding.divider.visibility = View.GONE
+                    binding.btnPause.visibility = View.GONE
+                    binding.btnStop.visibility = View.GONE
                 }
                 TimerState.RUNNING -> {
-                    // Trường hợp 2: đang chạy → hiện +1, divider, Pause
-                    binding.btnPlay?.visibility = View.GONE
-                    binding.btnAddOne?.visibility = View.VISIBLE
-                    binding.divider?.visibility = View.VISIBLE
-                    binding.btnPause?.visibility = View.VISIBLE
-                    binding.btnStop?.visibility = View.GONE
+                    binding.btnPlay.visibility = View.GONE
+                    binding.btnAddOne.visibility = View.VISIBLE
+                    binding.divider.visibility = View.VISIBLE
+                    binding.btnPause.visibility = View.VISIBLE
+                    binding.btnStop.visibility = View.GONE
                 }
                 TimerState.PAUSED -> {
-                    // Tạm dừng → Play + Stop
-                    binding.btnPlay?.visibility = View.VISIBLE
-                    binding.btnAddOne?.visibility = View.VISIBLE
-                    binding.divider?.visibility = View.VISIBLE
-                    binding.btnPause?.visibility = View.GONE
-                    binding.btnStop?.visibility = View.VISIBLE
+                    binding.btnPlay.visibility = View.VISIBLE
+                    binding.btnAddOne.visibility = View.VISIBLE
+                    binding.divider.visibility = View.VISIBLE
+                    binding.btnPause.visibility = View.GONE
+                    binding.btnStop.visibility = View.VISIBLE
+                }
+                TimerState.BREAK_READY -> {
+                    binding.btnPlay.visibility = View.VISIBLE
+                    binding.btnAddOne.visibility = View.GONE
+                    binding.divider.visibility = View.GONE
+                    binding.btnPause.visibility = View.GONE
+                    binding.btnStop.visibility = View.GONE
+                }
+                TimerState.BREAK_RUNNING -> {
+                    binding.btnPlay.visibility = View.GONE
+                    binding.btnAddOne.visibility = View.GONE // allow +1 break? per previous design yes
+                    binding.divider.visibility = View.GONE
+                    binding.btnPause.visibility = View.GONE
+                    binding.btnStop.visibility = View.VISIBLE
+                }
+                TimerState.BREAK_PAUSED -> {
+                    binding.btnPlay.visibility = View.GONE
+                    binding.btnAddOne.visibility = View.GONE
+                    binding.divider.visibility = View.GONE
+                    binding.btnPause.visibility = View.GONE
+                    binding.btnStop.visibility = View.GONE
                 }
             }
         }
