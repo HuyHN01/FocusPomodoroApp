@@ -19,7 +19,7 @@ class PomodoroViewModel : ViewModel() {
     fun skipBreak() = PomodoroRepository.skipBreak()
     fun addOneMinute() = PomodoroRepository.addOneMinute()
     fun pauseTimer() = PomodoroRepository.pauseTimer()
-    fun resumeTimer() = PomodoroRepository.startTimer() // resume route handled by repo
+    fun resumeTimer() = PomodoroRepository.startTimer()
     fun resetTimer() = PomodoroRepository.resetTimer()
     fun setCustomTime(seconds: Int) = PomodoroRepository.setCustomTime(seconds)
 }
