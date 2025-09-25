@@ -109,11 +109,38 @@ class PomodoroActivity : AppCompatActivity() {
         binding.btnStartBreak.setOnClickListener { viewModel.startBreak() }    // start break
         binding.btnSkipBreak.setOnClickListener { viewModel.skipBreak() }      // skip break
 
-        binding.llFocus.setOnClickListener { openFullscreenTimer() }
+        binding.llMeditation.setOnClickListener {
+            //setActiveTab(binding.llMeditation)
+            // TODO: mở chế độ Meditation
+        }
+
+        binding.llTimer.setOnClickListener {
+            //setActiveTab(binding.llTimer)
+            // TODO: mở chế độ Timer
+        }
+
+        binding.llFocus.setOnClickListener {
+            //setActiveTab(binding.llFocus)
+            openFullscreenTimer()
+        }
+
+        binding.llMusic.setOnClickListener {
+            //setActiveTab(binding.llMusic)
+            // TODO: mở chế độ Music
+        }
     }
 
     private fun openFullscreenTimer() {
         val intent = Intent(this, FullscreenTimerActivity::class.java)
         startActivity(intent)
     }
+
+    private fun setActiveTab(selected: View) {
+        val tabs = listOf(binding.llMeditation, binding.llTimer, binding.llFocus, binding.llMusic)
+
+        tabs.forEach { tab ->
+            tab.isSelected = (tab == selected)
+        }
+    }
+
 }
