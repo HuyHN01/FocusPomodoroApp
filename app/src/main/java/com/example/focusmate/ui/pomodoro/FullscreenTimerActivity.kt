@@ -5,6 +5,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -90,6 +91,7 @@ class FullscreenTimerActivity : AppCompatActivity() {
                     binding.btnStop.visibility = View.GONE
                 }
             }
+            adjustControlsContainerWidth(binding.llBottomControls!!)
         }
     }
 
@@ -118,6 +120,44 @@ class FullscreenTimerActivity : AppCompatActivity() {
         binding.btnTimerSettings?.setOnClickListener { /* TODO */ }
         binding.btnSettings?.setOnClickListener { /* TODO */ }
     }
+
+    fun adjustControlsContainerWidth(container: ConstraintLayout?) {
+        container?.let { c ->
+            c.post {
+                var totalWidth = 0
+                var visibleCount = 0
+
+                for (i in 0 until c.childCount) {
+                    val child = c.getChildAt(i)
+                    if (child.visibility == View.VISIBLE) {
+                        var w = child.measuredWidth
+                        if (w == 0) {
+                            child.measure(
+                                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                            )
+                            w = child.measuredWidth
+                        }
+                        totalWidth += w
+                        visibleCount++
+                    }
+                }
+
+                // spacing giữa các nút (ví dụ 16dp)
+                val spacingPx = (24 * c.resources.displayMetrics.density).toInt()
+                if (visibleCount > 1) {
+                    totalWidth += (visibleCount - 1) * spacingPx
+                }
+
+                totalWidth += c.paddingLeft + c.paddingRight
+
+                val params = c.layoutParams
+                params.width = totalWidth
+                c.layoutParams = params
+            }
+        }
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
