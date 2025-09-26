@@ -1,4 +1,4 @@
-package com.example.focusmate.ui.pomodoro
+package com.example.focusmate.ui.todolist
 
 import android.graphics.Paint
 import android.view.LayoutInflater

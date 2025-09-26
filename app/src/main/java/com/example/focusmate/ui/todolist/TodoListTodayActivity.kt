@@ -1,4 +1,4 @@
-package com.example.focusmate.ui.pomodoro
+package com.example.focusmate.ui.todolist
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -6,6 +6,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.focusmate.databinding.ActivityTodolistBinding
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.focusmate.ui.pomodoro.PomodoroViewModel
+import com.example.focusmate.ui.pomodoro.TimerState
 
 
 class TodoListTodayActivity : AppCompatActivity(){
