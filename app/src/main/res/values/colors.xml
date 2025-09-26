@@ -6,5 +6,7 @@
     <color name="background_stroke">#40ffffff</color>
     <color name="light_gray">#CCCCCC</color>
     <color name="dark_button">#333333</color>
+    <color name="red_pomodoro">#C30707</color>
+    <color name="black">#000000</color>
     <color name="red">#F44336</color>
 </resources>

@@ -12,6 +12,14 @@
         android:theme="@style/Theme.FocusMate">
 
         <activity
+            android:name=".ui.pomodoro.FullscreenTimerActivity"
+            android:exported="false" />
+        
+        <activity 
+            android:name=".ui.pomodoro.TodoListTodayActivity"-->
+            android:exported="false"/>-->
+        <activity
+            android:name=".ui.pomodoro.TodoListTodayActivity"
             android:name=".ui.auth.AuthActivity"
             android:exported="true">
             <intent-filter>
@@ -31,7 +39,5 @@
         <activity
             android:name=".MainActivity"
             android:exported="true" />
-    </application>
-
     </application>
 </manifest>
