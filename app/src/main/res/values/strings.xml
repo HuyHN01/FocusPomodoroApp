@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">FocusMate</string>
+    <string name="back">Quay lại</string>
+
 </resources>

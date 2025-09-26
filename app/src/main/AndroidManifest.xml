@@ -14,8 +14,11 @@
         <activity
             android:name=".ui.pomodoro.FullscreenTimerActivity"
             android:exported="false" />
+        
+<!--        <activity android:name=".ui.pomodoro.TodoListTodayActivity"-->
+<!--            android:exported="false"/>-->
         <activity
-            android:name=".ui.pomodoro.PomodoroActivity"
+            android:name=".ui.pomodoro.TodoListTodayActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
