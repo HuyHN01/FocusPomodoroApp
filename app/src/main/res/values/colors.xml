@@ -6,4 +6,5 @@
     <color name="background_stroke">#40ffffff</color>
     <color name="light_gray">#CCCCCC</color>
     <color name="dark_button">#333333</color>
+    <color name="red">#F44336</color>
 </resources>

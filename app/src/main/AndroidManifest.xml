@@ -12,16 +12,26 @@
         android:theme="@style/Theme.FocusMate">
 
         <activity
-            android:name=".ui.mainscreen.MainScreenActivity"
+            android:name=".ui.auth.AuthActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.pomodoro.FullscreenTimerActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.pomodoro.PomodoroActivity"
-            android:exported="false" />
+            android:exported="true"/>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true" />
+    </application>
 
     </application>
 </manifest>
