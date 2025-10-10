@@ -4,5 +4,6 @@ data class MenuItem(
     val iconRes: Int,
     val title: String,
     val focusedTime: String,
-    val taskCount: Int
+    val taskCount: Int,
+    val colorRes: Int? = null
 )

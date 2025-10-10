@@ -22,6 +22,9 @@ class MenuAdapter(private val onItemClicked: (MenuItem) -> Unit) :
             binding.itemText.text = item.title
             binding.itemTime.text = item.focusedTime
             binding.itemTaskCount.text = item.taskCount.toString()
+            item.colorRes?.let { color ->
+                binding.itemIcon.setColorFilter(color)
+            } ?: binding.itemIcon.clearColorFilter()
         }
     }
 
