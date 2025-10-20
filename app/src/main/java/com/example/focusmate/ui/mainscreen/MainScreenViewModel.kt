@@ -26,4 +26,26 @@ class MainScreenViewModel : ViewModel() {
             MenuItem( iconRes = R.drawable.outline_add_24, title = "Thêm Dự Án",focusedTime = "",taskCount = -1)
         )
     }
+    fun addProject(projectName: String, colorRes: Int) {
+        val currentList = _menuItems.value?.toMutableList() ?: mutableListOf()
+
+        val addButton = currentList.find { it.title == "Thêm Dự Án" }
+        currentList.remove(addButton)
+
+        val newProject = MenuItem(
+            iconRes = R.drawable.ic_circle,
+            title = projectName,
+            focusedTime = "0m",
+            taskCount = 0,
+            colorRes = colorRes
+        )
+        currentList.add(newProject)
+
+        if (addButton != null) {
+            currentList.add(addButton)
+        }
+
+        _menuItems.value = currentList
+    }
+
 }
