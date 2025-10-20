@@ -1,6 +1,7 @@
 package com.example.focusmate.ui.todolist
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -15,6 +16,7 @@ class TodoListTodayActivity : AppCompatActivity(){
     private lateinit var taskViewModel: TaskViewModel
     private lateinit var pomodoroViewModel: PomodoroViewModel
     private lateinit var tasksAdapter: TasksAdapter
+    private lateinit var completedTasksAdapter: TasksAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +27,17 @@ class TodoListTodayActivity : AppCompatActivity(){
         taskViewModel = ViewModelProvider(this).get(TaskViewModel::class.java)
         pomodoroViewModel = ViewModelProvider(this).get(PomodoroViewModel::class.java)
 
+
+        binding.completedTasksHeader.setOnClickListener {
+            if (binding.completedTasksList.visibility == View.VISIBLE) {
+                binding.completedTasksList.visibility = View.GONE
+                binding.completedTasksHeader.text = "Hiển thị những công việc đã hoàn thành ▼"
+            } else {
+                binding.completedTasksList.visibility = View.VISIBLE
+                binding.completedTasksHeader.text = "Ẩn đi những công việc đã hoàn thành ▲"
+            }
+        }
+
         // Khởi tạo Adapter với các callback
         tasksAdapter = TasksAdapter(
             onTaskClick = { task ->
@@ -34,19 +47,43 @@ class TodoListTodayActivity : AppCompatActivity(){
             onCompleteClick = { task ->
                 // Xử lý khi người dùng nhấn nút hoàn thành
                 taskViewModel.toggleTaskCompletion(task.id)
+
+
             }
         )
+        completedTasksAdapter = TasksAdapter(
+            onTaskClick = { task -> /* có thể mở chi tiết */ },
+            onCompleteClick = { task ->
+                taskViewModel.toggleTaskCompletion(task.id) // có thể đổi về chưa hoàn thành
+            }
+        )
+
 
         binding.tasksList.apply {
             layoutManager = LinearLayoutManager(this@TodoListTodayActivity)
             adapter = tasksAdapter
         }
+        binding.completedTasksList.apply {
+            layoutManager = LinearLayoutManager(this@TodoListTodayActivity)
+            adapter = completedTasksAdapter
+        }
 
+        taskViewModel.uncompletedTasks.observe(this) { uncompleted ->
+            tasksAdapter.submitList(uncompleted)
+        }
 
-        // Quan sát dữ liệu từ ViewModel và cập nhật Adapter
-        taskViewModel.tasks.observe(this, Observer { tasks ->
-            tasksAdapter.submitList(tasks)
+        taskViewModel.completedTasks.observe(this) { completed ->
+            completedTasksAdapter.submitList(completed)
+        }
+//
+
+        taskViewModel.uncompletedCount.observe(this, Observer { count ->
+            binding.taskNeedCompleteTV.text = count.toString();
         })
+        taskViewModel.completedCount.observe(this, Observer { count ->
+            binding.taskCompleted.text = count.toString();
+        })
+
 
         // Quan sát LiveData từ PomodoroViewModel
         pomodoroViewModel.state.observe(this, Observer { state ->

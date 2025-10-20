@@ -4,13 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="12dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:padding="12dp"
+    android:layout_margin="1dp"
+    android:background="@drawable/item_custom_have_riple_todolist"
+    >
 
     <ImageView
         android:id="@+id/task_complete_icon"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:src="@drawable/ellipse_shape_line_icon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

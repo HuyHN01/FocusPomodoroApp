@@ -2,6 +2,7 @@ package com.example.focusmate.ui.todolist
 
 import android.graphics.Paint
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.focusmate.R
@@ -53,10 +54,13 @@ class TasksAdapter(
                 binding.taskCompleteIcon.setImageResource(R.drawable.green_checkmark_icon)
                 binding.taskTitleTextView.paintFlags =
                     binding.taskTitleTextView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                binding.taskPlayIcon.visibility = View.GONE
             } else {
                 binding.taskCompleteIcon.setImageResource(R.drawable.ellipse_shape_line_icon)
                 binding.taskTitleTextView.paintFlags =
                     binding.taskTitleTextView.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                binding.taskPlayIcon.visibility = View.VISIBLE
+                binding.taskPlayIcon.setOnClickListener { onTaskClick(task) }
             }
 
             // Xử lý sự kiện click

@@ -17,6 +17,8 @@ object TaskRepository {
         // Khởi tạo một vài task mẫu
         taskList.add(Task(UUID.randomUUID().toString(), "Sau khi bắt đầu đếm thời gian, hãy kiên quyết...", 1))
         taskList.add(Task(UUID.randomUUID().toString(), "Nhấn Nút Tròn bên trái để hoàn thành công việc đó", 1))
+        taskList.add(Task(UUID.randomUUID().toString(), "Nhấn Nút Tròn bên trái để hoàn thành công việc đó", 1))
+        taskList.add(Task(UUID.randomUUID().toString(), "Nhấn Nút Tròn bên trái để hoàn thành công việc đó", 1))
         _tasks.value = taskList
     }
 
