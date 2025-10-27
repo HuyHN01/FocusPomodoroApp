@@ -1,13 +1,20 @@
 package com.example.focusmate.ui.pomodoro
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.focusmate.databinding.ActivityPomodoroBinding
+import com.example.focusmate.util.PomodoroService
 import com.example.focusmate.util.PomodoroSoundPlayer
+import com.google.android.material.snackbar.Snackbar
 
 class PomodoroActivity : AppCompatActivity() {
 
@@ -17,6 +24,19 @@ class PomodoroActivity : AppCompatActivity() {
     private val defaultTotalTime = 25 * 60 // 25 phút
 
     private lateinit var soundPlayer: PomodoroSoundPlayer
+
+    // Request notification permission for Android 13+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            Snackbar.make(
+                binding.root,
+                "Cần quyền thông báo để hiển thị timer ở chế độ nền",
+                Snackbar.LENGTH_LONG
+            ).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,8 +48,41 @@ class PomodoroActivity : AppCompatActivity() {
 
         soundPlayer = PomodoroSoundPlayer(this)
 
+        // Request notification permission if needed
+        checkNotificationPermission()
+
+        // Start foreground service
+        PomodoroService.startService(this)
+
         observeViewModel()
         setupListeners()
+    }
+
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // Permission already granted
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    // Show rationale and request permission
+                    Snackbar.make(
+                        binding.root,
+                        "Ứng dụng cần quyền thông báo để hoạt động ở chế độ nền",
+                        Snackbar.LENGTH_LONG
+                    ).setAction("Cấp quyền") {
+                        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }.show()
+                }
+                else -> {
+                    // Request permission directly
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
     }
 
     private fun observeViewModel() {
@@ -158,5 +211,7 @@ class PomodoroActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         soundPlayer.release()
+        // NOTE: Không stop service ở đây vì ta muốn timer chạy ngay cả khi Activity bị destroy
+        // Service sẽ tự stop khi user nhấn Stop trong notification
     }
 }
