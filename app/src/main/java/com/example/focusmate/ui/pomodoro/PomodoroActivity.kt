@@ -7,6 +7,7 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.focusmate.databinding.ActivityPomodoroBinding
+import com.example.focusmate.util.PomodoroSoundPlayer
 
 class PomodoroActivity : AppCompatActivity() {
 
@@ -15,6 +16,8 @@ class PomodoroActivity : AppCompatActivity() {
 
     private val defaultTotalTime = 25 * 60 // 25 phút
 
+    private lateinit var soundPlayer: PomodoroSoundPlayer
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPomodoroBinding.inflate(layoutInflater)
@@ -22,6 +25,8 @@ class PomodoroActivity : AppCompatActivity() {
 
         // Khóa portrait
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        soundPlayer = PomodoroSoundPlayer(this)
 
         observeViewModel()
         setupListeners()
@@ -98,6 +103,13 @@ class PomodoroActivity : AppCompatActivity() {
                 }
             }
         }
+
+        viewModel.soundEvent.observe(this) {event ->
+            event?.let {
+                soundPlayer.playSound(it)
+                viewModel.resetSoundEvent()
+            }
+        }
     }
 
     private fun setupListeners() {
@@ -143,4 +155,8 @@ class PomodoroActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        soundPlayer.release()
+    }
 }

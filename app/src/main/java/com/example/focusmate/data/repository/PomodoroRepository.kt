@@ -4,12 +4,13 @@ import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.focusmate.ui.pomodoro.TimerState
+import com.example.focusmate.util.SoundEvent
 
 object PomodoroRepository {
 
-    private const val DEFAULT_POMODORO = 25 * 60
-    private const val SHORT_BREAK = 5 * 60
-    private const val LONG_BREAK = 15 * 60
+    private const val DEFAULT_POMODORO = 25
+    private const val SHORT_BREAK = 5
+    private const val LONG_BREAK = 15
     private const val POMODOROS_BEFORE_LONG_BREAK = 4
 
     private var sessionTotalTime = DEFAULT_POMODORO // tổng thời gian của session hiện tại (dùng cho progress max)
@@ -27,6 +28,9 @@ object PomodoroRepository {
 
     private val _state = MutableLiveData<TimerState>(TimerState.IDLE)
     val state: LiveData<TimerState> get() = _state
+
+    private val _soundEvent = MutableLiveData<SoundEvent?>()
+    val soundEvent: LiveData<SoundEvent?> = _soundEvent
 
     // START / RESUME entry point - thông minh: tự biết đang ở chế độ nào
     fun startTimer() {
@@ -63,6 +67,8 @@ object PomodoroRepository {
         _timeLeft.value = currentTime
         _state.value = TimerState.RUNNING
         startCountDown(isBreak = false)
+
+        _soundEvent.value = SoundEvent.START_FOCUS
     }
 
     private fun resumePomodoro() {
@@ -85,6 +91,8 @@ object PomodoroRepository {
         _timeLeft.postValue(currentTime)
         _state.postValue(TimerState.BREAK_READY)
         // do NOT auto-start break — wait for user to press "Bắt đầu giải lao" (per requirement)
+
+        _soundEvent.value = SoundEvent.END_FOCUS
     }
 
     // Start break when user presses Start Break
@@ -95,6 +103,8 @@ object PomodoroRepository {
             _sessionTotal.value = sessionTotalTime
             startCountDown(isBreak = true)
         }
+
+        _soundEvent.value = SoundEvent.START_BREAK
     }
 
     private fun resumeBreak() {
@@ -124,6 +134,8 @@ object PomodoroRepository {
         _sessionTotal.postValue(sessionTotalTime)
         _timeLeft.postValue(currentTime)
         _state.postValue(TimerState.IDLE)
+
+        _soundEvent.value = SoundEvent.END_BREAK
     }
 
     // Pause (works for both pomodoro and break)
@@ -192,5 +204,9 @@ object PomodoroRepository {
         _sessionTotal.value = sessionTotalTime
         _timeLeft.value = currentTime
         _state.value = TimerState.IDLE
+    }
+
+    fun resetSoundEvent() {
+        _soundEvent.value = null
     }
 }
