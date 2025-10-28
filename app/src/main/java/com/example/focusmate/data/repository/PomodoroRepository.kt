@@ -90,7 +90,7 @@ object PomodoroRepository {
         _sessionTotal.postValue(sessionTotalTime)
         _timeLeft.postValue(currentTime)
         _state.postValue(TimerState.BREAK_READY)
-        // do NOT auto-start break — wait for user to press "Bắt đầu giải lao" (per requirement)
+        // do NOT auto-start break – wait for user to press "Bắt đầu giải lao" (per requirement)
 
         _soundEvent.value = SoundEvent.END_FOCUS
     }

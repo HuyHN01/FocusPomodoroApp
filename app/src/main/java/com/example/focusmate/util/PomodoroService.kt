@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Observer
 import com.example.focusmate.R
@@ -18,7 +19,8 @@ import com.example.focusmate.ui.pomodoro.TimerState
 import com.example.focusmate.util.PomodoroSoundPlayer
 import com.example.focusmate.util.SoundEvent
 
-class PomodoroService: Service() {
+class PomodoroService : Service() {
+
     private lateinit var notificationManager: NotificationManager
     private lateinit var soundPlayer: PomodoroSoundPlayer
     private var wakeLock: PowerManager.WakeLock? = null
@@ -36,6 +38,7 @@ class PomodoroService: Service() {
         const val ACTION_PAUSE = "ACTION_PAUSE"
         const val ACTION_RESUME = "ACTION_RESUME"
         const val ACTION_STOP = "ACTION_STOP"
+        const val ACTION_START_BREAK = "ACTION_START_BREAK"
         const val ACTION_SKIP_BREAK = "ACTION_SKIP_BREAK"
 
         fun startService(context: Context) {
@@ -66,13 +69,13 @@ class PomodoroService: Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Handle actions from notification buttons
         when (intent?.action) {
+            ACTION_START -> PomodoroRepository.startTimer()
             ACTION_PAUSE -> PomodoroRepository.pauseTimer()
             ACTION_RESUME -> PomodoroRepository.startTimer()
             ACTION_STOP -> {
                 PomodoroRepository.resetTimer()
-                stopForeground(true)
-                stopSelf()
             }
+            ACTION_START_BREAK -> PomodoroRepository.startBreak()
             ACTION_SKIP_BREAK -> PomodoroRepository.skipBreak()
         }
 
@@ -145,7 +148,7 @@ class PomodoroService: Service() {
         val notification = NotificationCompat.Builder(this, PUSH_CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(message)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Thay bằng icon của bạn
+            .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
@@ -162,74 +165,162 @@ class PomodoroService: Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val minutes = currentTimeLeft / 60
-        val seconds = currentTimeLeft % 60
-        val timeText = String.format("%02d:%02d", minutes, seconds)
-
-        val (title, contentText) = when (currentState) {
-            TimerState.RUNNING -> "Đang tập trung" to "Còn lại: $timeText"
-            TimerState.PAUSED -> "Đã tạm dừng" to "Thời gian: $timeText"
-            TimerState.BREAK_READY -> "Sẵn sàng giải lao" to "Nhấn để bắt đầu nghỉ"
-            TimerState.BREAK_RUNNING -> "Đang giải lao" to "Còn lại: $timeText"
-            TimerState.BREAK_PAUSED -> "Giải lao tạm dừng" to "Thời gian: $timeText"
-            else -> "Pomodoro Timer" to "Sẵn sàng bắt đầu"
-        }
-
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText(contentText)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Thay bằng icon của bạn
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setSilent(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
 
-        // Add action buttons based on state
+        // Use custom layout based on state
         when (currentState) {
             TimerState.RUNNING -> {
-                builder.addAction(
-                    R.drawable.pause_circle_24px, // Thay bằng icon pause
-                    "Tạm dừng",
-                    createActionPendingIntent(ACTION_PAUSE)
-                )
+                builder.setCustomContentView(createRunningLayout())
             }
             TimerState.PAUSED -> {
-                builder.addAction(
-                    R.drawable.play_circle_24px, // Thay bằng icon play
-                    "Tiếp tục",
-                    createActionPendingIntent(ACTION_RESUME)
-                )
-                builder.addAction(
-                    R.drawable.ic_close, // Thay bằng icon stop
-                    "Dừng",
-                    createActionPendingIntent(ACTION_STOP)
-                )
+                builder.setCustomContentView(createPausedLayout())
             }
-            TimerState.BREAK_RUNNING, TimerState.BREAK_PAUSED -> {
-                builder.addAction(
-                    R.drawable.ic_close, // Thay bằng icon skip
-                    "Bỏ qua",
-                    createActionPendingIntent(ACTION_SKIP_BREAK)
-                )
+            TimerState.IDLE -> {
+                builder.setCustomContentView(createIdleLayout())
             }
-            else -> {
-                // IDLE or BREAK_READY - no actions or minimal actions
+            TimerState.BREAK_READY -> {
+                builder.setCustomContentView(createBreakReadyLayout())
+            }
+            TimerState.BREAK_RUNNING -> {
+                builder.setCustomContentView(createBreakRunningLayout())
+            }
+            TimerState.BREAK_PAUSED -> {
+                builder.setCustomContentView(createBreakRunningLayout()) // Same as running for break
             }
         }
 
         return builder.build()
     }
 
-    private fun createActionPendingIntent(action: String): PendingIntent {
-        val intent = Intent(this, PomodoroService::class.java).apply {
-            this.action = action
+    private fun createRunningLayout(): RemoteViews {
+        val remoteViews = RemoteViews(packageName, R.layout.notification_pomodoro_running)
+
+        val minutes = currentTimeLeft / 60
+        val seconds = currentTimeLeft % 60
+        val timeText = String.format("%02d:%02d", minutes, seconds)
+
+        remoteViews.setTextViewText(R.id.tvNotificationTitle, "Phát Triển Ứng Dụng Di Động: ...")
+        remoteViews.setTextViewText(R.id.tvNotificationTime, timeText)
+        remoteViews.setTextColor(R.id.tvNotificationTime, resources.getColor(android.R.color.holo_orange_dark, null))
+
+        // Set pause button action
+        val pauseIntent = Intent(this, PomodoroService::class.java).apply {
+            action = ACTION_PAUSE
         }
-        return PendingIntent.getService(
-            this,
-            action.hashCode(),
-            intent,
+        val pausePendingIntent = PendingIntent.getService(
+            this, ACTION_PAUSE.hashCode(), pauseIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        remoteViews.setOnClickPendingIntent(R.id.btnNotificationPause, pausePendingIntent)
+
+        return remoteViews
+    }
+
+    private fun createPausedLayout(): RemoteViews {
+        val remoteViews = RemoteViews(packageName, R.layout.notification_pomodoro_paused)
+
+        val minutes = currentTimeLeft / 60
+        val seconds = currentTimeLeft % 60
+        val timeText = String.format("%02d:%02d", minutes, seconds)
+
+        remoteViews.setTextViewText(R.id.tvNotificationTitle, "Phát Triển Ứng Dụng Di Động,...")
+        remoteViews.setTextViewText(R.id.tvNotificationTime, timeText)
+        remoteViews.setTextColor(R.id.tvNotificationTime, resources.getColor(android.R.color.holo_orange_dark, null))
+
+        // Set resume button action
+        val resumeIntent = Intent(this, PomodoroService::class.java).apply {
+            action = ACTION_RESUME
+        }
+        val resumePendingIntent = PendingIntent.getService(
+            this, ACTION_RESUME.hashCode(), resumeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        remoteViews.setOnClickPendingIntent(R.id.btnNotificationResume, resumePendingIntent)
+
+        // Set stop button action
+        val stopIntent = Intent(this, PomodoroService::class.java).apply {
+            action = ACTION_STOP
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this, ACTION_STOP.hashCode(), stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        remoteViews.setOnClickPendingIntent(R.id.btnNotificationStop, stopPendingIntent)
+
+        return remoteViews
+    }
+
+    private fun createIdleLayout(): RemoteViews {
+        val remoteViews = RemoteViews(packageName, R.layout.notification_pomodoro_idle)
+
+        remoteViews.setTextViewText(R.id.tvNotificationTitle, "Sau khi bắt đầu đếm thời gian, hãy kiê...")
+        remoteViews.setTextViewText(R.id.tvNotificationTime, "25:00")
+        remoteViews.setTextColor(R.id.tvNotificationTime, resources.getColor(android.R.color.holo_orange_dark, null))
+
+        // Set start button action
+        val startIntent = Intent(this, PomodoroService::class.java).apply {
+            action = ACTION_START
+        }
+        val startPendingIntent = PendingIntent.getService(
+            this, ACTION_START.hashCode(), startIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        remoteViews.setOnClickPendingIntent(R.id.btnNotificationStart, startPendingIntent)
+
+        return remoteViews
+    }
+
+    private fun createBreakReadyLayout(): RemoteViews {
+        val remoteViews = RemoteViews(packageName, R.layout.notification_pomodoro_break_ready)
+
+        val minutes = currentTimeLeft / 60
+        val seconds = currentTimeLeft % 60
+        val timeText = String.format("%02d:%02d", minutes, seconds)
+
+        remoteViews.setTextViewText(R.id.tvNotificationTitle, "Giờ nghỉ ngơi!")
+        remoteViews.setTextViewText(R.id.tvNotificationTime, timeText)
+        remoteViews.setTextColor(R.id.tvNotificationTime, resources.getColor(android.R.color.holo_blue_dark, null))
+
+        // Set start break button action
+        val startBreakIntent = Intent(this, PomodoroService::class.java).apply {
+            action = ACTION_START_BREAK
+        }
+        val startBreakPendingIntent = PendingIntent.getService(
+            this, ACTION_START_BREAK.hashCode(), startBreakIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        remoteViews.setOnClickPendingIntent(R.id.btnNotificationStartBreak, startBreakPendingIntent)
+
+        return remoteViews
+    }
+
+    private fun createBreakRunningLayout(): RemoteViews {
+        val remoteViews = RemoteViews(packageName, R.layout.notification_pomodoro_break_running)
+
+        val minutes = currentTimeLeft / 60
+        val seconds = currentTimeLeft % 60
+        val timeText = String.format("%02d:%02d", minutes, seconds)
+
+        remoteViews.setTextViewText(R.id.tvNotificationTitle, "Đang giải lao...")
+        remoteViews.setTextViewText(R.id.tvNotificationTime, timeText)
+        remoteViews.setTextColor(R.id.tvNotificationTime, resources.getColor(android.R.color.holo_blue_dark, null))
+
+        // Set skip break button action
+        val skipBreakIntent = Intent(this, PomodoroService::class.java).apply {
+            action = ACTION_SKIP_BREAK
+        }
+        val skipBreakPendingIntent = PendingIntent.getService(
+            this, ACTION_SKIP_BREAK.hashCode(), skipBreakIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        remoteViews.setOnClickPendingIntent(R.id.btnNotificationSkipBreak, skipBreakPendingIntent)
+
+        return remoteViews
     }
 
     private fun updateNotification() {

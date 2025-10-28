@@ -9,4 +9,9 @@
     <color name="red_pomodoro">#C30707</color>
     <color name="black">#000000</color>
     <color name="red">#F44336</color>
+    <color name="pomodoro_orange">#FF6B3D</color>
+    <color name="break_blue">#2196F3</color>
+    <color name="notification_bg">#F5F5F5</color>
+    <color name="notification_text_gray">#666666</color>
+    <color name="notification_button_gray">#9E9E9E</color>
 </resources>
