@@ -10,11 +10,13 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.focusmate.databinding.ActivityFullscreenTimerBinding
+import com.example.focusmate.util.PomodoroSoundPlayer
 
 class FullscreenTimerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityFullscreenTimerBinding
     private val viewModel: PomodoroViewModel by viewModels()
+    private lateinit var soundPlayer: PomodoroSoundPlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +24,8 @@ class FullscreenTimerActivity : AppCompatActivity() {
 
         binding = ActivityFullscreenTimerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        soundPlayer = PomodoroSoundPlayer(this)
 
         observeViewModel()
         setupClickListeners()
@@ -92,6 +96,13 @@ class FullscreenTimerActivity : AppCompatActivity() {
                 }
             }
             adjustControlsContainerWidth(binding.llBottomControls!!)
+        }
+
+        viewModel.soundEvent.observe(this) {event ->
+            event?.let {
+                soundPlayer.playSound(it)
+                viewModel.resetSoundEvent()
+            }
         }
     }
 
