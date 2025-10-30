@@ -101,8 +101,6 @@ class PomodoroService : Service() {
             currentState = state
             updateNotification()
 
-            showDebugToast("Current State changed to: ${currentState.name}, Current Sound ID: ${currentFocusSoundId}")
-
             handleFocusSoundPlayback(state)
 
             checkAndShowPushNotification(previousState, state)
@@ -409,11 +407,4 @@ class PomodoroService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
-
-    private fun showDebugToast(message: String) {
-        // Toast phải được gọi trên Main Thread.
-        android.os.Handler(mainLooper).post {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        }
-    }
 }

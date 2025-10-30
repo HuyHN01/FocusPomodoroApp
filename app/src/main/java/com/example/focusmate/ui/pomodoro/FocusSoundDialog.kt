@@ -73,8 +73,7 @@ class FocusSoundDialog (
             sounds = FocusSoundList.sounds,
             selectedSoundId = currentSoundId
         ) { sound ->
-            selectedSoundId = sound.id
-            // Phát demo khi chọn
+            selectedSoundId = sound.resourceId
             playDemo(sound)
         }
 
