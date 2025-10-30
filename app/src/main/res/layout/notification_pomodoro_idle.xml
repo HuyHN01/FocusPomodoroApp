@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:background="@color/notification_bg"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/tvNotificationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="80dp"
+        android:layout_toStartOf="@+id/btnNotificationStart"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Sau khi bắt đầu đếm thời gian, hãy kiê..."
+        android:textColor="@color/notification_text_gray"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/tvNotificationTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvNotificationTitle"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:text="25:00"
+        android:textColor="@color/pomodoro_orange"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <ImageButton
+        android:id="@+id/btnNotificationStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/notification_button_circle_orange"
+        android:contentDescription="Start"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/play_circle_24px"
+        app:tint="@color/white"/>
+
+</RelativeLayout>

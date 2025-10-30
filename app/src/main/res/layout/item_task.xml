@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:layout_margin="1dp"
+    android:background="@drawable/item_custom_have_riple_todolist"
+    >
+
+    <ImageView
+        android:id="@+id/task_complete_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ellipse_shape_line_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <LinearLayout
+        android:id="@+id/task_details_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="16dp"
+        android:paddingHorizontal="16dp"
+
+        app:layout_constraintStart_toEndOf="@id/task_complete_icon"
+        app:layout_constraintEnd_toStartOf="@id/task_play_icon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:id="@+id/task_title_text_view"
+            android:layout_width="wrap_content"
+            android:ellipsize="end"
+            android:layout_height="wrap_content"
+            android:text="Sau khi bắt đầu đếm thời gian, hãy kiên quyết chống lại mọi sự can thiệp..."
+            android:textSize="16sp"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/pomodoro_count_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1g 15ph"
+            android:textSize="12sp"
+            android:textColor="#767676" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/task_play_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/red_play_button_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginRight="10dp"
+
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
