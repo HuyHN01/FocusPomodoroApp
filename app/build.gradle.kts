@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
 
     id("com.google.devtools.ksp") version "2.2.20-2.0.3"
-
     id("com.google.gms.google-services")
 }
 
@@ -63,14 +62,15 @@ dependencies {
     // Thêm Platform BOM: Quản lý phiên bản tự động
     implementation(platform(libs.firebase.bom))
 
-    // Thư viện cho Firebase Authentication (Auth) - Kotlin KTX
-    implementation(libs.firebase.auth.ktx)
+    // Thư viện cho Firebase Authentication (Auth)
+    implementation(libs.firebase.auth)
 
-    // Thư viện cho Cloud Firestore - Kotlin KTX
-    implementation(libs.firebase.firestore.ktx)
+    // Thư viện cho Cloud Firestore
+    implementation(libs.firebase.firestore)
 
     // (Tùy chọn) Thư viện Firebase cho Kotlin
     implementation(libs.firebase.analytics.ktx) // Nếu có bật Analytics
 
-
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
 }
