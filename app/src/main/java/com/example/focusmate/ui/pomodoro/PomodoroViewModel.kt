@@ -10,6 +10,9 @@ class PomodoroViewModel : ViewModel() {
     val sessionTotal: LiveData<Int> = PomodoroRepository.sessionTotal
     val state: LiveData<TimerState> = PomodoroRepository.state
     val soundEvent: LiveData<SoundEvent?> = PomodoroRepository.soundEvent
+    val focusSoundId: LiveData<Int> = PomodoroRepository.focusSoundId
+    val focusSoundVolume: LiveData<Float> = PomodoroRepository.focusSoundVolume
+
     fun startTimer() = PomodoroRepository.startTimer()
     fun startBreak() = PomodoroRepository.startBreak()
     fun skipBreak() = PomodoroRepository.skipBreak()
@@ -19,4 +22,5 @@ class PomodoroViewModel : ViewModel() {
     fun resetTimer() = PomodoroRepository.resetTimer()
     fun setCustomTime(seconds: Int) = PomodoroRepository.setCustomTime(seconds)
     fun resetSoundEvent() = PomodoroRepository.resetSoundEvent()
+    fun setFocusSound(soundId: Int, volume: Float) = PomodoroRepository.setFocusSound(soundId, volume)
 }

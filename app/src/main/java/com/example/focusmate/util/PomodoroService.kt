@@ -10,24 +10,27 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.widget.RemoteViews
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Observer
 import com.example.focusmate.R
 import com.example.focusmate.data.repository.PomodoroRepository
+import com.example.focusmate.ui.pomodoro.FocusSoundAdapter
 import com.example.focusmate.ui.pomodoro.PomodoroActivity
 import com.example.focusmate.ui.pomodoro.TimerState
-import com.example.focusmate.util.PomodoroSoundPlayer
-import com.example.focusmate.util.SoundEvent
 
 class PomodoroService : Service() {
 
     private lateinit var notificationManager: NotificationManager
     private lateinit var soundPlayer: PomodoroSoundPlayer
+    private lateinit var focusSoundPlayer: FocusSoundPlayer
     private var wakeLock: PowerManager.WakeLock? = null
 
     private var currentState: TimerState = TimerState.IDLE
     private var currentTimeLeft: Int = 0
     private var lastSoundEvent: SoundEvent? = null
+    private var currentFocusSoundId: Int = 0
+    private var currentFocusSoundVolume: Float = 0.7f
 
     companion object {
         const val CHANNEL_ID = "pomodoro_service_channel"
@@ -60,6 +63,7 @@ class PomodoroService : Service() {
         super.onCreate()
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         soundPlayer = PomodoroSoundPlayer(this)
+        focusSoundPlayer = FocusSoundPlayer(this)
 
         createNotificationChannels()
         acquireWakeLock()
@@ -67,7 +71,7 @@ class PomodoroService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Handle actions from notification buttons
+
         when (intent?.action) {
             ACTION_START -> PomodoroRepository.startTimer()
             ACTION_PAUSE -> PomodoroRepository.pauseTimer()
@@ -79,27 +83,28 @@ class PomodoroService : Service() {
             ACTION_SKIP_BREAK -> PomodoroRepository.skipBreak()
         }
 
-        // Start foreground with initial notification
         startForeground(NOTIFICATION_ID, buildNotification())
 
         return START_STICKY
     }
 
     private fun observeRepository() {
-        // Observe time changes
+
         val timeObserver = Observer<Int> { seconds ->
             currentTimeLeft = seconds
             updateNotification()
         }
         PomodoroRepository.timeLeft.observeForever(timeObserver)
 
-        // Observe state changes
         val stateObserver = Observer<TimerState> { state ->
             val previousState = currentState
             currentState = state
             updateNotification()
 
-            // Check for state transitions that require push notifications
+            showDebugToast("Current State changed to: ${currentState.name}, Current Sound ID: ${currentFocusSoundId}")
+
+            handleFocusSoundPlayback(state)
+
             checkAndShowPushNotification(previousState, state)
         }
         PomodoroRepository.state.observeForever(stateObserver)
@@ -114,10 +119,43 @@ class PomodoroService : Service() {
             }
         }
         PomodoroRepository.soundEvent.observeForever(soundObserver)
+
+        val focusSoundIdObserver = Observer<Int> { soundId ->
+            currentFocusSoundId = soundId
+
+            if (currentState == TimerState.RUNNING) {
+                handleFocusSoundPlayback(currentState)
+            }
+        }
+        PomodoroRepository.focusSoundId.observeForever(focusSoundIdObserver)
+
+        val focusSoundVolumeObserver = Observer<Float> { volume ->
+            currentFocusSoundVolume = volume
+
+            if (focusSoundPlayer.isPlaying()) {
+                focusSoundPlayer.setVolume(volume)
+            }
+        }
+        PomodoroRepository.focusSoundVolume.observeForever(focusSoundVolumeObserver)
+    }
+
+    private fun handleFocusSoundPlayback(state: TimerState) {
+        when (state) {
+            TimerState.RUNNING -> {
+                if (currentFocusSoundId != 0) {
+                    focusSoundPlayer.playBackground(currentFocusSoundId, currentFocusSoundVolume)
+                }
+            }
+            TimerState.PAUSED -> {
+                focusSoundPlayer.pause()
+            }
+            else -> {
+                focusSoundPlayer.stopBackground()
+            }
+        }
     }
 
     private fun checkAndShowPushNotification(previousState: TimerState, newState: TimerState) {
-        // Kết thúc giải lao -> Bắt đầu Pomodoro mới
         if ((previousState == TimerState.BREAK_RUNNING || previousState == TimerState.BREAK_READY)
             && newState == TimerState.IDLE) {
             showPushNotification(
@@ -329,7 +367,6 @@ class PomodoroService : Service() {
 
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Foreground service channel (low priority, no sound)
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
                 "Pomodoro Timer",
@@ -340,7 +377,6 @@ class PomodoroService : Service() {
                 setSound(null, null)
             }
 
-            // Push notification channel (high priority, with sound)
             val pushChannel = NotificationChannel(
                 PUSH_CHANNEL_ID,
                 "Thông báo Pomodoro",
@@ -373,4 +409,11 @@ class PomodoroService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    private fun showDebugToast(message: String) {
+        // Toast phải được gọi trên Main Thread.
+        android.os.Handler(mainLooper).post {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 }

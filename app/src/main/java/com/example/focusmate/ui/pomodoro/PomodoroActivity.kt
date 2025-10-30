@@ -192,7 +192,23 @@ class PomodoroActivity : AppCompatActivity() {
         binding.llMusic.setOnClickListener {
             //setActiveTab(binding.llMusic)
             // TODO: mở chế độ Music
+            openFocusSoundDialog()
         }
+    }
+
+    private fun openFocusSoundDialog() {
+        val currentSoundId = viewModel.focusSoundId.value ?: 0
+        val currentVolume = viewModel.focusSoundVolume.value ?: 0.7f
+
+        val dialog = FocusSoundDialog(
+            currentSoundId = currentSoundId,
+            currentVolume = currentVolume,
+            onConfirm = { soundId, volume ->
+                viewModel.setFocusSound(soundId, volume)
+            }
+        )
+
+        dialog.show(supportFragmentManager, "FocusSoundDialogTag")
     }
 
     private fun openFullscreenTimer() {
