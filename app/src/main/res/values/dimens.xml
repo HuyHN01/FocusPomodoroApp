@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="timer_text_size_portrait">120sp</dimen>
-    <dimen name="timer_text_size_landscape">80sp</dimen>
-</resources>
