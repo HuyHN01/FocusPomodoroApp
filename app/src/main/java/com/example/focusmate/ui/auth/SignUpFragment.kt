@@ -40,9 +40,9 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
             when (result) {
                 is AuthResult.Loading -> Toast.makeText(context, "Loading...", Toast.LENGTH_SHORT).show()
                 is AuthResult.Success -> {
-                    Toast.makeText(context, "Registered ${result.user.email}", Toast.LENGTH_SHORT).show()
-                    //requireActivity().setResult(AppCompatActivity.RESULT_OK)
-                    //requireActivity().finish()
+                    //Toast.makeText(context, "Registered ${result.user.email}", Toast.LENGTH_SHORT).show()
+                    requireActivity().setResult(AppCompatActivity.RESULT_OK)
+                    requireActivity().finish()
                 }
                 is AuthResult.Error -> Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
             }
