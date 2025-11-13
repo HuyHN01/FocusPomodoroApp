@@ -1,50 +1,58 @@
-
 package com.example.focusmate.data.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.example.focusmate.data.model.Task
-import java.util.UUID
+import com.example.focusmate.data.local.dao.TaskDao
+import com.example.focusmate.data.local.entity.TaskEntity
+import com.example.focusmate.data.local.entity.TaskPriority
+import com.example.focusmate.data.local.entity.TaskStatus // Import Enum mới
 
-object TaskRepository {
+class TaskRepository(private val taskDao: TaskDao) {
 
-    private val _tasks = MutableLiveData<List<Task>>()
-    val tasks: LiveData<List<Task>> get() = _tasks
+    val uncompletedTasks: LiveData<List<TaskEntity>> = taskDao.getTasksByStatus(TaskStatus.PENDING)
+    val completedTasks: LiveData<List<TaskEntity>> = taskDao.getTasksByStatus(TaskStatus.COMPLETED)
 
-    private val taskList = mutableListOf<Task>()
-
-    init {
-        // Khởi tạo một vài task mẫu
-        taskList.add(Task(UUID.randomUUID().toString(), "Sau khi bắt đầu đếm thời gian, hãy kiên quyết...", 1))
-        taskList.add(Task(UUID.randomUUID().toString(), "Nhấn Nút Tròn bên trái để hoàn thành công việc đó", 1))
-        taskList.add(Task(UUID.randomUUID().toString(), "Nhấn Nút Tròn bên trái để hoàn thành công việc đó", 1))
-        taskList.add(Task(UUID.randomUUID().toString(), "Nhấn Nút Tròn bên trái để hoàn thành công việc đó", 1))
-        _tasks.value = taskList
+    suspend fun addTask(
+        title: String,
+        estimatedPomodoros: Int,
+        userId: String, // Bắt buộc
+        projectId: String? = null, // 1. Thêm tham số này vào
+        priority: TaskPriority,
+        dueDate:Long?
+    ) {
+        val newTask = TaskEntity(
+            title = title,
+            estimatedPomodoros = estimatedPomodoros,
+            userId = userId,
+            projectId = projectId,
+            priority = priority,
+            dueDate = dueDate
+        )
+        taskDao.insertTask(newTask)
     }
 
-    fun addTask(title: String, pomodoroCount: Int) {
-        val newTask = Task(UUID.randomUUID().toString(), title, pomodoroCount)
-        taskList.add(newTask)
-        _tasks.value = taskList // Cập nhật LiveData để thông báo cho ViewModel/View
-    }
+    suspend fun updateTaskStatus(taskId: Int, newStatus: TaskStatus) {
+        taskDao.updateTaskStatus(taskId, newStatus)
 
-    fun completeTask(taskId: String) {
-        val taskToComplete = taskList.find { it.id == taskId }
-        taskToComplete?.let {
-            it.isCompleted = true
-            _tasks.value = taskList // Cập nhật LiveData
+        if (newStatus == TaskStatus.COMPLETED) {
+            taskDao.updateCompletedAt(taskId, System.currentTimeMillis())
+        } else {
+            taskDao.updateCompletedAt(taskId, null)
         }
     }
-    fun toggleTaskCompletion(taskId: String) {
-        val taskToUpdate = taskList.find { it.id == taskId }
-        taskToUpdate?.let {
-            // Đảo ngược giá trị của isCompleted
-            it.isCompleted = !it.isCompleted
-            _tasks.value = taskList // Cập nhật LiveData để thông báo cho UI
-        }
+
+    suspend fun clearAll() {
+        taskDao.clearAll()
     }
-    fun deleteTask(taskId: String) {
-        taskList.removeIf { it.id == taskId }
-        _tasks.value = taskList // Cập nhật LiveData
+
+    suspend fun getTaskById(taskId: Int): TaskEntity? {
+        return taskDao.getTaskById(taskId)
+    }
+
+    suspend fun deleteTask(task: TaskEntity) {
+        taskDao.deleteTask(task)
+    }
+
+    suspend fun updateTask(task: TaskEntity) {
+        taskDao.updateTask(task)
     }
 }

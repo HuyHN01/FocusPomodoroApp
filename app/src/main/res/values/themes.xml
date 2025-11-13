@@ -6,4 +6,8 @@
     </style>
 
     <style name="Theme.FocusMate" parent="Base.Theme.FocusMate" />
+    <style name="Theme.FocusMate.Calendar" parent="ThemeOverlay.AppCompat.Light">
+        <item name="colorAccent">@color/red_pomodoro</item>
+        <item name="android:textColorPrimary">@color/black</item>
+    </style>
 </resources>

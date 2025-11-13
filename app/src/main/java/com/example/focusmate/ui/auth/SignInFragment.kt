@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -32,8 +33,8 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
             when (result) {
                 is AuthResult.Loading -> Toast.makeText(context, "Loading...", Toast.LENGTH_SHORT).show()
                 is AuthResult.Success -> {
-                    Toast.makeText(context, "Welcome ${result.user.email}", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(requireContext(), PomodoroActivity::class.java))
+                    //Toast.makeText(context, "Welcome ${result.user.email}", Toast.LENGTH_SHORT).show()
+                    requireActivity().setResult(AppCompatActivity.RESULT_OK)
                     requireActivity().finish()
                 }
                 is AuthResult.Error -> Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()

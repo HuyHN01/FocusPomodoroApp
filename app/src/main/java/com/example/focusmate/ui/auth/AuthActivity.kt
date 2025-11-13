@@ -49,7 +49,7 @@ class AuthActivity : AppCompatActivity() {
     private fun setActiveTab(isSignIn: Boolean) {
         if (isSignIn) {
             binding.signInToggle.setBackgroundResource(R.drawable.bg_toggle_selected)
-            binding.signUpToggle.setTextColor(getColor(android.R.color.white))
+            binding.signInToggle.setTextColor(getColor(android.R.color.white))
             binding.signUpToggle.setBackgroundResource(android.R.color.transparent)
             binding.signUpToggle.setTextColor(getColor(R.color.red))
         } else {

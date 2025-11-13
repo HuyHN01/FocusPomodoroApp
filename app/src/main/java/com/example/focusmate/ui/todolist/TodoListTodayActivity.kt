@@ -1,14 +1,19 @@
 package com.example.focusmate.ui.todolist
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.focusmate.databinding.ActivityTodolistBinding
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.focusmate.data.local.entity.TaskPriority
+import com.example.focusmate.ui.pomodoro.PomodoroActivity
 import com.example.focusmate.ui.pomodoro.PomodoroViewModel
-import com.example.focusmate.ui.pomodoro.TimerState
 
 
 class TodoListTodayActivity : AppCompatActivity(){
@@ -20,10 +25,11 @@ class TodoListTodayActivity : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         binding = ActivityTodolistBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Khởi tạo các ViewModel
         taskViewModel = ViewModelProvider(this).get(TaskViewModel::class.java)
         pomodoroViewModel = ViewModelProvider(this).get(PomodoroViewModel::class.java)
 
@@ -41,23 +47,40 @@ class TodoListTodayActivity : AppCompatActivity(){
         // Khởi tạo Adapter với các callback
         tasksAdapter = TasksAdapter(
             onTaskClick = { task ->
-                // TODO: Xử lý khi click vào task, ví dụ như bắt đầu Pomodoro cho task đó
-                pomodoroViewModel.startTimer()
+                val intent = Intent(this, TaskDetailActivity::class.java).apply {
+                    putExtra("EXTRA_TASK_ID", task.taskId)
+                }
+                startActivity(intent)
             },
             onCompleteClick = { task ->
-                // Xử lý khi người dùng nhấn nút hoàn thành
-                taskViewModel.toggleTaskCompletion(task.id)
-
-
+                taskViewModel.toggleTaskCompletion(task.taskId)
+            },
+            onPlayClick = { task ->
+                val intent = Intent(this, PomodoroActivity::class.java).apply {
+                    putExtra("EXTRA_TASK_ID", task.taskId)
+                }
+                startActivity(intent)
             }
         )
+
         completedTasksAdapter = TasksAdapter(
-            onTaskClick = { task -> /* có thể mở chi tiết */ },
+            onTaskClick = { task ->
+                val intent = Intent(this, TaskDetailActivity::class.java).apply {
+                    putExtra("EXTRA_TASK_ID", task.taskId)
+                }
+                startActivity(intent)
+            },
             onCompleteClick = { task ->
-                taskViewModel.toggleTaskCompletion(task.id) // có thể đổi về chưa hoàn thành
+                taskViewModel.toggleTaskCompletion(task.taskId)
+            },
+            onPlayClick = { task ->
+                val intent = Intent(this, PomodoroActivity::class.java).apply {
+                    // SỬA LỖI 1: Sửa 'id' thành 'taskId'
+                    putExtra("EXTRA_TASK_ID", task.taskId)
+                }
+                startActivity(intent)
             }
         )
-
 
         binding.tasksList.apply {
             layoutManager = LinearLayoutManager(this@TodoListTodayActivity)
@@ -84,25 +107,32 @@ class TodoListTodayActivity : AppCompatActivity(){
             binding.taskCompleted.text = count.toString();
         })
 
-
-        // Quan sát LiveData từ PomodoroViewModel
-        pomodoroViewModel.state.observe(this, Observer { state ->
-            // TODO: Cập nhật giao diện dựa trên trạng thái (ví dụ: đổi icon play/pause)
-            when (state) {
-                TimerState.IDLE -> {}
-                TimerState.RUNNING -> {}
-                TimerState.PAUSED -> {}
-                TimerState.BREAK_READY -> {}
-                TimerState.BREAK_RUNNING -> {}
-                TimerState.BREAK_PAUSED -> {}
+        binding.addTaskEditText.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val title = binding.addTaskEditText.text.toString().trim()
+                if (title.isNotEmpty()) {
+                    // Sửa lỗi: Thêm 'priority = TaskPriority.NONE'
+                    taskViewModel.addNewTask(
+                        title = title,
+                        estimatedPomodoros = 1,
+                        priority = TaskPriority.NONE, // <-- THÊM THAM SỐ NÀY
+                        dueDate = null
+                    )
+                    binding.addTaskEditText.text.clear()
+                }
+                true
+            } else {
+                false
             }
-        })
-
-        // Gắn sự kiện click cho các nút khác trong giao diện
-        binding.addTaskLayout.setOnClickListener {
-            // TODO: Mở dialog hoặc màn hình để thêm task mới
         }
 
-        // ... Thêm các sự kiện click cho các nút khác
+        binding.addTaskEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.addTaskFragment.visibility = View.VISIBLE
+            } else {
+                binding.addTaskFragment.visibility = View.GONE
+            }
+        }
     }
+
 }

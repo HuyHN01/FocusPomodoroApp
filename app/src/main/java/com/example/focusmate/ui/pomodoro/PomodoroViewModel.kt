@@ -23,4 +23,6 @@ class PomodoroViewModel : ViewModel() {
     fun setCustomTime(seconds: Int) = PomodoroRepository.setCustomTime(seconds)
     fun resetSoundEvent() = PomodoroRepository.resetSoundEvent()
     fun setFocusSound(soundId: Int, volume: Float) = PomodoroRepository.setFocusSound(soundId, volume)
+
+
 }
