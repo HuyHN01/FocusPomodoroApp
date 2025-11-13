@@ -3,10 +3,12 @@ plugins {
     alias(libs.plugins.kotlin.android)
 
     // Thêm plugin KSP cho Kotlin Symbol Processing (thay thế kapt)
-//    id("com.google.devtools.ksp") version "2.2.20-2.0.3"
+    //id("com.google.devtools.ksp") version "2.2.20-2.0.3"
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
-}
+
+    id("com.google.devtools.ksp") version "2.2.20-2.0.3"
+    id("com.google.gms.google-services")
 
 android {
     namespace = "com.example.focusmate"
@@ -56,16 +58,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.fragment.ktx)
-    // Room Runtime
     implementation(libs.androidx.room.runtime)
-
-    // Kotlin Extensions và Coroutines cho Room
     implementation(libs.androidx.room.ktx)
-
-    // KSP (Kotlin Symbol Processing) - Bộ xử lý chú thích
     ksp(libs.androidx.room.compiler)
-
-    // Thư viện Test
     testImplementation(libs.androidx.room.testing)
 
     // 1. Thư viện Hilt runtime
@@ -75,4 +70,19 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+
+    // Thêm Platform BOM: Quản lý phiên bản tự động
+    implementation(platform(libs.firebase.bom))
+
+    // Thư viện cho Firebase Authentication (Auth)
+    implementation(libs.firebase.auth)
+
+    // Thư viện cho Cloud Firestore
+    implementation(libs.firebase.firestore)
+
+    // (Tùy chọn) Thư viện Firebase cho Kotlin
+    implementation(libs.firebase.analytics.ktx) // Nếu có bật Analytics
+
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
 }

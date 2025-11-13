@@ -15,7 +15,7 @@
             android:id="@+id/email_or_username_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nhập email hoặc tên người dùng"
+            android:hint="Email"
             android:inputType="textEmailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
