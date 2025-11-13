@@ -22,7 +22,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
+    <!-- Them fragment de co the ghi de len tv_status -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/pomodoro_task_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
     <!-- Timer Circle Container -->
     <FrameLayout
         android:id="@+id/fl_timer_container"

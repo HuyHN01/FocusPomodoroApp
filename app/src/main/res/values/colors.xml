@@ -9,7 +9,9 @@
     <color name="red_pomodoro">#C30707</color>
     <color name="black">#000000</color>
     <color name="red">#F44336</color>
-
+    <color name="blue">#1CE1F4</color>
+    <color name="orange">#FF9800</color>
+    <color name="green">#2AC84E</color>
 
     <!--Notification Color-->
     <color name="pomodoro_orange">#FF6B3D</color>
@@ -20,4 +22,9 @@
     <color name="notification_bg_gray">#BFBAB5</color>
     <color name="notification_ic_gray">#262628</color>
     <color name="notification_ic_white">#EEEEEE</color>
+
+    <color name="priority_high">#F44336</color>
+    <color name="priority_medium">#FFC107</color>
+    <color name="priority_low">#4CAF50</color>
+    <color name="priority_none">#BDBDBD</color>
 </resources>

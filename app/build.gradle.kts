@@ -2,9 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 
+    // Thêm plugin KSP cho Kotlin Symbol Processing (thay thế kapt)
+    //id("com.google.devtools.ksp") version "2.2.20-2.0.3"
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+
     id("com.google.devtools.ksp") version "2.2.20-2.0.3"
     id("com.google.gms.google-services")
-}
 
 android {
     namespace = "com.example.focusmate"
@@ -58,6 +62,14 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.androidx.room.testing)
+
+    // 1. Thư viện Hilt runtime
+    implementation(libs.hilt.android)
+
+    // 2. Trình biên dịch KSP cho Hilt (thay vì kapt)
+    ksp(libs.hilt.compiler)
+
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
 
     // Thêm Platform BOM: Quản lý phiên bản tự động
     implementation(platform(libs.firebase.bom))

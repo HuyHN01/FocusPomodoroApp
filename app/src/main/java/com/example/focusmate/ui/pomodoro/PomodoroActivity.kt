@@ -11,12 +11,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
+import com.example.focusmate.R
 import com.example.focusmate.databinding.ActivityPomodoroBinding
+import com.example.focusmate.ui.todolist.TaskViewModel
 import com.example.focusmate.util.PomodoroService
 import com.example.focusmate.util.PomodoroSoundPlayer
 import com.google.android.material.snackbar.Snackbar
 
 class PomodoroActivity : AppCompatActivity() {
+
+    //Them vao sau
+    private var currentTaskId: Int = -1
+    private lateinit var taskViewModel: TaskViewModel
+    //ket thuc them vao
 
     private lateinit var binding: ActivityPomodoroBinding
     private val viewModel: PomodoroViewModel by viewModels()
@@ -56,6 +65,54 @@ class PomodoroActivity : AppCompatActivity() {
 
         observeViewModel()
         setupListeners()
+
+
+        //Them vao de lay task tu todolist
+        taskViewModel = ViewModelProvider(this).get(TaskViewModel::class.java)
+        currentTaskId = intent.getIntExtra("EXTRA_TASK_ID", -1)
+
+        if (currentTaskId != -1) {
+            taskViewModel.loadTaskById(currentTaskId)
+        }
+
+        setupObserver()
+
+
+
+    }
+
+    private fun setupObserver() {
+        // Quan sát Task hiện tại
+        taskViewModel.currentTask.asLiveData().observe(this) { task ->
+            if (task != null) {
+                // ĐÃ CÓ TASK: Ẩn TextView, Hiện Fragment
+                binding.tvStatus.visibility = View.GONE
+                binding.pomodoroTaskFragmentContainer.visibility = View.VISIBLE
+
+                // Tải Fragment mới với tên task
+                loadTaskFragment(task.title)
+                if (viewModel.state.value == TimerState.IDLE) {
+                    viewModel.startTimer()
+                }
+
+            } else {
+                // KHÔNG CÓ TASK: Hiện TextView, Ẩn Fragment
+                viewModel.pauseTimer()
+
+                binding.tvStatus.visibility = View.VISIBLE
+                binding.pomodoroTaskFragmentContainer.visibility = View.GONE
+
+            }
+        }
+    }
+
+    // Hàm mới để tải Fragment
+    private fun loadTaskFragment(taskTitle: String) {
+        val fragment = PomodoroTaskFragment.newInstance(taskTitle)
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.pomodoro_task_fragment_container, fragment)
+            .commit()
     }
 
     private fun checkNotificationPermission() {
