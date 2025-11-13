@@ -4,23 +4,21 @@ import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.focusmate.R
-import com.example.focusmate.data.model.Task
+import com.example.focusmate.data.local.entity.TaskEntity
+import com.example.focusmate.data.local.entity.TaskStatus // Import Enum mới
 import com.example.focusmate.databinding.ItemTaskBinding
 
+
 class TasksAdapter(
-    private val onTaskClick: (Task) -> Unit,           // Callback khi click vào task
-    private val onCompleteClick: (Task) -> Unit        // Callback khi click vào nút hoàn thành
-) : RecyclerView.Adapter<TasksAdapter.TaskViewHolder>() {
+    private val onTaskClick: (TaskEntity) -> Unit,
+    private val onCompleteClick: (TaskEntity) -> Unit,
+    private val onPlayClick: (TaskEntity) -> Unit
+) : ListAdapter<TaskEntity, TasksAdapter.TaskViewHolder>(TaskDiffCallback()) {
 
-    private var tasks: List<Task> = emptyList()
-
-    // Cập nhật danh sách tasks và thông báo cho RecyclerView
-    fun submitList(newTasks: List<Task>) {
-        tasks = newTasks
-        notifyDataSetChanged()
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val binding = ItemTaskBinding.inflate(
@@ -31,26 +29,44 @@ class TasksAdapter(
         return TaskViewHolder(binding)
     }
 
+
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        val task = tasks[position]
+        val task = getItem(position)
         holder.bind(task)
     }
-
-    override fun getItemCount(): Int = tasks.size
 
     inner class TaskViewHolder(private val binding: ItemTaskBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(task: Task) {
-            // Hiển thị tiêu đề task
+        init {
+            binding.root.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    onTaskClick(getItem(adapterPosition))
+                }
+            }
+
+            binding.taskPlayIcon.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    onPlayClick(getItem(adapterPosition))
+                }
+            }
+
+
+            binding.taskCompleteIcon.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    onCompleteClick(getItem(adapterPosition))
+                }
+            }
+        }
+
+
+        fun bind(task: TaskEntity) {
             binding.taskTitleTextView.text = task.title
 
-            // Hiển thị số Pomodoro ước tính
-            val pomodoroText = "${task.pomodoroCount}g 15ph" // Giả sử 1g 15ph = 1 pomodoro
+            val pomodoroText = "${task.estimatedPomodoros} Pomodoro"
             binding.pomodoroCountTextView.text = pomodoroText
 
-            // Xử lý trạng thái hoàn thành
-            if (task.isCompleted) {
+            if (task.status == TaskStatus.COMPLETED) {
                 binding.taskCompleteIcon.setImageResource(R.drawable.green_checkmark_icon)
                 binding.taskTitleTextView.paintFlags =
                     binding.taskTitleTextView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
@@ -60,12 +76,18 @@ class TasksAdapter(
                 binding.taskTitleTextView.paintFlags =
                     binding.taskTitleTextView.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
                 binding.taskPlayIcon.visibility = View.VISIBLE
-                binding.taskPlayIcon.setOnClickListener { onTaskClick(task) }
             }
+        }
+    }
 
-            // Xử lý sự kiện click
-            binding.root.setOnClickListener { onTaskClick(task) }
-            binding.taskCompleteIcon.setOnClickListener { onCompleteClick(task) }
+    class TaskDiffCallback : DiffUtil.ItemCallback<TaskEntity>() {
+        override fun areItemsTheSame(oldItem: TaskEntity, newItem: TaskEntity): Boolean {
+            // 3. Sửa 'id' thành 'taskId' để khớp Entity
+            return oldItem.taskId == newItem.taskId
+        }
+
+        override fun areContentsTheSame(oldItem: TaskEntity, newItem: TaskEntity): Boolean {
+            return oldItem == newItem
         }
     }
 }

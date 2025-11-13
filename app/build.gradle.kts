@@ -3,7 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
 
     // Thêm plugin KSP cho Kotlin Symbol Processing (thay thế kapt)
-    id("com.google.devtools.ksp") version "2.2.20-2.0.3"
+//    id("com.google.devtools.ksp") version "2.2.20-2.0.3"
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -65,4 +67,12 @@ dependencies {
 
     // Thư viện Test
     testImplementation(libs.androidx.room.testing)
+
+    // 1. Thư viện Hilt runtime
+    implementation(libs.hilt.android)
+
+    // 2. Trình biên dịch KSP cho Hilt (thay vì kapt)
+    ksp(libs.hilt.compiler)
+
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
 }

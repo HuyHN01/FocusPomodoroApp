@@ -29,8 +29,17 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".ui.mainscreen.MainScreenActivity"-->
+<!--            android:exported="true">-->
+
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
         <activity
-            android:name=".ui.mainscreen.MainScreenActivity"
+            android:name=".ui.todolist.TodoListTodayActivity"
             android:exported="true">
 
             <intent-filter>
@@ -42,13 +51,14 @@
             android:name=".ui.pomodoro.FullscreenTimerActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.todolist.TaskDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.pomodoro.PomodoroActivity"
             android:exported="true">
         </activity>
 
-        <activity
-            android:name=".ui.todolist.TodoListTodayActivity"
-            android:exported="false" />
+
 
     </application>
 

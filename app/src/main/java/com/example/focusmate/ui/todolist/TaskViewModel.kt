@@ -1,43 +1,137 @@
 package com.example.focusmate.ui.todolist
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
-import com.example.focusmate.data.model.Task
+import android.app.Application
+import androidx.lifecycle.*
+import com.example.focusmate.data.local.AppDatabase
+import com.example.focusmate.data.local.entity.TaskEntity
+import com.example.focusmate.data.local.entity.TaskPriority
+import com.example.focusmate.data.local.entity.TaskStatus // Import mới
 import com.example.focusmate.data.repository.TaskRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class TaskViewModel : ViewModel() {
+class TaskViewModel(application: Application) : AndroidViewModel(application) {
+    private val _tempSelectedPriority = MutableLiveData<TaskPriority>(TaskPriority.NONE)
+    val tempSelectedPriority: LiveData<TaskPriority> = _tempSelectedPriority
+    private val repository: TaskRepository
 
-    val tasks = TaskRepository.tasks
+    val uncompletedTasks: LiveData<List<TaskEntity>>
+    val completedTasks: LiveData<List<TaskEntity>>
 
-    val completedCount: LiveData<Int> = TaskRepository.tasks.map { tasks ->
-        tasks.count { it.isCompleted }
-    }
-    val uncompletedCount: LiveData<Int> = TaskRepository.tasks.map { tasks ->
-        tasks.count { !it.isCompleted }
-    }
+    val uncompletedCount = MediatorLiveData<Int>()
+    val completedCount = MediatorLiveData<Int>()
+    private val _currentTask = MutableStateFlow<TaskEntity?>(null)
+    val currentTask: StateFlow<TaskEntity?> = _currentTask.asStateFlow()
 
-    // Danh sách chưa xong
-    val uncompletedTasks: LiveData<List<Task>> = tasks.map { list ->
-        list.filter { !it.isCompleted }
-    }
+    init {
+        val taskDao = AppDatabase.getDatabase(application).taskDao()
+        repository = TaskRepository(taskDao)
 
-    // Danh sách đã xong
-    val completedTasks: LiveData<List<Task>> = tasks.map { list ->
-        list.filter { it.isCompleted }
-    }
-    fun addNewTask(title: String, pomodoroCount: Int) {
-        TaskRepository.addTask(title, pomodoroCount)
-    }
-    fun toggleTaskCompletion(taskId: String) {
-        TaskRepository.toggleTaskCompletion(taskId)
-    }
 
-    fun completeTask(taskId: String) {
-        TaskRepository.completeTask(taskId)
+        uncompletedTasks = repository.uncompletedTasks
+        completedTasks = repository.completedTasks
+
+        // Đếm số lượng
+        uncompletedCount.addSource(uncompletedTasks) { list ->
+            uncompletedCount.value = list.size
+        }
+        completedCount.addSource(completedTasks) { list ->
+            completedCount.value = list.size
+        }
     }
 
-    fun deleteTask(taskId: String) {
-        TaskRepository.deleteTask(taskId)
+    fun addNewTask(
+        title: String,
+        estimatedPomodoros: Int,
+        priority: TaskPriority,
+        dueDate:Long?
+    ) {
+        viewModelScope.launch {
+
+            val tempUserId = "user_123"
+
+            repository.addTask(
+                title = title,
+                estimatedPomodoros = estimatedPomodoros,
+                userId = tempUserId,
+                projectId = null,
+                priority = priority,
+                dueDate = dueDate
+            )
+        }
+    }
+
+    fun toggleTaskCompletion(taskId: Int) {
+        viewModelScope.launch {
+            // Lấy task hiện tại từ DB
+            val task = repository.getTaskById(taskId)
+            if (task != null) {
+                // Quyết định trạng thái mới
+                val newStatus = if (task.status == TaskStatus.PENDING) {
+                    TaskStatus.COMPLETED
+                } else {
+                    TaskStatus.PENDING
+                }
+                repository.updateTaskStatus(taskId, newStatus)
+            }
+        }
+    }
+
+    fun loadTaskById(taskId: Int) {
+        viewModelScope.launch {
+            _currentTask.value = repository.getTaskById(taskId)
+        }
+    }
+
+    fun deleteTask() {
+        _currentTask.value?.let { taskToDelete ->
+            viewModelScope.launch {
+                repository.deleteTask(taskToDelete)
+                _currentTask.value = null
+            }
+        }
+    }
+
+    fun updateCurrentTask(
+        newTitle: String,
+        newEstimatedPomodoros: Int,
+        newNote: String?
+
+    ) {
+
+        _currentTask.value?.let { taskToUpdate ->
+            val updatedTask = taskToUpdate.copy(
+                title = newTitle,
+                estimatedPomodoros = newEstimatedPomodoros, // Sửa 'pomodoroCount'
+                note = newNote,
+                lastModified = System.currentTimeMillis()
+            )
+            viewModelScope.launch {
+                repository.updateTask(updatedTask)
+                _currentTask.value = updatedTask
+            }
+        }
+    }
+
+    fun clearCurrentTask() {
+        _currentTask.value = null
+    }
+    fun setTempPriority(priority: TaskPriority) {
+        _tempSelectedPriority.value = priority
+    }
+
+    fun updateTaskPriority(newPriority: TaskPriority) {
+        _currentTask.value?.let { currentTask ->
+            val updatedTask = currentTask.copy(
+                priority = newPriority,
+                lastModified = System.currentTimeMillis()
+            )
+            viewModelScope.launch {
+                repository.updateTask(updatedTask)
+                _currentTask.value = updatedTask
+            }
+        }
     }
 }
