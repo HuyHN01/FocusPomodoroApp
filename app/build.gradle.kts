@@ -5,11 +5,10 @@ plugins {
     // Thêm plugin KSP cho Kotlin Symbol Processing (thay thế kapt)
     //id("com.google.devtools.ksp") version "2.2.20-2.0.3"
     alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
 
     id("com.google.devtools.ksp") version "2.2.20-2.0.3"
     id("com.google.gms.google-services")
-
+}
 android {
     namespace = "com.example.focusmate"
     compileSdk = 36
