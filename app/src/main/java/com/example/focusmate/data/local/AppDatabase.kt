@@ -7,12 +7,16 @@ import androidx.room.RoomDatabase
 import com.example.focusmate.data.local.dao.TaskDao
 import com.example.focusmate.data.local.dao.UserDao
 import com.example.focusmate.data.local.entity.UserEntity
+
+import com.example.focusmate.data.local.dao.ProjectDao
+import com.example.focusmate.data.local.entity.ProjectEntity
 import com.example.focusmate.data.local.entity.TaskEntity
 
-@Database(entities = [UserEntity::class, TaskEntity::class], version = 3, exportSchema = false)
+@Database(entities = [UserEntity::class, TaskEntity::class, ProjectEntity::class], version = 4, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun taskDao(): TaskDao
+    abstract fun projectDao(): ProjectDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
