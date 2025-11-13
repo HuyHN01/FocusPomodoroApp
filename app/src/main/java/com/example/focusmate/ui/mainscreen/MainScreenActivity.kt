@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.focusmate.databinding.MainScreenBinding
 import com.example.focusmate.ui.MainScreenViewModel
 import com.example.focusmate.ui.pomodoro.PomodoroActivity
-import com.example.focusmate.R
+import com.example.focusmate.ui.auth.AuthActivity
+
 class MainScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: MainScreenBinding
@@ -54,5 +55,28 @@ class MainScreenActivity : AppCompatActivity() {
 
             startActivity(intent)
         }
+
+        binding.loginText.setOnClickListener {
+            val intent = Intent(this, AuthActivity::class.java)
+            authLauncher.launch(intent)
+        }
+    }
+
+    private val authLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
+
+            updateUiForLoggedInUser()
+        } else {
+            Toast.makeText(this, "Đăng nhập đã bị hủy.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateUiForLoggedInUser() {
+        // Ví dụ:
+        // buttonLogin.text = "Đã đăng nhập"
+        // buttonSync.isEnabled = true
     }
 }
