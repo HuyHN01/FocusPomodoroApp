@@ -58,7 +58,7 @@ class TaskDetailActivity : AppCompatActivity() {
                 } else {
                     binding.edittextTaskName.paintFlags = binding.edittextTaskName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
                 }
-
+                binding.tvPomodoroValue.text = "${task.estimatedPomodoros} Pomodoro"
                 // 3. --- PHẦN MỚI: HIỂN THỊ GHI CHÚ ---
                 binding.edittextNote.setText(task.note)
                 // ------------------------------------
@@ -74,6 +74,37 @@ class TaskDetailActivity : AppCompatActivity() {
                     ContextCompat.getColor(this, flagColor)
                 )
 
+                binding.btnRemoveDueDate.setOnClickListener {
+                    if (!isObserving) {
+                        // Gọi hàm mới, truyền 'null' để xóa ngày
+                        taskViewModel.updateTaskDueDate(null)
+                    }
+                }
+
+                if (task.dueDate != null) {
+                    // Nếu CÓ ngày -> Hiển thị ngày (màu đỏ) và hiện nút X
+                    binding.tvDueDateValue.text = formatDate(task.dueDate!!) // Gọi hàm formatDate em đã tạo
+                    binding.tvDueDateValue.setTextColor(ContextCompat.getColor(this, R.color.red_pomodoro))
+                    binding.btnRemoveDueDate.visibility = View.VISIBLE
+                } else {
+                    // Nếu KHÔNG có ngày (null) -> Hiển thị "Không" (màu đen) và ẩn nút X
+                    binding.tvDueDateValue.text = "Không"
+                    binding.tvDueDateValue.setTextColor(ContextCompat.getColor(this, R.color.black))
+                    binding.btnRemoveDueDate.visibility = View.GONE
+                }
+                // 2. Click vào CẢ HÀNG "Ngày đến hạn"
+                binding.rowDueDate.setOnClickListener {
+                    if (!isObserving) {
+                        val currentDate = taskViewModel.currentTask.value?.dueDate
+
+                        // Tái sử dụng Dialog Lịch
+                        val dateDialog = DatePickerDialogFragment(currentDate) { newTimestamp ->
+                            taskViewModel.updateTaskDueDate(newTimestamp)
+                        }
+
+                        dateDialog.show(supportFragmentManager, "DatePickerDialog")
+                    }
+                }
                 isObserving = false
             } else {
                 if (!isObserving) finish()
@@ -81,6 +112,10 @@ class TaskDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun formatDate(timestamp: Long): String {
+        val sdf = java.text.SimpleDateFormat("EEE, dd 'thg' MM yyyy", java.util.Locale("vi", "VN"))
+        return sdf.format(java.util.Date(timestamp))
+    }
     private fun setupListeners() {
         binding.toolbar.setNavigationOnClickListener {
             finish()
@@ -97,6 +132,23 @@ class TaskDetailActivity : AppCompatActivity() {
             if (!isObserving) {
 
                 showPriorityPopup(view)
+            }
+        }
+
+        binding.rowPomodoro.setOnClickListener {
+            if (!isObserving) {
+                // 1. Lấy số Pomo hiện tại
+                val currentCount = taskViewModel.currentTask.value?.estimatedPomodoros ?: 1
+
+                // 2. Tạo Dialog MỚI (PomodoroCountPickerFragment)
+                val dialog = PomodoroCountPickerFragment(currentCount) { newCount ->
+                    // 3. Khi Dialog trả về số Pomo mới, gọi ViewModel
+                    // (Hàm này trong ViewModel chúng ta đã viết rồi)
+                    taskViewModel.updateTaskPomodoros(newCount)
+                }
+
+                // 4. Hiển thị Dialog
+                dialog.show(supportFragmentManager, "PomoCountPicker")
             }
         }
     }

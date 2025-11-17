@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import com.example.focusmate.R
 import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.ui.auth.AuthActivity
+import com.example.focusmate.ui.todolist.TodoListTodayActivity
 
 class MainScreenActivity : AppCompatActivity() {
 
@@ -56,6 +57,11 @@ class MainScreenActivity : AppCompatActivity() {
                 val intent = Intent(this, AddProjectActivity::class.java)
                 addProjectLauncher.launch(intent)
             } else {
+                if (menuItem.title == "Hôm nay") {
+                    val intent = Intent(this, TodoListTodayActivity::class.java)
+                    startActivity(intent)
+
+                }
                 Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
             }
         },

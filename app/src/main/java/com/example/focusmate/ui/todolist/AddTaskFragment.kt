@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -19,6 +20,8 @@ class AddTaskFragment : Fragment() {
     private var _binding: FragmentAddTaskBinding? = null
     private val binding get() = _binding!!
     private var selectedDate: Long? = null
+    private var selectedPomodoros: Int = 0
+    private lateinit var pomoIcons: List<ImageView>
     private val viewModel: TaskViewModel by activityViewModels()
 
     // Xóa biến 'selectedPriority' cũ, vì ViewModel sẽ quản lý
@@ -48,15 +51,26 @@ class AddTaskFragment : Fragment() {
             )
         }
 
-        // 2. SỬA LẠI HÀM CLICK CỜ: MỞ DIALOG
+        pomoIcons = listOf(
+            binding.pomo1,
+            binding.pomo2,
+            binding.pomo3,
+            binding.pomo4,
+            binding.pomo5,
+            binding.pomo6
+        )
+
+        pomoIcons.forEachIndexed { index, imageView ->
+            imageView.setOnClickListener {
+                selectedPomodoros = index + 1 // index (0-4) + 1 = số Pomo (1-5)
+                updatePomoIcons(selectedPomodoros)
+            }
+        }
         binding.iconPriorityFlag.setOnClickListener {
-            // Xóa logic 'cyclePriority()' cũ
-            // Mở Dialog
             PriorityPickerDialogFragment().show(parentFragmentManager, "PriorityPicker")
         }
 
         binding.iconDate.setOnClickListener {
-            // Thay vì showDatePicker() cũ, ta gọi Dialog mới
             val dateDialog = DatePickerDialogFragment(selectedDate) { timestamp ->
                 selectedDate = timestamp
                 updateDateIcon(timestamp)
@@ -65,7 +79,6 @@ class AddTaskFragment : Fragment() {
             dateDialog.show(parentFragmentManager, "DatePickerDialog")
         }
 
-        // 3. HÀM "HOÀN TẤT"
         binding.completeText.setOnClickListener {
             val taskTitle = requireActivity()
                 .findViewById<EditText>(R.id.add_task_edit_text)
@@ -78,7 +91,7 @@ class AddTaskFragment : Fragment() {
 
                 viewModel.addNewTask(
                     title = taskTitle,
-                    estimatedPomodoros = 1,
+                    estimatedPomodoros = selectedPomodoros,
                     priority = currentPriority,
                     dueDate = selectedDate
                 )
@@ -88,6 +101,8 @@ class AddTaskFragment : Fragment() {
                 // 4. RESET LẠI PRIORITY VỀ NONE CHO LẦN SAU
                 viewModel.setTempPriority(TaskPriority.NONE)
                 selectedDate = null
+                selectedPomodoros = 0
+                updatePomoIcons(selectedPomodoros)
                 binding.iconDate.setImageResource(R.drawable.sunny_24dp_1f1f1f_fill0_wght400_grad0_opsz24)
             }
 
@@ -133,6 +148,20 @@ class AddTaskFragment : Fragment() {
 
 
     }
+
+    private fun updatePomoIcons(count: Int) {
+        val activeColor = ContextCompat.getColor(requireContext(), R.color.pink_pomo)
+        val inactiveColor = ContextCompat.getColor(requireContext(), R.color.gray_pomo)
+
+        pomoIcons.forEachIndexed { index, imageView ->
+            if (index < count) {
+                imageView.setColorFilter(activeColor)
+            } else {
+                imageView.setColorFilter(inactiveColor)
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
