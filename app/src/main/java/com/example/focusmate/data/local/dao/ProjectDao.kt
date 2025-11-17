@@ -15,8 +15,8 @@ interface ProjectDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertProject(project: ProjectEntity)
 
-    @Query("SELECT * FROM projects ORDER BY `order` ASC")
-    fun getAllProjects(): LiveData<List<ProjectEntity>>
+    @Query("SELECT * FROM projects WHERE userId = :userId ORDER BY `order` ASC")
+    fun getAllProjects(userId: String): LiveData<List<ProjectEntity>>
 
     @Update
     suspend fun updateProject(project: ProjectEntity)

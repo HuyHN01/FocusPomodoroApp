@@ -20,7 +20,7 @@ class TaskDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTaskDetailBinding
     private lateinit var taskViewModel: TaskViewModel
-    private var currentTaskId: Int = -1
+    private var currentTaskId: String? = null
 
     private var isObserving = true
 
@@ -32,13 +32,16 @@ class TaskDetailActivity : AppCompatActivity() {
 
         taskViewModel = ViewModelProvider(this).get(TaskViewModel::class.java)
 
-        currentTaskId = intent.getIntExtra("EXTRA_TASK_ID", -1)
-        if (currentTaskId == -1) {
+        currentTaskId = intent.getStringExtra("EXTRA_TASK_ID")
+
+        currentTaskId?.let { safeTaskId ->
+            // 'safeTaskId' là một bản sao String an toàn, không null
+            taskViewModel.loadTaskById(safeTaskId)
+        } ?: run {
+            // Khối 'run' này sẽ chạy nếu 'currentTaskId' là null
             finish()
             return
         }
-
-        taskViewModel.loadTaskById(currentTaskId)
         setupObservers()
         setupListeners()
     }
@@ -122,8 +125,8 @@ class TaskDetailActivity : AppCompatActivity() {
         }
 
         binding.checkboxComplete.setOnCheckedChangeListener { _, _ ->
-            if (!isObserving) {
-                taskViewModel.toggleTaskCompletion(currentTaskId)
+            currentTaskId?.let { safeTaskId ->
+                taskViewModel.toggleTaskCompletion(safeTaskId)
             }
         }
 
@@ -199,7 +202,7 @@ class TaskDetailActivity : AppCompatActivity() {
     }
 
     private fun saveTaskChanges() {
-        if (currentTaskId == -1) return
+        if (currentTaskId == null) return
 
         val newTitle = binding.edittextTaskName.text.toString().trim()
 

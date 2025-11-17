@@ -21,9 +21,7 @@ import com.example.focusmate.util.PomodoroSoundPlayer
 import com.google.android.material.snackbar.Snackbar
 
 class PomodoroActivity : AppCompatActivity() {
-
-    //Them vao sau
-    private var currentTaskId: Int = -1
+    private var currentTaskId: String? = null
     private lateinit var taskViewModel: TaskViewModel
     //ket thuc them vao
 
@@ -69,16 +67,12 @@ class PomodoroActivity : AppCompatActivity() {
 
         //Them vao de lay task tu todolist
         taskViewModel = ViewModelProvider(this).get(TaskViewModel::class.java)
-        currentTaskId = intent.getIntExtra("EXTRA_TASK_ID", -1)
+        currentTaskId = intent.getStringExtra("EXTRA_TASK_ID")
 
-        if (currentTaskId != -1) {
-            taskViewModel.loadTaskById(currentTaskId)
+        currentTaskId?.let { taskId ->
+            taskViewModel.loadTaskById(taskId)
         }
-
         setupObserver()
-
-
-
     }
 
     private fun setupObserver() {

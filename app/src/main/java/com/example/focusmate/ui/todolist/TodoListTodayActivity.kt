@@ -3,7 +3,6 @@ package com.example.focusmate.ui.todolist
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -14,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.focusmate.data.local.entity.TaskPriority
 import com.example.focusmate.ui.pomodoro.PomodoroActivity
 import com.example.focusmate.ui.pomodoro.PomodoroViewModel
+import androidx.core.view.isVisible
 
 
 class TodoListTodayActivity : AppCompatActivity(){
@@ -26,16 +26,15 @@ class TodoListTodayActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
-        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         binding = ActivityTodolistBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        taskViewModel = ViewModelProvider(this).get(TaskViewModel::class.java)
-        pomodoroViewModel = ViewModelProvider(this).get(PomodoroViewModel::class.java)
+        taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
+        pomodoroViewModel = ViewModelProvider(this)[PomodoroViewModel::class.java]
 
 
         binding.completedTasksHeader.setOnClickListener {
-            if (binding.completedTasksList.visibility == View.VISIBLE) {
+            if (binding.completedTasksList.isVisible) {
                 binding.completedTasksList.visibility = View.GONE
                 binding.completedTasksHeader.text = "Hiển thị những công việc đã hoàn thành ▼"
             } else {
@@ -101,10 +100,10 @@ class TodoListTodayActivity : AppCompatActivity(){
 //
 
         taskViewModel.uncompletedCount.observe(this, Observer { count ->
-            binding.taskNeedCompleteTV.text = count.toString();
+            binding.taskNeedCompleteTV.text = count.toString()
         })
         taskViewModel.completedCount.observe(this, Observer { count ->
-            binding.taskCompleted.text = count.toString();
+            binding.taskCompleted.text = count.toString()
         })
 
         binding.addTaskEditText.setOnEditorActionListener { v, actionId, event ->

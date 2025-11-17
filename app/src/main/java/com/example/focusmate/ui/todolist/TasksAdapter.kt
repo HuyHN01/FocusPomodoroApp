@@ -40,21 +40,21 @@ class TasksAdapter(
 
         init {
             binding.root.setOnClickListener {
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    onTaskClick(getItem(adapterPosition))
+                if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                    onTaskClick(getItem(bindingAdapterPosition))
                 }
             }
 
             binding.taskPlayIcon.setOnClickListener {
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    onPlayClick(getItem(adapterPosition))
+                if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                    onPlayClick(getItem(bindingAdapterPosition))
                 }
             }
 
 
             binding.taskCompleteIcon.setOnClickListener {
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    onCompleteClick(getItem(adapterPosition))
+                if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                    onCompleteClick(getItem(bindingAdapterPosition))
                 }
             }
         }
