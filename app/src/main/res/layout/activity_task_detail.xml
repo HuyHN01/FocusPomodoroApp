@@ -4,13 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#EFEFEF">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorSurface"
+        android:background="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:menu="@menu/menu_task_detail">
@@ -19,85 +20,299 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintVertical_bias="1.0"
+        tools:layout_editor_absoluteX="64dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="16dp">
-
-            <RelativeLayout
+            android:paddingHorizontal="0dp">
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="12dp">
-
-                <CheckBox
-                    android:id="@+id/checkbox_complete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:button="@drawable/ellipse_shape_line_icon"
-                    android:layout_alignBaseline="@+id/edittext_task_name"
-                    />
-
-                <EditText
-                    android:id="@+id/edittext_task_name"
+                android:orientation="vertical"
+                android:background="@color/white"
+                android:layout_marginTop="10dp"
+                >
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/checkbox_complete"
-                    android:layout_toStartOf="@id/imageview_flag"
-                    android:textColor="@color/black"
-                    android:textSize="20sp"
-                    android:text="test"
-                    android:textStyle="bold"
-                    android:background="@android:color/transparent"
-                    android:inputType="textCapSentences" />
+                    android:paddingVertical="12dp">
 
-                <ImageView
-                    android:id="@+id/imageview_flag"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/flag_svgrepo_com"
-                    android:contentDescription="Gắn cờ ưu tiên" />
-            </RelativeLayout>
+                    <CheckBox
+                        android:id="@+id/checkbox_complete"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@+id/edittext_task_name"
+                        android:button="@drawable/ellipse_shape_line_icon" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_add_tag"
-                style="@style/Widget.MaterialComponents.Chip.Action"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="+ Nhãn"
-                android:textColor="?attr/colorPrimary"
-                app:chipStrokeColor="?attr/colorPrimary"
-                app:chipStrokeWidth="1dp"
-                android:layout_marginBottom="16dp" />
+                    <EditText
+                        android:id="@+id/edittext_task_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@id/imageview_flag"
+                        android:layout_toEndOf="@id/checkbox_complete"
+                        android:background="@android:color/transparent"
+                        android:inputType="textCapSentences"
+                        android:text="test"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginBottom="16dp"/>
+                    <ImageView
+                        android:id="@+id/imageview_flag"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="Gắn cờ ưu tiên"
+                        android:src="@drawable/flag_svgrepo_com" />
+                </RelativeLayout>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_add_tag"
+                    style="@style/Widget.MaterialComponents.Chip.Action"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="+ Nhãn"
+                    android:layout_marginLeft="20dp"
+                    android:textColor="?attr/colorPrimary"
+                    app:chipStrokeColor="?attr/colorPrimary"
+                    app:chipStrokeWidth="1dp" />
+
+            </LinearLayout>
 
 
-
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginVertical="16dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="+ Thêm công việc phụ"
-                android:textColor="?attr/colorPrimary"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"/>
-
-            <EditText
-                android:id="@+id/edittext_note"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Thêm ghi chú ..."
-                android:background="@android:color/transparent"
-                android:inputType="textMultiLine"
-                android:minLines="3"
-                android:gravity="top" />
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:background="@color/white"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                >
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/row_pomodoro"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="12dp"
+                    android:layout_marginVertical="5dp"
+                    >
+
+                    <ImageView
+                        android:id="@+id/icon_pomodoro"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/timer_24dp_1f1f1f_fill0_wght400_grad0_opsz24"
+                        android:alpha="0.7"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/label_pomodoro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pomodoro"
+                        android:textSize="16sp"
+                        android:layout_marginStart="16dp"
+                        app:layout_constraintStart_toEndOf="@id/icon_pomodoro"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tv_pomodoro_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 Pomodoro"
+                        android:textSize="16sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/row_due_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+
+                    android:paddingVertical="12dp">
+
+                    <ImageView
+                        android:id="@+id/icon_due_date"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/event_24px"
+                        android:alpha="0.7"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/label_due_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ngày đến hạn"
+                        android:textSize="16sp"
+                        android:layout_marginStart="16dp"
+                        app:layout_constraintStart_toEndOf="@id/icon_due_date"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <ImageView
+                        android:id="@+id/btn_remove_due_date"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="2dp"
+                        android:visibility="gone"
+                        android:src="@drawable/cancel_24px"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tv_due_date_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:text="Không"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/btn_remove_due_date"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="1.0" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/row_reminder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:paddingVertical="12dp">
+
+                    <ImageView
+                        android:id="@+id/icon_reminder"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/notifications_24dp_1f1f1f_fill0_wght400_grad0_opsz24"
+                        android:alpha="0.7"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/label_reminder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Báo nhắc"
+                        android:textSize="16sp"
+                        android:layout_marginStart="16dp"
+                        app:layout_constraintStart_toEndOf="@id/icon_reminder"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tv_reminder_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Không"
+                        android:textSize="16sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/row_repeat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="5dp"
+                    android:paddingVertical="12dp">
+
+                    <ImageView
+                        android:id="@+id/icon_repeat"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/replay_24dp_1f1f1f_fill0_wght400_grad0_opsz24"
+                        android:alpha="0.7"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/label_repeat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lặp lại"
+                        android:textSize="16sp"
+                        android:layout_marginStart="16dp"
+                        app:layout_constraintStart_toEndOf="@id/icon_repeat"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tv_repeat_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Không"
+                        android:textSize="16sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="10dp"
+                android:background="@color/white"
+                android:layout_marginVertical="10dp"
+                >
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="#EEEEEE" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="16dp"
+                    android:background="#EEEEEE" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="+ Thêm công việc phụ"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+                <EditText
+                    android:id="@+id/edittext_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    android:gravity="top"
+                    android:padding="10dp"
+
+                    android:hint="Thêm ghi chú ..."
+                    android:inputType="textMultiLine"
+                    android:minLines="4" />
+
+
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

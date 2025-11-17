@@ -27,4 +27,6 @@
     <color name="priority_medium">#FFC107</color>
     <color name="priority_low">#4CAF50</color>
     <color name="priority_none">#BDBDBD</color>
+    <color name="gray_pomo">#B6B6B6</color>
+    <color name="pink_pomo">#E71292</color>
 </resources>

@@ -134,4 +134,37 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+    fun updateTaskPomodoros(newCount: Int) {
+        // 1. Chỉ chạy nếu _currentTask đã được tải
+        _currentTask.value?.let { currentTask ->
+
+            // 2. Tạo một bản sao Task với số Pomo mới
+            val updatedTask = currentTask.copy(
+                estimatedPomodoros = newCount,
+                lastModified = System.currentTimeMillis() // Cập nhật thời gian
+            )
+
+            // 3. Lưu vào DB và cập nhật lại giao diện
+            viewModelScope.launch {
+                repository.updateTask(updatedTask)
+                _currentTask.value = updatedTask // Cập nhật StateFlow
+            }
+        }
+    }
+
+    fun updateTaskDueDate(newDueDate: Long?) {
+        _currentTask.value?.let { currentTask ->
+            // 1. Tạo bản sao Task với dueDate mới
+            val updatedTask = currentTask.copy(
+                dueDate = newDueDate,
+                lastModified = System.currentTimeMillis()
+            )
+
+            // 2. Lưu vào DB và cập nhật UI
+            viewModelScope.launch {
+                repository.updateTask(updatedTask)
+                _currentTask.value = updatedTask
+            }
+        }
+    }
 }
