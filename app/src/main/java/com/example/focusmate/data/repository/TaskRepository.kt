@@ -10,6 +10,9 @@ import com.example.focusmate.util.Constants
 import com.google.firebase.firestore.firestore
 import com.google.firebase.Firebase
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class TaskRepository(private val taskDao: TaskDao) {
 
@@ -132,4 +135,43 @@ class TaskRepository(private val taskDao: TaskDao) {
             }
         }
     }
+
+    fun syncTasks(userId: String, scope: CoroutineScope) {
+        // Không đồng bộ cho khách
+        if (userId == com.example.focusmate.util.Constants.GUEST_USER_ID) return
+
+        firestore.collection("users").document(userId).collection("tasks")
+            .addSnapshotListener { snapshots, error ->
+                if (error != null) {
+                    Log.e(TAG, "Listen failed.", error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshots != null) {
+                    scope.launch(Dispatchers.IO) {
+                        for (dc in snapshots.documentChanges) {
+                            // Firestore tự động map String "PENDING" -> Enum TaskStatus.PENDING
+                            // nhờ vào cấu trúc data class chuẩn
+                            val task = dc.document.toObject(TaskEntity::class.java)
+
+                            when (dc.type) {
+                                com.google.firebase.firestore.DocumentChange.Type.ADDED -> {
+                                    taskDao.insertTask(task)
+                                    Log.d(TAG, "Sync: Added task ${task.title}")
+                                }
+                                com.google.firebase.firestore.DocumentChange.Type.MODIFIED -> {
+                                    taskDao.updateTask(task)
+                                    Log.d(TAG, "Sync: Modified task ${task.title}")
+                                }
+                                com.google.firebase.firestore.DocumentChange.Type.REMOVED -> {
+                                    taskDao.deleteTask(task)
+                                    Log.d(TAG, "Sync: Removed task ${task.title}")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+    }
+
 }

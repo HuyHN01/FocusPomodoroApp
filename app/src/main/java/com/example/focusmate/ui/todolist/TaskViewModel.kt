@@ -48,6 +48,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         uncompletedTasks = repository.getUncompletedTasks(currentUserId)
         completedTasks = repository.getCompletedTasks(currentUserId)
 
+        repository.syncTasks(currentUserId, viewModelScope)
+
         // Đếm số lượng
         uncompletedCount.addSource(uncompletedTasks) { list ->
             uncompletedCount.value = list.size

@@ -8,16 +8,17 @@ import java.util.UUID
 data class TaskEntity(
     @PrimaryKey
     val taskId: String = UUID.randomUUID().toString(),
-    val userId: String,
-    var projectId: String?,         // Có thể null nếu là task "Inbox"
-    val title: String,
+    val userId: String = "",
+    var projectId: String? = null,         // Có thể null nếu là task "Inbox"
+    val title: String = "",
     val note: String? = null,
+
     val status: TaskStatus = TaskStatus.PENDING, // Dùng Enum (PENDING, COMPLETED)
     val priority: TaskPriority = TaskPriority.NONE, // Dùng Enum (NONE, LOW, MEDIUM, HIGH)
-    val dueDate: Long? = null,      // Lưu dạng Timestamp
 
+    val dueDate: Long? = null,      // Lưu dạng Timestamp
     // Pomodoro fields
-    val estimatedPomodoros: Int,    // Số Pomodoro dự kiến
+    val estimatedPomodoros: Int = 1,    // Số Pomodoro dự kiến
     val completedPomodoros: Int = 0,// Số Pomodoro đã hoàn thành
 
     // Timestamps
