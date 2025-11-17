@@ -54,6 +54,8 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
         // Code mới (đúng): Gọi hàm và truyền userId vào
         projectsFromDb = repository.getAllProjects(currentUserId)
 
+        repository.syncProjects(currentUserId, viewModelScope)
+
         // Phần code còn lại của em để tạo menu tĩnh
         staticMenuItems = listOf(
             MenuItem(id = null, R.drawable.wb_sunny_24px, "Hôm nay", "1h 15m", 5, null),
