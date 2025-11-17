@@ -10,12 +10,22 @@ import com.example.focusmate.data.local.AppDatabase
 import com.example.focusmate.data.repository.ProjectRepository
 import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.data.local.entity.ProjectEntity
+
+// 1. Thêm import cho AuthRepository
+import com.example.focusmate.data.repository.AuthRepository
+
 import kotlinx.coroutines.launch
 import java.util.UUID
 
 class MainScreenViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: ProjectRepository
+
+    // 2. Thêm AuthRepository để lấy userId
+    private val authRepository: AuthRepository
+
+    // 3. Thêm biến để giữ userId hiện tại (có thể là GUEST hoặc UID Firebase)
+    private val currentUserId: String
 
     private val _menuItems = MediatorLiveData<List<MenuItem>>()
     val menuItems: LiveData<List<MenuItem>> = _menuItems
@@ -24,10 +34,27 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
     private val staticMenuItems: List<MenuItem>
 
     init {
-        val projectDao = AppDatabase.getDatabase(application).projectDao()
-        repository = ProjectRepository(projectDao)
-        projectsFromDb = repository.allProjects
+        // Khởi tạo DB một lần
+        val db = AppDatabase.getDatabase(application)
 
+        // Khởi tạo DAO
+        val projectDao = db.projectDao()
+
+        // 4. Khởi tạo cả hai Repository
+        // (Giả sử AuthRepository của em có constructor nhận Application)
+        authRepository = AuthRepository(application)
+        repository = ProjectRepository(projectDao)
+
+        // 5. LẤY userId HIỆN TẠI
+        // Đây là mấu chốt: Lấy ID từ AuthRepository
+        currentUserId = authRepository.getCurrentUserId()
+
+        // 6. SỬA LỖI BIÊN DỊCH
+        // Code cũ (lỗi): projectsFromDb = repository.allProjects
+        // Code mới (đúng): Gọi hàm và truyền userId vào
+        projectsFromDb = repository.getAllProjects(currentUserId)
+
+        // Phần code còn lại của em để tạo menu tĩnh
         staticMenuItems = listOf(
             MenuItem(id = null, R.drawable.wb_sunny_24px, "Hôm nay", "1h 15m", 5, null),
             MenuItem(id = null, R.drawable.wb_twilight_24px, "Ngày mai", "0m", 0, null),
@@ -73,7 +100,12 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
 
             val newProject = ProjectEntity(
                 projectId = UUID.randomUUID().toString(),
-                userId = "default_user",
+
+                // 7. SỬA LỖI LOGIC
+                // Code cũ (lỗi): userId = "default_user",
+                // Code mới (đúng): Dùng userId động đã lấy ở 'init'
+                userId = currentUserId,
+
                 name = projectName,
                 color = colorString,
                 order = newOrder,
@@ -83,6 +115,7 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
             repository.insert(newProject)
         }
     }
+
     fun deleteProject(menuItem: MenuItem) {
         if (menuItem.id == null) return
 

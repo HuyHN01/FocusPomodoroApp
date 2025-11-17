@@ -8,8 +8,12 @@ import com.example.focusmate.data.local.entity.TaskStatus // Import Enum mới
 
 class TaskRepository(private val taskDao: TaskDao) {
 
-    val uncompletedTasks: LiveData<List<TaskEntity>> = taskDao.getTasksByStatus(TaskStatus.PENDING)
-    val completedTasks: LiveData<List<TaskEntity>> = taskDao.getTasksByStatus(TaskStatus.COMPLETED)
+    fun getUncompletedTasks(userId: String): LiveData<List<TaskEntity>> {
+        return taskDao.getTasksByStatus(userId, TaskStatus.PENDING)
+    }
+    fun getCompletedTasks(userId: String): LiveData<List<TaskEntity>> {
+        return taskDao.getTasksByStatus(userId, TaskStatus.COMPLETED)
+    }
 
     suspend fun addTask(
         title: String,
@@ -30,7 +34,7 @@ class TaskRepository(private val taskDao: TaskDao) {
         taskDao.insertTask(newTask)
     }
 
-    suspend fun updateTaskStatus(taskId: Int, newStatus: TaskStatus) {
+    suspend fun updateTaskStatus(taskId: String, newStatus: TaskStatus) {
         taskDao.updateTaskStatus(taskId, newStatus)
 
         if (newStatus == TaskStatus.COMPLETED) {
@@ -44,7 +48,7 @@ class TaskRepository(private val taskDao: TaskDao) {
         taskDao.clearAll()
     }
 
-    suspend fun getTaskById(taskId: Int): TaskEntity? {
+    suspend fun getTaskById(taskId: String): TaskEntity? {
         return taskDao.getTaskById(taskId)
     }
 

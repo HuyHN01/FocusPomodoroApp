@@ -10,6 +10,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.tasks.await
 
+import com.example.focusmate.util.Constants.GUEST_USER_ID
+
 // Lớp Result để bọc kết quả trả về
 sealed class AuthResultWrapper<out T> {
     data class Success<out T>(val data: T) : AuthResultWrapper<T>()
@@ -73,5 +75,14 @@ class AuthRepository(context: Context) {
         firebaseAuth.signOut()
         // 2. Xóa cache user khỏi Room
         userDao.clearCachedUser()
+    }
+
+    fun getCurrentUserId(): String {
+        val firebaseUser = firebaseAuth.currentUser
+        return if (firebaseUser != null) {
+            firebaseUser.uid // Nếu đã đăng nhập, trả về UID
+        } else {
+            GUEST_USER_ID // Nếu chưa đăng nhập, trả về ID Khách
+        }
     }
 }

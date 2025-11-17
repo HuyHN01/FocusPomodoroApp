@@ -6,7 +6,9 @@ import com.example.focusmate.data.local.entity.ProjectEntity
 
 class ProjectRepository(private val projectDao: ProjectDao) {
 
-    val allProjects: LiveData<List<ProjectEntity>> = projectDao.getAllProjects()
+    fun getAllProjects(userId: String): LiveData<List<ProjectEntity>> {
+        return projectDao.getAllProjects(userId)
+    }
 
     suspend fun insert(project: ProjectEntity) {
         projectDao.insertProject(project)
