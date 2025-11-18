@@ -18,34 +18,39 @@ class AuthActivity : AppCompatActivity() {
 
         // load mac dinh Sign In
         if (savedInstanceState == null) {
-            supportFragmentManager.commit {
-                replace(R.id.auth_fragment_container, SignInFragment())
-            }
+            navigateToSignIn() // Sử dụng hàm vừa tách ra
         }
 
         binding.signInToggle.setOnClickListener {
-            setActiveTab(true)
-            supportFragmentManager.commit {
-                setCustomAnimations(
-                    android.R.anim.slide_in_left,
-                    android.R.anim.slide_out_right
-                )
-                replace(R.id.auth_fragment_container, SignInFragment())
-            }
+            navigateToSignIn()
         }
 
         binding.signUpToggle.setOnClickListener {
-            setActiveTab(false)
-            supportFragmentManager.commit {
-                setCustomAnimations(
-                    android.R.anim.slide_in_left,
-                    android.R.anim.slide_out_right
-                )
-                replace(binding.authFragmentContainer.id, SignUpFragment())
-            }
+            navigateToSignUp()
         }
     }
 
+    fun navigateToSignIn() {
+        setActiveTab(true) // Cập nhật UI của Toggle Button
+        supportFragmentManager.commit {
+            setCustomAnimations(
+                android.R.anim.slide_in_left,
+                android.R.anim.slide_out_right
+            )
+            replace(R.id.auth_fragment_container, SignInFragment())
+        }
+    }
+
+    fun navigateToSignUp() {
+        setActiveTab(false) // Cập nhật UI của Toggle Button
+        supportFragmentManager.commit {
+            setCustomAnimations(
+                android.R.anim.slide_in_left,
+                android.R.anim.slide_out_right
+            )
+            replace(R.id.auth_fragment_container, SignUpFragment())
+        }
+    }
     private fun setActiveTab(isSignIn: Boolean) {
         if (isSignIn) {
             binding.signInToggle.setBackgroundResource(R.drawable.bg_toggle_selected)

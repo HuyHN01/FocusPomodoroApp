@@ -29,6 +29,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _userLoggedIn = MutableLiveData<FirebaseUser?>()
     val userLoggedIn: LiveData<FirebaseUser?> = _userLoggedIn
 
+    private val _verificationResult = MutableLiveData<AuthResultWrapper<String>>()
+    val verificationResult: LiveData<AuthResultWrapper<String>> = _verificationResult
+
     init {
         // Kiểm tra ngay khi ViewModel được tạo
         _userLoggedIn.value = repository.getCurrentFirebaseUser()
@@ -63,6 +66,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     _authResult.value = AuthResult.Error(result.message)
                 }
             }
+        }
+    }
+
+    fun resendVerificationEmail() {
+        viewModelScope.launch {
+            // _verificationResult.value = Loading... (nếu muốn hiển thị loading)
+            val result = repository.sendVerificationEmail()
+            _verificationResult.value = result
         }
     }
 }

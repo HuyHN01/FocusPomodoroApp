@@ -38,15 +38,31 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
 
         viewModel.authResult.observe(viewLifecycleOwner) { result ->
             when (result) {
-                is AuthResult.Loading -> Toast.makeText(context, "Loading...", Toast.LENGTH_SHORT).show()
+                is AuthResult.Loading -> { /* Show loading */ }
                 is AuthResult.Success -> {
-                    //Toast.makeText(context, "Registered ${result.user.email}", Toast.LENGTH_SHORT).show()
-                    requireActivity().setResult(AppCompatActivity.RESULT_OK)
-                    requireActivity().finish()
+                    // KHÔNG finish activity ở đây nữa.
+                    // Hiện Dialog thông báo thành công
+                    showVerificationDialog()
                 }
                 is AuthResult.Error -> Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun showVerificationDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Đăng ký thành công")
+            .setMessage("Một email xác thực đã được gửi đến hộp thư của bạn. Vui lòng xác thực trước khi đăng nhập.")
+            .setPositiveButton("Đã hiểu") { _, _ ->
+                // Chuyển tab sang Đăng nhập để user đăng nhập lại sau khi verify
+                // (Em có thể gọi hàm switchTab của AuthActivity nếu cần, hoặc đơn giản là reload lại)
+                //requireActivity().finish() // Hoặc để user tự chuyển tab
+                if (activity is AuthActivity) {
+                    (activity as AuthActivity).navigateToSignIn()
+                }
+            }
+            .setCancelable(false)
+            .show()
     }
 }
 
