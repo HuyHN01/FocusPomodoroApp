@@ -19,6 +19,11 @@ import java.util.Calendar
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     // 1. Biến UI
+
+    private val _tempSelectedProject = MutableLiveData<ProjectEntity?>(null)
+    val tempSelectedProject: LiveData<ProjectEntity?> = _tempSelectedProject
+
+
     private val _tempSelectedPriority = MutableLiveData<TaskPriority>(TaskPriority.NONE)
     val tempSelectedPriority: LiveData<TaskPriority> = _tempSelectedPriority
     private val _currentTask = MutableStateFlow<TaskEntity?>(null)
@@ -94,6 +99,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
+    fun setTempProject(project: ProjectEntity?) {
+        _tempSelectedProject.value = project
+    }
     private fun formatMinutesToHHMM(totalMinutes: Int): String {
         val hours = totalMinutes / 60
         val minutes = totalMinutes % 60
@@ -106,16 +114,18 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         title: String,
         estimatedPomodoros: Int,
         priority: TaskPriority,
-        dueDate:Long?
+        dueDate:Long?,
+        projectId: String?
     ) {
         viewModelScope.launch {
             repository.addTask(
                 title = title,
                 estimatedPomodoros = estimatedPomodoros,
                 userId = currentUserId,
-                projectId = null,
+                projectId = projectId,
                 priority = priority,
-                dueDate = dueDate
+                dueDate = dueDate,
+
             )
         }
     }
@@ -261,4 +271,5 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
 }
