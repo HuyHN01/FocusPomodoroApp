@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Focus Mate</string>
+    <string name="app_name">FocusMate</string>
     <string name="back">Quay lại</string>
     <string name="profile">Ảnh đại diện người dùng</string>
     <string name="focus_timer">Bắt đầu phiên Pomodoro</string>
