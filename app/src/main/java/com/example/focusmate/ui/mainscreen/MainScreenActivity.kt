@@ -18,6 +18,7 @@ import com.example.focusmate.R
 import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.ui.auth.AuthActivity
 import com.example.focusmate.ui.todolist.TodoListTodayActivity
+import com.example.focusmate.ui.weeklist.WeekListActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
@@ -85,8 +86,14 @@ class MainScreenActivity : AppCompatActivity() {
                         val intent = Intent(this, TodoListTodayActivity::class.java)
                         startActivity(intent)
                     } else {
+                        if (menuItem.title == "Tuần này") {
+                            val intent = Intent(this, WeekListActivity::class.java)
+                            startActivity(intent)
+                        }
+                        else {
+                            Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
+                        }
                         // Xử lý click vào project cụ thể
-                        Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
                     }
                 }
             },

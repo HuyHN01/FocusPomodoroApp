@@ -33,6 +33,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: TaskRepository
     private val authRepository: AuthRepository
     private val currentUserId: String
+    val allTasks: LiveData<List<TaskEntity>>
 
     // 3. LiveData chính (ĐÃ DỌN SẠCH)
     val uncompletedTasks: LiveData<List<TaskEntity>> // Chỉ (Hôm nay + Quá hạn)
@@ -73,7 +74,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         completedTasks = repository.getTasksCompletedToday(currentUserId, startOfDay, endOfDay)
         repository.syncTasks(currentUserId, viewModelScope)
 
-        // Gán nguồn cho Mediator (ĐÃ SỬA SẠCH)
+        //Them cho WeekActivity
+        allTasks = repository.getAllTasks(currentUserId)
+        //Ket thuc
         uncompletedCount.addSource(uncompletedTasks) { list ->
             uncompletedCount.value = list.size
         }
@@ -271,5 +274,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-
+    fun startAddTask() {
+        _tempSelectedProject.value = null
+        _tempSelectedPriority.value = TaskPriority.NONE
+    }
 }
