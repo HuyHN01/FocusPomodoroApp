@@ -18,6 +18,7 @@ import com.example.focusmate.databinding.ActivityPomodoroBinding
 import com.example.focusmate.ui.todolist.TaskViewModel
 import com.example.focusmate.util.PomodoroService
 import com.example.focusmate.util.PomodoroSoundPlayer
+import com.example.focusmate.util.SoundEvent
 import com.google.android.material.snackbar.Snackbar
 
 class PomodoroActivity : AppCompatActivity() {
@@ -211,8 +212,18 @@ class PomodoroActivity : AppCompatActivity() {
         viewModel.soundEvent.observe(this) {event ->
             event?.let {
                 soundPlayer.playSound(it)
+
+                //Them doan nay de nam duoc so luong pomo da hoan thanh
+                if (it == SoundEvent.END_FOCUS && currentTaskId != null) {
+
+                    currentTaskId?.let { id ->
+
+                        taskViewModel.incrementCompletedPomodoros(id)
+                    }
+                }
                 viewModel.resetSoundEvent()
             }
+
         }
     }
 

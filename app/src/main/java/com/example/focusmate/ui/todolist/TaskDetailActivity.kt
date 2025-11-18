@@ -1,6 +1,8 @@
 package com.example.focusmate.ui.todolist
 
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.view.Menu
@@ -55,11 +57,35 @@ class TaskDetailActivity : AppCompatActivity() {
                 binding.edittextTaskName.setText(task.title)
 
                 // 2. Hiển thị Trạng thái (Checkbox & Gạch ngang)
-                binding.checkboxComplete.isChecked = (task.status == TaskStatus.COMPLETED)
                 if (task.status == TaskStatus.COMPLETED) {
+                    // HOÀN THÀNH:
+                    binding.checkboxComplete.isChecked = true
+
+                    binding.checkboxComplete.setButtonDrawable(R.drawable.green_checkmark_icon)
+
+                    binding.checkboxComplete.buttonTintList = null
+
                     binding.edittextTaskName.paintFlags = binding.edittextTaskName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                    // Làm mờ chữ
+                    binding.edittextTaskName.setTextColor(ContextCompat.getColor(this, R.color.priority_none))
                 } else {
+                    binding.checkboxComplete.isChecked = false
+                    binding.checkboxComplete.setButtonDrawable(R.drawable.ellipse_shape_line_icon)
+
                     binding.edittextTaskName.paintFlags = binding.edittextTaskName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                    // Set chữ về màu đen
+                    binding.edittextTaskName.setTextColor(ContextCompat.getColor(this, R.color.black))
+
+                    // Lấy màu ưu tiên
+                    val priorityColorRes = when (task.priority) {
+                        TaskPriority.HIGH -> R.color.priority_high
+                        TaskPriority.MEDIUM -> R.color.priority_medium
+                        TaskPriority.LOW -> R.color.priority_low
+                        TaskPriority.NONE -> R.color.priority_none
+                    }
+                    val priorityColor = ContextCompat.getColor(this, priorityColorRes)
+
+                    binding.checkboxComplete.buttonTintList = android.content.res.ColorStateList.valueOf(priorityColor)
                 }
                 binding.tvPomodoroValue.text = "${task.estimatedPomodoros} Pomodoro"
                 // 3. --- PHẦN MỚI: HIỂN THỊ GHI CHÚ ---
@@ -91,7 +117,7 @@ class TaskDetailActivity : AppCompatActivity() {
                     binding.btnRemoveDueDate.visibility = View.VISIBLE
                 } else {
                     // Nếu KHÔNG có ngày (null) -> Hiển thị "Không" (màu đen) và ẩn nút X
-                    binding.tvDueDateValue.text = "Không"
+                    binding.tvDueDateValue.text = "Hôm nay"
                     binding.tvDueDateValue.setTextColor(ContextCompat.getColor(this, R.color.black))
                     binding.btnRemoveDueDate.visibility = View.GONE
                 }
@@ -108,7 +134,21 @@ class TaskDetailActivity : AppCompatActivity() {
                         dateDialog.show(supportFragmentManager, "DatePickerDialog")
                     }
                 }
+                taskViewModel.allProjects.observe(this) { projects ->
+                    // Tìm Project Entity dựa trên projectId của Task
+                    val currentProject = projects.find { it.projectId == task.projectId }
+
+                    if (currentProject != null) {
+                        binding.tvProjectValue.text = currentProject.name
+                    } else {
+                        // Nếu không tìm thấy (projectId là null) -> "Nhiệm vụ" (Inbox)
+                        binding.tvProjectValue.text = "Nhiệm vụ"
+                        binding.iconProject.imageTintList = ColorStateList.valueOf(Color.GRAY)
+                    }
+                }
+
                 isObserving = false
+
             } else {
                 if (!isObserving) finish()
             }
@@ -124,7 +164,8 @@ class TaskDetailActivity : AppCompatActivity() {
             finish()
         }
 
-        binding.checkboxComplete.setOnCheckedChangeListener { _, _ ->
+        binding.checkboxComplete.setOnClickListener {
+            // Không cần 'if (!isObserving)' nữa, vì Click chỉ xảy ra khi user bấm
             currentTaskId?.let { safeTaskId ->
                 taskViewModel.toggleTaskCompletion(safeTaskId)
             }
@@ -145,13 +186,17 @@ class TaskDetailActivity : AppCompatActivity() {
 
                 // 2. Tạo Dialog MỚI (PomodoroCountPickerFragment)
                 val dialog = PomodoroCountPickerFragment(currentCount) { newCount ->
-                    // 3. Khi Dialog trả về số Pomo mới, gọi ViewModel
-                    // (Hàm này trong ViewModel chúng ta đã viết rồi)
                     taskViewModel.updateTaskPomodoros(newCount)
                 }
 
                 // 4. Hiển thị Dialog
                 dialog.show(supportFragmentManager, "PomoCountPicker")
+            }
+        }
+        binding.rowProject.setOnClickListener {
+            if (!isObserving) {
+                // Mở Dialog "Chuyển tới Dự án"
+                ProjectPickerDialogFragment().show(supportFragmentManager, "ProjectPicker")
             }
         }
     }

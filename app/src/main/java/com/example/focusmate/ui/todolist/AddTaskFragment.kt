@@ -19,7 +19,7 @@ class AddTaskFragment : Fragment() {
 
     private var _binding: FragmentAddTaskBinding? = null
     private val binding get() = _binding!!
-    private var selectedDate: Long? = null
+    private var selectedDate: Long? = System.currentTimeMillis()
     private var selectedPomodoros: Int = 0
     private lateinit var pomoIcons: List<ImageView>
     private val viewModel: TaskViewModel by activityViewModels()
@@ -100,7 +100,7 @@ class AddTaskFragment : Fragment() {
 
                 // 4. RESET LẠI PRIORITY VỀ NONE CHO LẦN SAU
                 viewModel.setTempPriority(TaskPriority.NONE)
-                selectedDate = null
+                selectedDate = System.currentTimeMillis()
                 selectedPomodoros = 0
                 updatePomoIcons(selectedPomodoros)
                 binding.iconDate.setImageResource(R.drawable.sunny_24dp_1f1f1f_fill0_wght400_grad0_opsz24)

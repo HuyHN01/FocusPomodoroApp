@@ -72,17 +72,6 @@
                         android:src="@drawable/flag_svgrepo_com" />
                 </RelativeLayout>
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_add_tag"
-                    style="@style/Widget.MaterialComponents.Chip.Action"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:text="+ Nhãn"
-                    android:layout_marginLeft="20dp"
-                    android:textColor="?attr/colorPrimary"
-                    app:chipStrokeColor="?attr/colorPrimary"
-                    app:chipStrokeWidth="1dp" />
 
             </LinearLayout>
 
@@ -192,78 +181,41 @@
                         app:layout_constraintVertical_bias="1.0" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/row_reminder"
+                    android:id="@+id/row_project"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="5dp"
                     android:paddingVertical="12dp">
 
                     <ImageView
-                        android:id="@+id/icon_reminder"
+                        android:id="@+id/icon_project"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/notifications_24dp_1f1f1f_fill0_wght400_grad0_opsz24"
+                        android:src="@drawable/file_box_svgrepo_com"
                         android:alpha="0.7"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"/>
 
                     <TextView
-                        android:id="@+id/label_reminder"
+                        android:id="@+id/label_project"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Báo nhắc"
+                        android:text="Dự án"
                         android:textSize="16sp"
                         android:layout_marginStart="16dp"
-                        app:layout_constraintStart_toEndOf="@id/icon_reminder"
+                        app:layout_constraintStart_toEndOf="@id/icon_project"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"/>
 
                     <TextView
-                        android:id="@+id/tv_reminder_value"
+                        android:id="@+id/tv_project_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Không"
-                        android:textSize="16sp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/row_repeat"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="5dp"
-                    android:paddingVertical="12dp">
-
-                    <ImageView
-                        android:id="@+id/icon_repeat"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/replay_24dp_1f1f1f_fill0_wght400_grad0_opsz24"
-                        android:alpha="0.7"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
-
-                    <TextView
-                        android:id="@+id/label_repeat"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Lặp lại"
-                        android:textSize="16sp"
-                        android:layout_marginStart="16dp"
-                        app:layout_constraintStart_toEndOf="@id/icon_repeat"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
-
-                    <TextView
-                        android:id="@+id/tv_repeat_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Không"
+                        android:text="Nhiệm vụ"
                         android:textSize="16sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -271,34 +223,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="10dp"
-                android:background="@color/white"
-                android:layout_marginVertical="10dp"
-                >
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="#EEEEEE" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginVertical="16dp"
-                    android:background="#EEEEEE" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:text="+ Thêm công việc phụ"
-                    android:textColor="?attr/colorPrimary"
-                    android:textStyle="bold" />
-            </LinearLayout>
 
                 <EditText
                     android:id="@+id/edittext_note"
@@ -307,7 +232,7 @@
                     android:background="@color/white"
                     android:gravity="top"
                     android:padding="10dp"
-
+                    android:layout_marginTop="15dp"
                     android:hint="Thêm ghi chú ..."
                     android:inputType="textMultiLine"
                     android:minLines="4" />

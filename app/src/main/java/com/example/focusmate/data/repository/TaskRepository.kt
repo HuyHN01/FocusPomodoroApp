@@ -20,13 +20,16 @@ class TaskRepository(private val taskDao: TaskDao) {
     private val firestore = Firebase.firestore
     private val TAG = "TaskRepository"
 
-    fun getUncompletedTasks(userId: String): LiveData<List<TaskEntity>> {
-        // Tạm thời vẫn đọc từ Room (Sau này sẽ gắn listener Firestore ở đây)
-        return taskDao.getTasksByStatus(userId, TaskStatus.PENDING)
+    fun getUncompletedTasks(userId: String, endOfTodayTimestamp: Long): LiveData<List<TaskEntity>> {
+        return taskDao.getUncompletedTasks(userId, endOfTodayTimestamp)
     }
 
-    fun getCompletedTasks(userId: String): LiveData<List<TaskEntity>> {
-        return taskDao.getTasksByStatus(userId, TaskStatus.COMPLETED)
+//    fun getCompletedTasks(userId: String): LiveData<List<TaskEntity>> {
+//        return taskDao.getTasksByStatus(userId, TaskStatus.COMPLETED)
+//    }
+
+    fun getTasksCompletedToday(userId: String, startOfToday: Long, endOfToday: Long): LiveData<List<TaskEntity>> {
+        return taskDao.getTasksCompletedToday(userId, startOfToday, endOfToday)
     }
 
     suspend fun addTask(
