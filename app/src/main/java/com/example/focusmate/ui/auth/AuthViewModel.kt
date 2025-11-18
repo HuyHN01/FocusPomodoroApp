@@ -69,6 +69,24 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun signInWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _authResult.value = AuthResult.Loading
+            // Gọi xuống Repository
+            val result = repository.signInWithGoogle(idToken)
+
+            // Xử lý kết quả trả về UI
+            when (result) {
+                is AuthResultWrapper.Success -> {
+                    _authResult.value = AuthResult.Success(result.data)
+                }
+                is AuthResultWrapper.Error -> {
+                    _authResult.value = AuthResult.Error(result.message)
+                }
+            }
+        }
+    }
+
     fun resendVerificationEmail() {
         viewModelScope.launch {
             // _verificationResult.value = Loading... (nếu muốn hiển thị loading)

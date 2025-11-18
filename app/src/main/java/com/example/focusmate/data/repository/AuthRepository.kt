@@ -11,6 +11,7 @@ import com.google.firebase.auth.auth
 import kotlinx.coroutines.tasks.await
 
 import com.example.focusmate.util.Constants.GUEST_USER_ID
+import com.google.firebase.auth.GoogleAuthProvider
 
 const val ERROR_EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED"
 // Lớp Result để bọc kết quả trả về
@@ -80,6 +81,33 @@ class AuthRepository(context: Context) {
             }
         } catch (e: Exception) {
             AuthResultWrapper.Error(e.message ?: "Đăng nhập thất bại.")
+        }
+    }
+
+    suspend fun signInWithGoogle(idToken: String): AuthResultWrapper<FirebaseUser> {
+        return try {
+            // 1. Tạo Credential từ idToken mà Google trả về
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+            // 2. Đăng nhập vào Firebase với Credential đó
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+            val firebaseUser = authResult.user
+
+            if (firebaseUser != null) {
+                // 3. Lưu thông tin user vào Room (giống như đăng nhập thường)
+                val userEntity = UserEntity(
+                    uid = firebaseUser.uid,
+                    email = firebaseUser.email ?: "",
+                    displayName = firebaseUser.displayName // Google thường có tên hiển thị
+                )
+                userDao.cacheUser(userEntity)
+
+                AuthResultWrapper.Success(firebaseUser)
+            } else {
+                AuthResultWrapper.Error("Google Sign-In thất bại: User null")
+            }
+        } catch (e: Exception) {
+            AuthResultWrapper.Error(e.message ?: "Lỗi đăng nhập Google")
         }
     }
 
