@@ -134,28 +134,7 @@ class MainScreenActivity : AppCompatActivity() {
             binding.loginText.text = name
         }
     }
-
-    /*
-    private fun checkCurrentUser() {
-        val user = firebaseAuth.currentUser
-        if (user != null) {
-            val displayName = user.displayName
-            val email = user.email
-
-            val greetingName = if (!displayName.isNullOrBlank()) {
-                displayName
-            } else if (!email.isNullOrBlank()) {
-                email
-            } else {
-                "Người dùng"
-            }
-            binding.loginText.text = greetingName
-
-        } else {
-            binding.loginText.text = "Đăng Nhập | Đăng Ký"
-        }
-    }
-    */
+    
 
     private fun showLogoutMenu(anchorView: View) {
         val popup = PopupMenu(this, anchorView)
