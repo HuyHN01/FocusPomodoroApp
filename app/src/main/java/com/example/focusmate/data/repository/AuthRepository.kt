@@ -126,6 +126,18 @@ class AuthRepository(context: Context) {
         }
     }
 
+    suspend fun sendPasswordResetEmail(email: String): AuthResultWrapper<String> {
+        return try {
+            // Hàm này của Firebase trả về Void (không có dữ liệu), chỉ cần không lỗi là thành công
+            firebaseAuth.sendPasswordResetEmail(email).await()
+            AuthResultWrapper.Success("Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư.")
+        } catch (e: Exception) {
+            // Các lỗi thường gặp: Email không tồn tại, sai định dạng email
+            AuthResultWrapper.Error(e.message ?: "Không thể gửi email đặt lại mật khẩu.")
+        }
+    }
+
+
     suspend fun signOut() {
         // 1. Đăng xuất khỏi Firebase
         firebaseAuth.signOut()

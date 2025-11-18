@@ -1,10 +1,13 @@
 package com.example.focusmate.ui.auth
 
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
@@ -57,6 +60,7 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
         val emailInput = view.findViewById<TextInputEditText>(R.id.email_or_username_input)
         val passwordInput = view.findViewById<TextInputEditText>(R.id.password_input)
         val signInButton = view.findViewById<AppCompatButton>(R.id.sign_in_button)
+        val forgotPasswordText = view.findViewById<View>(R.id.forgot_password_text)
 
         // LƯU Ý: Em cần đảm bảo trong file XML fragment_sign_in.xml có View ID này
         // Nếu em dùng ImageView cho nút Google, hãy chắc chắn ID đúng
@@ -86,6 +90,10 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
         // 4. Xử lý sự kiện Click nút Google (Khắc phục warning 'launcher never used')
         googleButton?.setOnClickListener {
             signInGoogle()
+        }
+
+        forgotPasswordText.setOnClickListener {
+            showForgotPasswordDialog()
         }
 
         // 5. Quan sát dữ liệu từ ViewModel
@@ -127,6 +135,17 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
                 is AuthResultWrapper.Error -> Toast.makeText(context, wrapper.message, Toast.LENGTH_LONG).show()
             }
         }
+
+        viewModel.resetPasswordResult.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is AuthResultWrapper.Success -> {
+                    Toast.makeText(context, result.data, Toast.LENGTH_LONG).show()
+                }
+                is AuthResultWrapper.Error -> {
+                    Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun showResendVerificationDialog() {
@@ -141,4 +160,46 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
             }
             .show()
     }
+
+    private fun showForgotPasswordDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Quên mật khẩu")
+        builder.setMessage("Nhập email của bạn để nhận liên kết đặt lại mật khẩu:")
+
+        // Tạo một EditText bằng code (đỡ phải tạo file layout xml mới)
+        val input = EditText(context)
+        input.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+        input.hint = "example@email.com"
+
+        // Thêm padding cho đẹp
+        val container = android.widget.FrameLayout(requireContext())
+        val params = android.widget.FrameLayout.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        params.leftMargin = 50
+        params.rightMargin = 50
+        input.layoutParams = params
+        container.addView(input)
+
+        builder.setView(container)
+
+        // Nút Gửi
+        builder.setPositiveButton("Gửi") { _, _ ->
+            val email = input.text.toString().trim()
+            if (email.isNotEmpty()) {
+                viewModel.resetPassword(email)
+            } else {
+                Toast.makeText(context, "Vui lòng nhập email", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Nút Hủy
+        builder.setNegativeButton("Hủy") { dialog, _ ->
+            dialog.cancel()
+        }
+
+        builder.show()
+    }
+
 }

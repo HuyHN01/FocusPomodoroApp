@@ -32,6 +32,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _verificationResult = MutableLiveData<AuthResultWrapper<String>>()
     val verificationResult: LiveData<AuthResultWrapper<String>> = _verificationResult
 
+    private val _resetPasswordResult = MutableLiveData<AuthResultWrapper<String>>()
+    val resetPasswordResult: LiveData<AuthResultWrapper<String>> = _resetPasswordResult
+
+
+
     init {
         // Kiểm tra ngay khi ViewModel được tạo
         _userLoggedIn.value = repository.getCurrentFirebaseUser()
@@ -92,6 +97,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             // _verificationResult.value = Loading... (nếu muốn hiển thị loading)
             val result = repository.sendVerificationEmail()
             _verificationResult.value = result
+        }
+    }
+
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            // Có thể thêm state Loading nếu muốn, nhưng với dialog thì thường xử lý nhanh
+            val result = repository.sendPasswordResetEmail(email)
+            _resetPasswordResult.value = result
         }
     }
 }
