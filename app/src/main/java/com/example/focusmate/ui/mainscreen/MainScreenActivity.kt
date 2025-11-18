@@ -3,10 +3,12 @@ package com.example.focusmate.ui.mainscreen
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.focusmate.databinding.MainScreenBinding
 import com.example.focusmate.ui.MainScreenViewModel
@@ -16,12 +18,14 @@ import com.example.focusmate.R
 import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.ui.auth.AuthActivity
 import com.example.focusmate.ui.todolist.TodoListTodayActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 class MainScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: MainScreenBinding
     private val viewModel: MainScreenViewModel by viewModels()
-
+    private lateinit var firebaseAuth: FirebaseAuth
     private val editProjectLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -50,7 +54,7 @@ class MainScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = MainScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        firebaseAuth = FirebaseAuth.getInstance()
         val adapter = MenuAdapter(
             onItemClicked = { menuItem ->
             if (menuItem.title == "Thêm Dự Án") {
@@ -84,9 +88,21 @@ class MainScreenActivity : AppCompatActivity() {
         }
 
         binding.loginText.setOnClickListener {
-            val intent = Intent(this, AuthActivity::class.java)
-            authLauncher.launch(intent)
+            if (firebaseAuth.currentUser == null) {
+                val intent = Intent(this, AuthActivity::class.java)
+                authLauncher.launch(intent)
+            } else {
+                Toast.makeText(this, "Bạn đã đăng nhập", Toast.LENGTH_SHORT).show()
+            }
         }
+        binding.profileImage.setOnClickListener { view ->
+            if (firebaseAuth.currentUser != null) {
+                showLogoutMenu(view)
+            } else {
+                Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show()
+            }
+        }
+        checkCurrentUser()
     }
 
     private val authLauncher = registerForActivityResult(
@@ -95,16 +111,48 @@ class MainScreenActivity : AppCompatActivity() {
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
             Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
 
-            updateUiForLoggedInUser()
+            checkCurrentUser()
         } else {
             Toast.makeText(this, "Đăng nhập đã bị hủy.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun updateUiForLoggedInUser() {
-        // Ví dụ:
-        // buttonLogin.text = "Đã đăng nhập"
-        // buttonSync.isEnabled = true
+    private fun checkCurrentUser() {
+        val user = firebaseAuth.currentUser
+        if (user != null) {
+            val displayName = user.displayName
+            val email = user.email
+
+            val greetingName = if (!displayName.isNullOrBlank()) {
+                displayName
+            } else if (!email.isNullOrBlank()) {
+                email
+            } else {
+                "Người dùng"
+            }
+            binding.loginText.text = greetingName
+
+        } else {
+            binding.loginText.text = "Đăng Nhập | Đăng Ký"
+        }
+    }
+    private fun showLogoutMenu(anchorView: View) {
+        val popup = PopupMenu(this, anchorView)
+
+        popup.menu.add("Đăng xuất")
+
+        popup.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.title == "Đăng xuất") {
+
+                // --- PHẦN LOGIC ĐĂNG XUẤT CỦA BẠN EM ĐỂ Ở ĐÂY ---
+
+                Toast.makeText(this, "Đã nhấn đăng xuất!", Toast.LENGTH_SHORT).show()
+                true
+            } else {
+                false
+            }
+        }
+        popup.show()
     }
     private fun showProjectOptionsDialog(menuItem: MenuItem) {
         val options = arrayOf("Chỉnh sửa", "Xóa")
