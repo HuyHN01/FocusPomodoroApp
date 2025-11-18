@@ -139,18 +139,23 @@ class AuthRepository(context: Context) {
 
 
     suspend fun signOut() {
-        // 1. Đăng xuất khỏi Firebase
+        // 1. Đăng xuất khỏi Firebase (Ngắt kết nối server)
         firebaseAuth.signOut()
-        // 2. Xóa cache user khỏi Room
+
+        // 2. Xóa cache user khỏi Room (Xóa định danh người dùng cũ)
         userDao.clearCachedUser()
+
+        // LƯU Ý: Ở đây ta không xóa bảng Projects/Tasks.
+        // Việc bảo mật dữ liệu sẽ phụ thuộc vào việc ViewModel reload lại dữ liệu
+        // với userId = "GUEST_USER" ngay sau khi hàm này chạy xong.
     }
 
     fun getCurrentUserId(): String {
         val firebaseUser = firebaseAuth.currentUser
         return if (firebaseUser != null) {
-            firebaseUser.uid // Nếu đã đăng nhập, trả về UID
+            firebaseUser.uid
         } else {
-            GUEST_USER_ID // Nếu chưa đăng nhập, trả về ID Khách
+            GUEST_USER_ID // Quan trọng: Luôn trả về ID Khách khi không đăng nhập
         }
     }
 }

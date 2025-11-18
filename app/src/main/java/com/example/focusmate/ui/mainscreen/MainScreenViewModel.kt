@@ -4,71 +4,127 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.focusmate.R
 import com.example.focusmate.data.local.AppDatabase
-import com.example.focusmate.data.repository.ProjectRepository
-import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.data.local.entity.ProjectEntity
-
-// 1. Thêm import cho AuthRepository
+import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.data.repository.AuthRepository
-
+import com.example.focusmate.data.repository.ProjectRepository
 import kotlinx.coroutines.launch
 import java.util.UUID
 
 class MainScreenViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: ProjectRepository
-
-    // 2. Thêm AuthRepository để lấy userId
     private val authRepository: AuthRepository
 
-    // 3. Thêm biến để giữ userId hiện tại (có thể là GUEST hoặc UID Firebase)
-    private val currentUserId: String
+    // Biến lưu UserId hiện tại (Không được final vì sẽ thay đổi khi login/logout)
+    private var currentUserId: String
 
+    // LiveData quản lý danh sách hiển thị trên UI
     private val _menuItems = MediatorLiveData<List<MenuItem>>()
     val menuItems: LiveData<List<MenuItem>> = _menuItems
 
-    private val projectsFromDb: LiveData<List<ProjectEntity>>
-    private val staticMenuItems: List<MenuItem>
+    // LiveData lưu thông tin User để hiển thị lên Header (Tên/Email)
+    private val _currentUserInfo = MutableLiveData<String>()
+    val currentUserInfo: LiveData<String> = _currentUserInfo
+
+    // Biến giữ LiveData từ DB để có thể removeSource khi đổi user
+    private var currentProjectSource: LiveData<List<ProjectEntity>>? = null
+
+    private val staticMenuItems: List<MenuItem> = listOf(
+        MenuItem(id = null, R.drawable.wb_sunny_24px, "Hôm nay", "1h 15m", 5, null),
+        MenuItem(id = null, R.drawable.wb_twilight_24px, "Ngày mai", "0m", 0, null),
+        MenuItem(id = null, R.drawable.calendar_month_24px, "Tuần này", "1h 15m", 5, null),
+        MenuItem(id = null, R.drawable.event_available_24px, "Đã lên kế hoạch", "1h 15m", 5, null),
+        MenuItem(id = null, R.drawable.event_24px, "Sự kiện", "0m", 0, null),
+        MenuItem(id = null, R.drawable.check_circle_24px, "Đã hoàn thành", "0m", 0, null),
+        MenuItem(id = null, R.drawable.task_24px, "Nhiệm vụ", "1h 15m", 5, null)
+    )
 
     init {
-        // Khởi tạo DB một lần
         val db = AppDatabase.getDatabase(application)
-
-        // Khởi tạo DAO
         val projectDao = db.projectDao()
-
-        // 4. Khởi tạo cả hai Repository
-        // (Giả sử AuthRepository của em có constructor nhận Application)
         authRepository = AuthRepository(application)
         repository = ProjectRepository(projectDao)
 
-        // 5. LẤY userId HIỆN TẠI
-        // Đây là mấu chốt: Lấy ID từ AuthRepository
+        // Khởi tạo giá trị ban đầu
         currentUserId = authRepository.getCurrentUserId()
 
-        // 6. SỬA LỖI BIÊN DỊCH
-        // Code cũ (lỗi): projectsFromDb = repository.allProjects
-        // Code mới (đúng): Gọi hàm và truyền userId vào
-        projectsFromDb = repository.getAllProjects(currentUserId)
+        // Tải dữ liệu lần đầu
+        reloadData()
+    }
 
+    /**
+     * Hàm trung tâm để tải lại dữ liệu.
+     * Được gọi khi:
+     * 1. Mở ứng dụng (init)
+     * 2. Đăng nhập thành công
+     * 3. Đăng xuất thành công
+     */
+    fun reloadData() {
+        // 1. Cập nhật ID mới nhất từ AuthRepository (Có thể là UID hoặc GUEST_USER)
+        currentUserId = authRepository.getCurrentUserId()
+
+        // 2. Cập nhật thông tin hiển thị User (Tên/Email)
+        updateUserInfo()
+
+        // 3. Đồng bộ dữ liệu mẫu (nếu là Guest hoặc User mới)
         repository.syncProjects(currentUserId, viewModelScope)
 
-        // Phần code còn lại của em để tạo menu tĩnh
-        staticMenuItems = listOf(
-            MenuItem(id = null, R.drawable.wb_sunny_24px, "Hôm nay", "1h 15m", 5, null),
-            MenuItem(id = null, R.drawable.wb_twilight_24px, "Ngày mai", "0m", 0, null),
-            MenuItem(id = null, R.drawable.calendar_month_24px, "Tuần này", "1h 15m", 5, null),
-            MenuItem(id = null, R.drawable.event_available_24px, "Đã lên kế hoạch", "1h 15m", 5, null),
-            MenuItem(id = null, R.drawable.event_24px, "Sự kiện", "0m", 0, null),
-            MenuItem(id = null, R.drawable.check_circle_24px, "Đã hoàn thành", "0m", 0, null),
-            MenuItem(id = null, R.drawable.task_24px, "Nhiệm vụ", "1h 15m", 5, null)
-        )
+        // 4. "Chuyển kênh" lắng nghe Database
+        // Bước A: Nếu đang lắng nghe kênh cũ (User cũ), hãy gỡ bỏ nó
+        currentProjectSource?.let {
+            _menuItems.removeSource(it)
+        }
 
-        _menuItems.addSource(projectsFromDb) { projects ->
+        // Bước B: Tạo kênh mới với ID mới
+        val newSource = repository.getAllProjects(currentUserId)
+        currentProjectSource = newSource
+
+        // Bước C: Lắng nghe kênh mới và cập nhật UI
+        _menuItems.addSource(newSource) { projects ->
             combineLists(projects)
+        }
+    }
+
+    /**
+     * Xử lý Logic Đăng xuất
+     */
+    fun signOut() {
+        viewModelScope.launch {
+            // 1. Gọi Repo đăng xuất (Xóa cache, ngắt kết nối Firebase)
+            authRepository.signOut()
+
+            // 2. Quan trọng: Tải lại dữ liệu với tư cách là Guest
+            reloadData()
+        }
+    }
+
+    /**
+     * Gọi hàm này sau khi Login thành công từ Activity
+     */
+    fun checkUserStatus() {
+        // Chỉ cần gọi reloadData để refresh toàn bộ
+        reloadData()
+    }
+
+    private fun updateUserInfo() {
+        val user = authRepository.getCurrentFirebaseUser()
+        if (user != null) {
+            val displayName = user.displayName
+            val email = user.email
+            _currentUserInfo.value = if (!displayName.isNullOrBlank()) {
+                displayName
+            } else if (!email.isNullOrBlank()) {
+                email
+            } else {
+                "Người dùng"
+            }
+        } else {
+            _currentUserInfo.value = "Đăng Nhập | Đăng Ký"
         }
     }
 
@@ -98,16 +154,14 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
 
     fun addProject(projectName: String, colorString: String) {
         viewModelScope.launch {
-            val newOrder = projectsFromDb.value?.size ?: 0
+            // Lấy danh sách hiện tại để tính order
+            // Lưu ý: Phải lấy từ currentProjectSource.value thay vì projectsFromDb cũ
+            val currentList = currentProjectSource?.value
+            val newOrder = currentList?.size ?: 0
 
             val newProject = ProjectEntity(
                 projectId = UUID.randomUUID().toString(),
-
-                // 7. SỬA LỖI LOGIC
-                // Code cũ (lỗi): userId = "default_user",
-                // Code mới (đúng): Dùng userId động đã lấy ở 'init'
-                userId = currentUserId,
-
+                userId = currentUserId, // Luôn dùng ID hiện tại (đã cập nhật)
                 name = projectName,
                 color = colorString,
                 order = newOrder,
@@ -121,7 +175,8 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
     fun deleteProject(menuItem: MenuItem) {
         if (menuItem.id == null) return
 
-        val projectEntity = projectsFromDb.value?.find { it.projectId == menuItem.id }
+        // Tìm trong danh sách hiện tại
+        val projectEntity = currentProjectSource?.value?.find { it.projectId == menuItem.id }
 
         if (projectEntity != null) {
             viewModelScope.launch {
@@ -132,7 +187,7 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
 
     fun updateProject(id: String, newName: String, newColorString: String) {
         viewModelScope.launch {
-            val originalProject = projectsFromDb.value?.find { it.projectId == id }
+            val originalProject = currentProjectSource?.value?.find { it.projectId == id }
             if (originalProject != null) {
                 val updatedProject = originalProject.copy(
                     name = newName,

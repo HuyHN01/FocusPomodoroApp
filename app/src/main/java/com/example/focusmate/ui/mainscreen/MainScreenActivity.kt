@@ -25,7 +25,18 @@ class MainScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: MainScreenBinding
     private val viewModel: MainScreenViewModel by viewModels()
-    private lateinit var firebaseAuth: FirebaseAuth
+
+
+    private val authLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
+            // Refresh lại dữ liệu sau khi đăng nhập
+            viewModel.checkUserStatus()
+        }
+    }
+
     private val editProjectLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -54,69 +65,77 @@ class MainScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = MainScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        firebaseAuth = FirebaseAuth.getInstance()
+
+        setupRecyclerView()
+        setupClickListeners()
+        observeViewModel()
+
+        // Kiểm tra trạng thái ban đầu
+        viewModel.checkUserStatus()
+    }
+
+    private fun setupRecyclerView() {
         val adapter = MenuAdapter(
             onItemClicked = { menuItem ->
-            if (menuItem.title == "Thêm Dự Án") {
-                val intent = Intent(this, AddProjectActivity::class.java)
-                addProjectLauncher.launch(intent)
-            } else {
-                if (menuItem.title == "Hôm nay") {
-                    val intent = Intent(this, TodoListTodayActivity::class.java)
-                    startActivity(intent)
-
+                if (menuItem.title == "Thêm Dự Án") {
+                    val intent = Intent(this, AddProjectActivity::class.java)
+                    addProjectLauncher.launch(intent)
+                } else {
+                    if (menuItem.title == "Hôm nay") {
+                        val intent = Intent(this, TodoListTodayActivity::class.java)
+                        startActivity(intent)
+                    } else {
+                        // Xử lý click vào project cụ thể
+                        Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
+                    }
                 }
-                Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
-            }
-        },
+            },
             onItemLongClicked = { menuItem ->
                 showProjectOptionsDialog(menuItem)
             }
         )
-
         binding.menuRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.menuRecyclerView.adapter = adapter
 
-
+        // Quan sát danh sách Project từ ViewModel
         viewModel.menuItems.observe(this) { items ->
             adapter.submitList(items)
         }
-        binding.pomodoroCardView.setOnClickListener {
-            val intent = Intent(this, PomodoroActivity::class.java)
+    }
 
-            startActivity(intent)
+    private fun setupClickListeners() {
+        binding.pomodoroCardView.setOnClickListener {
+            startActivity(Intent(this, PomodoroActivity::class.java))
         }
 
+        // Xử lý Click vào tên User/Đăng nhập
         binding.loginText.setOnClickListener {
-            if (firebaseAuth.currentUser == null) {
-                val intent = Intent(this, AuthActivity::class.java)
-                authLauncher.launch(intent)
+            // Kiểm tra thông qua ViewModel hoặc Text hiện tại
+            if (binding.loginText.text == "Đăng Nhập | Đăng Ký") {
+                authLauncher.launch(Intent(this, AuthActivity::class.java))
             } else {
-                Toast.makeText(this, "Bạn đã đăng nhập", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bạn đang đăng nhập với tên: ${binding.loginText.text}", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // Xử lý Click vào Avatar -> Hiện Menu Đăng xuất
         binding.profileImage.setOnClickListener { view ->
-            if (firebaseAuth.currentUser != null) {
+            if (binding.loginText.text != "Đăng Nhập | Đăng Ký") {
                 showLogoutMenu(view)
             } else {
                 Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show()
             }
         }
-        checkCurrentUser()
     }
 
-    private val authLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == AppCompatActivity.RESULT_OK) {
-            Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
-
-            checkCurrentUser()
-        } else {
-            Toast.makeText(this, "Đăng nhập đã bị hủy.", Toast.LENGTH_SHORT).show()
+    private fun observeViewModel() {
+        // Quan sát thông tin User để cập nhật UI (Thay thế cho hàm checkCurrentUser cũ)
+        viewModel.currentUserInfo.observe(this) { name ->
+            binding.loginText.text = name
         }
     }
 
+    /*
     private fun checkCurrentUser() {
         val user = firebaseAuth.currentUser
         if (user != null) {
@@ -136,17 +155,21 @@ class MainScreenActivity : AppCompatActivity() {
             binding.loginText.text = "Đăng Nhập | Đăng Ký"
         }
     }
+    */
+
     private fun showLogoutMenu(anchorView: View) {
         val popup = PopupMenu(this, anchorView)
-
         popup.menu.add("Đăng xuất")
+
+        // Thêm icon hoặc các option khác nếu cần (VD: Cài đặt tài khoản)
 
         popup.setOnMenuItemClickListener { menuItem ->
             if (menuItem.title == "Đăng xuất") {
+                // --- LOGIC ĐĂNG XUẤT AN TOÀN ---
+                // Gọi sang ViewModel để xử lý Data + Auth
+                viewModel.signOut()
 
-                // --- PHẦN LOGIC ĐĂNG XUẤT CỦA BẠN EM ĐỂ Ở ĐÂY ---
-
-                Toast.makeText(this, "Đã nhấn đăng xuất!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Đã đăng xuất thành công!", Toast.LENGTH_SHORT).show()
                 true
             } else {
                 false
@@ -154,6 +177,7 @@ class MainScreenActivity : AppCompatActivity() {
         }
         popup.show()
     }
+
     private fun showProjectOptionsDialog(menuItem: MenuItem) {
         val options = arrayOf("Chỉnh sửa", "Xóa")
 
