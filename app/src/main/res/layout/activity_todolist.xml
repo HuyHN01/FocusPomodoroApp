@@ -72,6 +72,7 @@
                     android:orientation="vertical"
                     android:gravity="center">
                     <TextView
+                        android:id="@+id/tv_total_estimated_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="00:00"
@@ -117,6 +118,7 @@
                     android:orientation="vertical"
                     android:gravity="center">
                     <TextView
+                        android:id="@+id/tv_total_time_elapsed"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="00:00"

@@ -127,14 +127,7 @@
                 android:padding="8dp"
                 android:src="@drawable/flag_svgrepo_com" />
 
-            <ImageView
-                android:id="@+id/icon_tag"
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:src="@drawable/sell_24dp_1f1f1f_fill0_wght400_grad0_opsz24"
-                android:contentDescription="Chọn nhãn"
-                android:padding="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
+
 
         </LinearLayout>
 

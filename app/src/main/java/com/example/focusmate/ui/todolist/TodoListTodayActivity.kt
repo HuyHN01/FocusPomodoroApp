@@ -20,7 +20,10 @@ class TodoListTodayActivity : AppCompatActivity(){
     private lateinit var binding: ActivityTodolistBinding
     private lateinit var taskViewModel: TaskViewModel
     private lateinit var pomodoroViewModel: PomodoroViewModel
-    private lateinit var tasksAdapter: TasksAdapter
+
+    // --- 1. KHAI BÁO 3 ADAPTER ---
+    private lateinit var tasksAdapter: TasksAdapter // Cho task "Hôm nay"
+    private lateinit var otherTasksAdapter: TasksAdapter // CHO TASK "KHÁC" (MỚI)
     private lateinit var completedTasksAdapter: TasksAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +35,7 @@ class TodoListTodayActivity : AppCompatActivity(){
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
         pomodoroViewModel = ViewModelProvider(this)[PomodoroViewModel::class.java]
 
-
+        // --- 2. XỬ LÝ CLICK CÁC HEADER ---
         binding.completedTasksHeader.setOnClickListener {
             if (binding.completedTasksList.isVisible) {
                 binding.completedTasksList.visibility = View.GONE
@@ -42,8 +45,17 @@ class TodoListTodayActivity : AppCompatActivity(){
                 binding.completedTasksHeader.text = "Ẩn đi những công việc đã hoàn thành ▲"
             }
         }
+        binding.backArrow.setOnClickListener {
+            finish()
+        }
+        taskViewModel.timeElapsedFormatted.observe(this) { formattedTime ->
+            binding.tvTotalTimeElapsed.text = formattedTime // Dùng ID mới ở Bước 1
+        }
 
-        // Khởi tạo Adapter với các callback
+
+        // --- 3. KHỞI TẠO 3 ADAPTER ---
+
+        // Adapter 1: Task "Hôm nay" (Code cũ của em)
         tasksAdapter = TasksAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -62,6 +74,7 @@ class TodoListTodayActivity : AppCompatActivity(){
             }
         )
 
+        // Adapter 2: Task "Hoàn thành" (Code cũ của em)
         completedTasksAdapter = TasksAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -74,31 +87,65 @@ class TodoListTodayActivity : AppCompatActivity(){
             },
             onPlayClick = { task ->
                 val intent = Intent(this, PomodoroActivity::class.java).apply {
-                    // SỬA LỖI 1: Sửa 'id' thành 'taskId'
                     putExtra("EXTRA_TASK_ID", task.taskId)
                 }
                 startActivity(intent)
             }
         )
 
-        binding.tasksList.apply {
+        // Adapter 3: Task "Khác" (MỚI - Copy y hệt)
+        otherTasksAdapter = TasksAdapter(
+            onTaskClick = { task ->
+                val intent = Intent(this, TaskDetailActivity::class.java).apply {
+                    putExtra("EXTRA_TASK_ID", task.taskId)
+                }
+                startActivity(intent)
+            },
+            onCompleteClick = { task ->
+                taskViewModel.toggleTaskCompletion(task.taskId)
+            },
+            onPlayClick = { task ->
+                val intent = Intent(this, PomodoroActivity::class.java).apply {
+                    putExtra("EXTRA_TASK_ID", task.taskId)
+                }
+                startActivity(intent)
+            }
+        )
+
+        // --- 4. SETUP 3 RECYCLERVIEW ---
+        binding.tasksList.apply { // List "Hôm nay"
             layoutManager = LinearLayoutManager(this@TodoListTodayActivity)
             adapter = tasksAdapter
         }
-        binding.completedTasksList.apply {
+        binding.completedTasksList.apply { // List "Hoàn thành"
             layoutManager = LinearLayoutManager(this@TodoListTodayActivity)
             adapter = completedTasksAdapter
         }
 
-        taskViewModel.uncompletedTasks.observe(this) { uncompleted ->
-            tasksAdapter.submitList(uncompleted)
+
+        // --- 5. SỬA LẠI CÁC OBSERVER ---
+
+        // Observer "Thời gian" (Code cũ của em - Đã đúng)
+        taskViewModel.estimatedTimeFormatted.observe(this) { formattedTime ->
+            binding.tvTotalEstimatedTime.text = formattedTime
         }
 
+        // Sửa lỗi cú pháp và logic
+        taskViewModel.uncompletedTasks.observe(this) { uncompletedToday ->
+            tasksAdapter.submitList(uncompletedToday)
+        }
+
+        // Thêm observer mới cho "Công việc khác"
+//        taskViewModel.otherPendingTasks.observe(this) { otherTasks ->
+//            otherTasksAdapter.submitList(otherTasks)
+//        }
+
+        // Observer "Hoàn thành" (Giữ nguyên)
         taskViewModel.completedTasks.observe(this) { completed ->
             completedTasksAdapter.submitList(completed)
         }
-//
 
+        // Các observer đếm số lượng (Giữ nguyên)
         taskViewModel.uncompletedCount.observe(this, Observer { count ->
             binding.taskNeedCompleteTV.text = count.toString()
         })
@@ -106,15 +153,15 @@ class TodoListTodayActivity : AppCompatActivity(){
             binding.taskCompleted.text = count.toString()
         })
 
+        // Thêm task nhanh (Giữ nguyên)
         binding.addTaskEditText.setOnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val title = binding.addTaskEditText.text.toString().trim()
                 if (title.isNotEmpty()) {
-                    // Sửa lỗi: Thêm 'priority = TaskPriority.NONE'
                     taskViewModel.addNewTask(
                         title = title,
                         estimatedPomodoros = 1,
-                        priority = TaskPriority.NONE, // <-- THÊM THAM SỐ NÀY
+                        priority = TaskPriority.NONE,
                         dueDate = null
                     )
                     binding.addTaskEditText.text.clear()
@@ -133,5 +180,4 @@ class TodoListTodayActivity : AppCompatActivity(){
             }
         }
     }
-
 }

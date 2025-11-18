@@ -34,6 +34,10 @@ interface TaskDao {
     @Query("UPDATE tasks SET completedAt = :completedAt WHERE taskId = :taskId")
     suspend fun updateCompletedAt(taskId: String, completedAt: Long?)
 
+    @Query("SELECT * FROM tasks WHERE status = 'COMPLETED' AND userId = :userId AND completedAt BETWEEN :startOfToday AND :endOfToday ORDER BY completedAt DESC")
+    fun getTasksCompletedToday(userId: String, startOfToday: Long, endOfToday: Long): LiveData<List<TaskEntity>>
+    @Query("SELECT * FROM tasks WHERE status = 'PENDING' AND userId = :userId AND dueDate IS NOT NULL AND dueDate <= :endOfTodayTimestamp ORDER BY priority ASC, dueDate ASC")
+    fun getUncompletedTasks(userId: String, endOfTodayTimestamp: Long): LiveData<List<TaskEntity>>
 
     @Query("DELETE FROM tasks")
     suspend fun clearAll()
@@ -47,4 +51,6 @@ interface TaskDao {
 
     @Update
     suspend fun updateTask(task: TaskEntity)
+
+
 }
