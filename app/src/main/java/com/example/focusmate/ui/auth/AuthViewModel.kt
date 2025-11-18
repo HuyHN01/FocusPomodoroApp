@@ -29,6 +29,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _userLoggedIn = MutableLiveData<FirebaseUser?>()
     val userLoggedIn: LiveData<FirebaseUser?> = _userLoggedIn
 
+    private val _verificationResult = MutableLiveData<AuthResultWrapper<String>>()
+    val verificationResult: LiveData<AuthResultWrapper<String>> = _verificationResult
+
+    private val _resetPasswordResult = MutableLiveData<AuthResultWrapper<String>>()
+    val resetPasswordResult: LiveData<AuthResultWrapper<String>> = _resetPasswordResult
+
+
+
     init {
         // Kiểm tra ngay khi ViewModel được tạo
         _userLoggedIn.value = repository.getCurrentFirebaseUser()
@@ -63,6 +71,40 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     _authResult.value = AuthResult.Error(result.message)
                 }
             }
+        }
+    }
+
+    fun signInWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _authResult.value = AuthResult.Loading
+            // Gọi xuống Repository
+            val result = repository.signInWithGoogle(idToken)
+
+            // Xử lý kết quả trả về UI
+            when (result) {
+                is AuthResultWrapper.Success -> {
+                    _authResult.value = AuthResult.Success(result.data)
+                }
+                is AuthResultWrapper.Error -> {
+                    _authResult.value = AuthResult.Error(result.message)
+                }
+            }
+        }
+    }
+
+    fun resendVerificationEmail() {
+        viewModelScope.launch {
+            // _verificationResult.value = Loading... (nếu muốn hiển thị loading)
+            val result = repository.sendVerificationEmail()
+            _verificationResult.value = result
+        }
+    }
+
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            // Có thể thêm state Loading nếu muốn, nhưng với dialog thì thường xử lý nhanh
+            val result = repository.sendPasswordResetEmail(email)
+            _resetPasswordResult.value = result
         }
     }
 }
