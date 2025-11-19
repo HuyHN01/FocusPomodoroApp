@@ -1,4 +1,4 @@
-package com.example.focusmate.ui.todolist // Em để chung package cho tiện
+package com.example.focusmate.ui.todolist 
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,7 +14,7 @@ class PriorityPickerDialogFragment : DialogFragment() {
     private var _binding: DialogPriorityPickerBinding? = null
     private val binding get() = _binding!!
 
-    // Dùng chung ViewModel với AddTaskFragment và Activity
+    
     private val viewModel: TaskViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -29,7 +29,7 @@ class PriorityPickerDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Gán sự kiện click cho 4 nút
+        
         binding.btnPriorityHigh.setOnClickListener {
             viewModel.setTempPriority(TaskPriority.HIGH)
             dismiss()

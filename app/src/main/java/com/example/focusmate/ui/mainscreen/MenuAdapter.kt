@@ -29,7 +29,7 @@ class MenuAdapter(private val onItemClicked: (MenuItem) -> Unit,
                 try {
                     binding.itemIcon.setColorFilter(Color.parseColor(colorStr))
                 } catch (e: IllegalArgumentException) {
-                    // Xử lý nếu lỡ lưu màu bị sai định dạng
+
                     binding.itemIcon.clearColorFilter()
                 }
             } ?: binding.itemIcon.clearColorFilter()

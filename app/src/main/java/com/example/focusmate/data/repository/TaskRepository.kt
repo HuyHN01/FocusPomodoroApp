@@ -16,17 +16,24 @@ import kotlinx.coroutines.launch
 
 class TaskRepository(private val taskDao: TaskDao) {
 
-    // Khởi tạo Firestore
+    
     private val firestore = Firebase.firestore
     private val TAG = "TaskRepository"
 
+    fun getUncompletedTasksByProject(userId: String, projectId: String): LiveData<List<TaskEntity>> {
+        return taskDao.getUncompletedTasksByProject(userId, projectId)
+    }
+
+    fun getCompletedTasksByProject(userId: String, projectId: String): LiveData<List<TaskEntity>> {
+        return taskDao.getCompletedTasksByProject(userId, projectId)
+    }
     fun getUncompletedTasks(userId: String, endOfTodayTimestamp: Long): LiveData<List<TaskEntity>> {
         return taskDao.getUncompletedTasks(userId, endOfTodayTimestamp)
     }
 
-//    fun getCompletedTasks(userId: String): LiveData<List<TaskEntity>> {
-//        return taskDao.getTasksByStatus(userId, TaskStatus.COMPLETED)
-//    }
+
+
+
 
     fun getTasksCompletedToday(userId: String, startOfToday: Long, endOfToday: Long): LiveData<List<TaskEntity>> {
         return taskDao.getTasksCompletedToday(userId, startOfToday, endOfToday)
@@ -52,15 +59,15 @@ class TaskRepository(private val taskDao: TaskDao) {
             dueDate = dueDate
         )
 
-        // 1. LOCAL: Lưu vào Room trước (Luôn thành công nếu dữ liệu đúng)
+        
         taskDao.insertTask(newTask)
 
-        // 2. REMOTE: Đẩy lên Firestore (Nếu không phải khách)
+        
         if (userId != Constants.GUEST_USER_ID) {
             try {
                 firestore.collection("users").document(userId)
                     .collection("tasks").document(newTask.taskId)
-                    .set(newTask) // Dùng set để ghi đè hoặc tạo mới
+                    .set(newTask) 
                     .await()
                 Log.d(TAG, "Success: Task ${newTask.taskId} synced to Cloud.")
             } catch (e: Exception) {
@@ -70,24 +77,24 @@ class TaskRepository(private val taskDao: TaskDao) {
     }
 
     suspend fun updateTaskStatus(taskId: String, newStatus: TaskStatus) {
-        // 1. LOCAL: Cập nhật Room
+        
         taskDao.updateTaskStatus(taskId, newStatus)
         val completedAt = if (newStatus == TaskStatus.COMPLETED) System.currentTimeMillis() else null
         taskDao.updateCompletedAt(taskId, completedAt)
 
-        // 2. REMOTE: Cập nhật Firestore
-        // Vì hàm này chỉ nhận taskId, ta cần lấy Task từ DB ra để biết userId là ai
+        
+        
         val task = taskDao.getTaskById(taskId)
         if (task != null && task.userId != Constants.GUEST_USER_ID) {
             try {
                 val updates = mapOf(
-                    "status" to newStatus, // Room Converter sẽ tự lo việc enum -> string khi lưu entity, nhưng với map ta nên cẩn thận
+                    "status" to newStatus, 
                     "completedAt" to completedAt
                 )
 
                 firestore.collection("users").document(task.userId)
                     .collection("tasks").document(taskId)
-                    .update(updates) // Chỉ update các trường thay đổi
+                    .update(updates) 
                     .await()
                 Log.d(TAG, "Success: Task status updated on Cloud.")
             } catch (e: Exception) {
@@ -97,8 +104,8 @@ class TaskRepository(private val taskDao: TaskDao) {
     }
 
     suspend fun clearAll() {
-        // Hàm này nguy hiểm nếu dùng với Firestore (xóa hết trên mây)
-        // Hiện tại chỉ xóa Local để test
+        
+        
         taskDao.clearAll()
     }
 
@@ -107,10 +114,10 @@ class TaskRepository(private val taskDao: TaskDao) {
     }
 
     suspend fun deleteTask(task: TaskEntity) {
-        // 1. LOCAL
+        
         taskDao.deleteTask(task)
 
-        // 2. REMOTE
+        
         if (task.userId != Constants.GUEST_USER_ID) {
             try {
                 firestore.collection("users").document(task.userId)
@@ -125,15 +132,15 @@ class TaskRepository(private val taskDao: TaskDao) {
     }
 
     suspend fun updateTask(task: TaskEntity) {
-        // 1. LOCAL
+        
         taskDao.updateTask(task)
 
-        // 2. REMOTE
+        
         if (task.userId != Constants.GUEST_USER_ID) {
             try {
                 firestore.collection("users").document(task.userId)
                     .collection("tasks").document(task.taskId)
-                    .set(task) // Ghi đè lại toàn bộ task đã sửa
+                    .set(task) 
                     .await()
                 Log.d(TAG, "Success: Task updated on Cloud.")
             } catch (e: Exception) {
@@ -146,7 +153,7 @@ class TaskRepository(private val taskDao: TaskDao) {
         return taskDao.getTasksByDateRange(userId, status, startTime, endTime)
     }
     fun syncTasks(userId: String, scope: CoroutineScope) {
-        // Không đồng bộ cho khách
+        
         if (userId == com.example.focusmate.util.Constants.GUEST_USER_ID) return
 
         firestore.collection("users").document(userId).collection("tasks")
@@ -159,8 +166,8 @@ class TaskRepository(private val taskDao: TaskDao) {
                 if (snapshots != null) {
                     scope.launch(Dispatchers.IO) {
                         for (dc in snapshots.documentChanges) {
-                            // Firestore tự động map String "PENDING" -> Enum TaskStatus.PENDING
-                            // nhờ vào cấu trúc data class chuẩn
+                            
+                            
                             val task = dc.document.toObject(TaskEntity::class.java)
 
                             when (dc.type) {

@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.focusmate.databinding.FragmentPomodoroTaskBinding
 import com.example.focusmate.ui.todolist.TaskViewModel
 
-//Phan nay cua Tu
+
 class PomodoroTaskFragment : Fragment() {
 
     private lateinit var taskViewModel: TaskViewModel
@@ -30,17 +30,17 @@ class PomodoroTaskFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Lấy title từ Activity (qua arguments)
+        
         val taskTitle = arguments?.getString("TASK_TITLE")
         binding.taskTitleInFragment.text = taskTitle
 
-        // (Nâng cao) Xử lý khi nhấn nút X
+        
         binding.closeTaskButton.setOnClickListener {
             taskViewModel.clearCurrentTask()
         }
     }
 
-    // Hàm static để Activity gọi và truyền data
+    
     companion object {
         fun newInstance(title: String): PomodoroTaskFragment {
             val fragment = PomodoroTaskFragment()

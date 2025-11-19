@@ -30,8 +30,8 @@ class DatePickerDialogFragment(
 
         dialog?.window?.let { window ->
             window.setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT, // Chiều ngang: Full
-                ViewGroup.LayoutParams.WRAP_CONTENT  // Chiều dọc: Tự động
+                ViewGroup.LayoutParams.MATCH_PARENT, 
+                ViewGroup.LayoutParams.WRAP_CONTENT  
             )
             window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }

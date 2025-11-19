@@ -48,11 +48,11 @@ class FullscreenTimerActivity : AppCompatActivity() {
             binding.tvSeconds.text = String.format("%02d", sec)
         }
 
-        // Cập nhật thanh control theo state
+        
         viewModel.state.observe(this) { state ->
             when (state) {
                 TimerState.IDLE -> {
-                    // only show play
+                    
                     binding.btnPlay.visibility = View.VISIBLE
                     binding.btnAddOne.visibility = View.GONE
                     binding.divider.visibility = View.GONE
@@ -82,7 +82,7 @@ class FullscreenTimerActivity : AppCompatActivity() {
                 }
                 TimerState.BREAK_RUNNING -> {
                     binding.btnPlay.visibility = View.GONE
-                    binding.btnAddOne.visibility = View.GONE // allow +1 break? per previous design yes
+                    binding.btnAddOne.visibility = View.GONE 
                     binding.divider.visibility = View.GONE
                     binding.btnPause.visibility = View.GONE
                     binding.btnStop.visibility = View.VISIBLE
@@ -127,9 +127,9 @@ class FullscreenTimerActivity : AppCompatActivity() {
             finish()
         }
 
-        binding.btnVolume?.setOnClickListener { /* TODO */ }
-        binding.btnTimerSettings?.setOnClickListener { /* TODO */ }
-        binding.btnSettings?.setOnClickListener { /* TODO */ }
+        binding.btnVolume?.setOnClickListener {  }
+        binding.btnTimerSettings?.setOnClickListener {  }
+        binding.btnSettings?.setOnClickListener {  }
     }
 
     fun adjustControlsContainerWidth(container: ConstraintLayout?) {
@@ -154,7 +154,7 @@ class FullscreenTimerActivity : AppCompatActivity() {
                     }
                 }
 
-                // spacing giữa các nút (ví dụ 16dp)
+                
                 val spacingPx = (24 * c.resources.displayMetrics.density).toInt()
                 if (visibleCount > 1) {
                     totalWidth += (visibleCount - 1) * spacingPx

@@ -2,7 +2,7 @@ package com.example.focusmate.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.UUID // <-- Nhớ import
+import java.util.UUID 
 
 @Entity(tableName = "projects")
 data class ProjectEntity(

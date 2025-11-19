@@ -18,11 +18,9 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-// --- CÁC HÀM HỖ TRỢ (Em có thể để ở cuối file) ---
 
-/**
- * Lấy mốc 00:00:00 của một ngày
- */
+
+
 private fun getStartOfDay(calendar: Calendar): Calendar {
     calendar.set(Calendar.HOUR_OF_DAY, 0)
     calendar.set(Calendar.MINUTE, 0)
@@ -31,17 +29,13 @@ private fun getStartOfDay(calendar: Calendar): Calendar {
     return calendar
 }
 
-/**
- * Kiểm tra xem ngày có bị quá hạn không (trước 00:00 sáng hôm nay)
- */
+
 private fun isOverdue(timestamp: Long): Boolean {
     val today = getStartOfDay(Calendar.getInstance())
     return timestamp < today.timeInMillis
 }
 
-/**
- * Biến Long (1731465000000) thành "Th 5, 13 thg 11"
- */
+
 private fun formatTimestampToShortDate(timestamp: Long): String {
     val sdf = SimpleDateFormat("EEE, dd 'thg' MM", Locale("vi", "VN"))
     return sdf.format(Date(timestamp))
@@ -96,41 +90,41 @@ class TasksAdapter(
         }
 
 
-        // --- SỬA LẠI HÀM BIND() ĐỂ ĐỔI MÀU ---
+        
         fun bind(task: TaskEntity) {
-            val context = binding.root.context // Lấy context
+            val context = binding.root.context 
             binding.taskTitleTextView.text = task.title
 
-            // 1. Chuẩn bị Pomo
+            
             val pomoText = "${task.estimatedPomodoros} Pomodoro"
 
-            // 2. Lấy màu mặc định (ví dụ: màu đen)
-            val defaultColor = ContextCompat.getColor(context, R.color.black) // Em đổi thành màu chữ mặc định của em
-            val overdueColor = ContextCompat.getColor(context, R.color.priority_high) // Màu đỏ
+            
+            val defaultColor = ContextCompat.getColor(context, R.color.black) 
+            val overdueColor = ContextCompat.getColor(context, R.color.priority_high) 
 
-            // 3. Kiểm tra Ngày đến hạn
+            
             if (task.dueDate != null) {
-                // Nếu CÓ ngày -> Hiển thị cả Pomo và Ngày
+                
                 val dateText = formatTimestampToShortDate(task.dueDate!!)
                 binding.pomodoroCountTextView.text = "$pomoText • $dateText"
 
-                // KIỂM TRA QUÁ HẠN
+                
                 if (isOverdue(task.dueDate!!)) {
-                    // Quá hạn -> Tô màu Đỏ
+                    
                     binding.pomodoroCountTextView.setTextColor(overdueColor)
                 } else {
-                    // Chưa quá hạn -> Màu mặc định
+                    
                     binding.pomodoroCountTextView.setTextColor(defaultColor)
                 }
 
             } else {
-                // Nếu KHÔNG có ngày -> Chỉ hiển thị Pomo
+                
                 binding.pomodoroCountTextView.text = pomoText
-                // Màu mặc định
+                
                 binding.pomodoroCountTextView.setTextColor(defaultColor)
             }
 
-            // 4. Xử lý trạng thái (Completed / Pending)
+            
             if (task.status == TaskStatus.COMPLETED) {
                 binding.taskCompleteIcon.setImageResource(R.drawable.green_checkmark_icon)
                 binding.taskCompleteIcon.clearColorFilter()
@@ -147,10 +141,10 @@ class TasksAdapter(
                     TaskPriority.HIGH -> ContextCompat.getColor(context, R.color.priority_high)
                     TaskPriority.MEDIUM -> ContextCompat.getColor(context, R.color.priority_medium)
                     TaskPriority.LOW -> ContextCompat.getColor(context, R.color.priority_low)
-                    TaskPriority.NONE -> ContextCompat.getColor(context, R.color.priority_none) // Màu xám
+                    TaskPriority.NONE -> ContextCompat.getColor(context, R.color.priority_none) 
                 }
 
-                // TÔ MÀU cho vòng tròn
+                
                 binding.taskCompleteIcon.setColorFilter(priorityColor)
             }
         }

@@ -89,7 +89,7 @@ class AddProjectActivity : AppCompatActivity() {
 
     private fun renderColorOptions() {
         colorGrid.removeAllViews()
-        val size = (resources.displayMetrics.density * 70).toInt() // 48dp
+        val size = (resources.displayMetrics.density * 70).toInt()
 
         for (color in colors) {
             val btn = ImageButton(this).apply {

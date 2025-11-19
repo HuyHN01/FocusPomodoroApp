@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
-//import android.widget.TextView
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -46,9 +46,9 @@ class AuthActivity : AppCompatActivity() {
 
 
 
-        // load mac dinh Sign In
+        
         if (savedInstanceState == null) {
-            navigateToSignIn() // Sử dụng hàm vừa tách ra
+            navigateToSignIn() 
         }
 
         binding.signInToggle.setOnClickListener {
@@ -61,7 +61,7 @@ class AuthActivity : AppCompatActivity() {
     }
 
     fun navigateToSignIn() {
-        setActiveTab(true) // Cập nhật UI của Toggle Button
+        setActiveTab(true) 
         supportFragmentManager.commit {
             setCustomAnimations(
                 android.R.anim.slide_in_left,
@@ -72,7 +72,7 @@ class AuthActivity : AppCompatActivity() {
     }
 
     fun navigateToSignUp() {
-        setActiveTab(false) // Cập nhật UI của Toggle Button
+        setActiveTab(false) 
         supportFragmentManager.commit {
             setCustomAnimations(
                 android.R.anim.slide_in_left,
@@ -95,6 +95,6 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    // Hàm tiện ích đổi dp sang pixel (để code gọn hơn)
+    
     fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

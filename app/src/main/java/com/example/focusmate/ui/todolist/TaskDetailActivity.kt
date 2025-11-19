@@ -37,10 +37,10 @@ class TaskDetailActivity : AppCompatActivity() {
         currentTaskId = intent.getStringExtra("EXTRA_TASK_ID")
 
         currentTaskId?.let { safeTaskId ->
-            // 'safeTaskId' là một bản sao String an toàn, không null
+            
             taskViewModel.loadTaskById(safeTaskId)
         } ?: run {
-            // Khối 'run' này sẽ chạy nếu 'currentTaskId' là null
+            
             finish()
             return
         }
@@ -53,12 +53,12 @@ class TaskDetailActivity : AppCompatActivity() {
             if (task != null) {
                 isObserving = true
 
-                // 1. Hiển thị Tiêu đề
+                
                 binding.edittextTaskName.setText(task.title)
 
-                // 2. Hiển thị Trạng thái (Checkbox & Gạch ngang)
+                
                 if (task.status == TaskStatus.COMPLETED) {
-                    // HOÀN THÀNH:
+                    
                     binding.checkboxComplete.isChecked = true
 
                     binding.checkboxComplete.setButtonDrawable(R.drawable.green_checkmark_icon)
@@ -66,17 +66,17 @@ class TaskDetailActivity : AppCompatActivity() {
                     binding.checkboxComplete.buttonTintList = null
 
                     binding.edittextTaskName.paintFlags = binding.edittextTaskName.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                    // Làm mờ chữ
+                    
                     binding.edittextTaskName.setTextColor(ContextCompat.getColor(this, R.color.priority_none))
                 } else {
                     binding.checkboxComplete.isChecked = false
                     binding.checkboxComplete.setButtonDrawable(R.drawable.ellipse_shape_line_icon)
 
                     binding.edittextTaskName.paintFlags = binding.edittextTaskName.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                    // Set chữ về màu đen
+                    
                     binding.edittextTaskName.setTextColor(ContextCompat.getColor(this, R.color.black))
 
-                    // Lấy màu ưu tiên
+                    
                     val priorityColorRes = when (task.priority) {
                         TaskPriority.HIGH -> R.color.priority_high
                         TaskPriority.MEDIUM -> R.color.priority_medium
@@ -88,11 +88,11 @@ class TaskDetailActivity : AppCompatActivity() {
                     binding.checkboxComplete.buttonTintList = android.content.res.ColorStateList.valueOf(priorityColor)
                 }
                 binding.tvPomodoroValue.text = "${task.estimatedPomodoros} Pomodoro"
-                // 3. --- PHẦN MỚI: HIỂN THỊ GHI CHÚ ---
+                
                 binding.edittextNote.setText(task.note)
-                // ------------------------------------
+                
 
-                // 4. Hiển thị Màu cờ ưu tiên
+                
                 val flagColor = when (task.priority) {
                     TaskPriority.HIGH -> R.color.priority_high
                     TaskPriority.MEDIUM -> R.color.priority_medium
@@ -105,28 +105,28 @@ class TaskDetailActivity : AppCompatActivity() {
 
                 binding.btnRemoveDueDate.setOnClickListener {
                     if (!isObserving) {
-                        // Gọi hàm mới, truyền 'null' để xóa ngày
+                        
                         taskViewModel.updateTaskDueDate(null)
                     }
                 }
 
                 if (task.dueDate != null) {
-                    // Nếu CÓ ngày -> Hiển thị ngày (màu đỏ) và hiện nút X
-                    binding.tvDueDateValue.text = formatDate(task.dueDate!!) // Gọi hàm formatDate em đã tạo
+                    
+                    binding.tvDueDateValue.text = formatDate(task.dueDate!!) 
                     binding.tvDueDateValue.setTextColor(ContextCompat.getColor(this, R.color.red_pomodoro))
                     binding.btnRemoveDueDate.visibility = View.VISIBLE
                 } else {
-                    // Nếu KHÔNG có ngày (null) -> Hiển thị "Không" (màu đen) và ẩn nút X
+                    
                     binding.tvDueDateValue.text = "Hôm nay"
                     binding.tvDueDateValue.setTextColor(ContextCompat.getColor(this, R.color.black))
                     binding.btnRemoveDueDate.visibility = View.GONE
                 }
-                // 2. Click vào CẢ HÀNG "Ngày đến hạn"
+                
                 binding.rowDueDate.setOnClickListener {
                     if (!isObserving) {
                         val currentDate = taskViewModel.currentTask.value?.dueDate
 
-                        // Tái sử dụng Dialog Lịch
+                        
                         val dateDialog = DatePickerDialogFragment(currentDate) { newTimestamp ->
                             taskViewModel.updateTaskDueDate(newTimestamp)
                         }
@@ -135,13 +135,13 @@ class TaskDetailActivity : AppCompatActivity() {
                     }
                 }
                 taskViewModel.allProjects.observe(this) { projects ->
-                    // Tìm Project Entity dựa trên projectId của Task
+                    
                     val currentProject = projects.find { it.projectId == task.projectId }
 
                     if (currentProject != null) {
                         binding.tvProjectValue.text = currentProject.name
                     } else {
-                        // Nếu không tìm thấy (projectId là null) -> "Nhiệm vụ" (Inbox)
+                        
                         binding.tvProjectValue.text = "Nhiệm vụ"
                         binding.iconProject.imageTintList = ColorStateList.valueOf(Color.GRAY)
                     }
@@ -165,13 +165,13 @@ class TaskDetailActivity : AppCompatActivity() {
         }
 
         binding.checkboxComplete.setOnClickListener {
-            // Không cần 'if (!isObserving)' nữa, vì Click chỉ xảy ra khi user bấm
+            
             currentTaskId?.let { safeTaskId ->
                 taskViewModel.toggleTaskCompletion(safeTaskId)
             }
         }
 
-        // Click vào cờ để đổi độ ưu tiên (Xoay vòng)
+        
         binding.imageviewFlag.setOnClickListener { view ->
             if (!isObserving) {
 
@@ -181,35 +181,35 @@ class TaskDetailActivity : AppCompatActivity() {
 
         binding.rowPomodoro.setOnClickListener {
             if (!isObserving) {
-                // 1. Lấy số Pomo hiện tại
+                
                 val currentCount = taskViewModel.currentTask.value?.estimatedPomodoros ?: 1
 
-                // 2. Tạo Dialog MỚI (PomodoroCountPickerFragment)
+                
                 val dialog = PomodoroCountPickerFragment(currentCount) { newCount ->
                     taskViewModel.updateTaskPomodoros(newCount)
                 }
 
-                // 4. Hiển thị Dialog
+                
                 dialog.show(supportFragmentManager, "PomoCountPicker")
             }
         }
         binding.rowProject.setOnClickListener {
             if (!isObserving) {
-                // Mở Dialog "Chuyển tới Dự án"
+                
                 ProjectPickerDialogFragment().show(supportFragmentManager, "ProjectPicker")
             }
         }
     }
 
     private fun showPriorityPopup(anchorView: View) {
-        // 1. Khởi tạo Layout (Dùng lại file XML em đã tạo)
+        
         val popupBinding = com.example.focusmate.databinding.DialogPrioritySelectionBinding.inflate(layoutInflater)
 
-        // 2. Tạo PopupWindow
+        
         val popupWindow = android.widget.PopupWindow(
             popupBinding.root,
-            android.view.ViewGroup.LayoutParams.WRAP_CONTENT, // Chiều rộng tự động
-            android.view.ViewGroup.LayoutParams.WRAP_CONTENT, // Chiều cao tự động
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 
             true
         )
 
@@ -236,8 +236,8 @@ class TaskDetailActivity : AppCompatActivity() {
             popupWindow.dismiss()
         }
 
-        // 4. HIỂN THỊ: Ngay bên dưới nút cờ (anchorView), lệch xuống 1 chút (yOffset)
-        // xoff = 0, yoff = -20 (để nó đè lên một chút cho đẹp, hoặc để 0)
+        
+        
         popupWindow.showAsDropDown(anchorView, 0, 0)
     }
 

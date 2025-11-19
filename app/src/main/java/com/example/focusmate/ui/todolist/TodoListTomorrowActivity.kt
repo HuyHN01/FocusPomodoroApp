@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.focusmate.databinding.ActivityTodolisttomorrowBinding
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.focusmate.data.local.entity.TaskPriority
-import com.example.focusmate.data.local.entity.TaskStatus // Cần thiết cho logic lọc
+import com.example.focusmate.data.local.entity.TaskStatus 
 import com.example.focusmate.ui.pomodoro.PomodoroActivity
 import com.example.focusmate.ui.pomodoro.PomodoroViewModel
 import java.util.Calendar
@@ -23,11 +23,11 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
     private lateinit var tomorrowViewModel: TomorrowViewModel
     private lateinit var pomodoroViewModel: PomodoroViewModel
 
-    // Khai báo Adapters
+    
     private lateinit var tasksAdapter: TasksAdapter
     private lateinit var completedTasksAdapter: TasksAdapter
 
-    // === 1. XỬ LÝ KHI FRAGMENT TRẢ DỮ LIỆU VỀ ===
+    
     override fun onTaskAddedFromFragment(title: String, pomodoros: Int, priority: TaskPriority, dueDate: Long?, projectId: String?) {
         tomorrowViewModel.addNewTask(
             title = title,
@@ -49,20 +49,20 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
         binding = ActivityTodolisttomorrowBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Khởi tạo ViewModels
+        
         tomorrowViewModel = ViewModelProvider(this)[TomorrowViewModel::class.java]
         pomodoroViewModel = ViewModelProvider(this)[PomodoroViewModel::class.java]
 
-        setupAdapters() // Khởi tạo Adapters
-        setupRecyclerViews() // Gán Adapters vào RecyclerViews (Phần bị thiếu)
-        setupUIListeners() // Xử lý các sự kiện click
-        observeData() // Lắng nghe dữ liệu
+        setupAdapters() 
+        setupRecyclerViews() 
+        setupUIListeners() 
+        observeData() 
     }
 
-    // --- CÁC HÀM SETUP ---
+    
 
     private fun setupAdapters() {
-        // Task List (Chưa hoàn thành)
+        
         tasksAdapter = TasksAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -79,7 +79,7 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
             }
         )
 
-        // Completed List (Đã hoàn thành)
+        
         completedTasksAdapter = TasksAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -93,14 +93,14 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
     }
 
     private fun setupRecyclerViews() {
-        // Gán Layout Manager và Adapter cho List CHƯA HOÀN THÀNH
+        
         binding.tasksList.apply {
             layoutManager = LinearLayoutManager(this@TodoListTomorrowActivity)
             adapter = tasksAdapter
-            isNestedScrollingEnabled = false // Quan trọng
+            isNestedScrollingEnabled = false 
         }
 
-        // Gán Layout Manager và Adapter cho List ĐÃ HOÀN THÀNH
+        
         binding.completedTasksList.apply {
             layoutManager = LinearLayoutManager(this@TodoListTomorrowActivity)
             adapter = completedTasksAdapter
@@ -109,10 +109,10 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
     }
 
     private fun setupUIListeners() {
-        // Xử lý nút Back
+        
         binding.backArrow.setOnClickListener { finish() }
 
-        // Xử lý nút ẩn/hiện danh sách hoàn thành
+        
         binding.completedTasksHeader.setOnClickListener {
             if (binding.completedTasksList.visibility == View.VISIBLE) {
                 binding.completedTasksList.visibility = View.GONE
@@ -123,7 +123,7 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
             }
         }
 
-        // A. Xử lý Thêm Nhanh (QUICK ADD)
+        
         binding.addTaskEditText.setOnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val title = binding.addTaskEditText.text.toString().trim()
@@ -132,7 +132,7 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
                         title = title,
                         estimatedPomodoros = 1,
                         priority = TaskPriority.NONE,
-                        dueDate = null, // Gửi null để ViewModel tự tính ngày mai
+                        dueDate = null, 
                         projectId = null
                     )
                     binding.addTaskEditText.text.clear()
@@ -144,7 +144,7 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
             }
         }
 
-        // B. Xử lý Focus (Mở Full Add Fragment)
+        
         binding.addTaskEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 val tomorrowTimestamp = getTomorrowTimestamp()
@@ -161,9 +161,9 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
         }
     }
 
-    // --- HÀM OBSERVE DỮ LIỆU ---
+    
     private fun observeData() {
-        // 1. OBSERVE task CHƯA HOÀN THÀNH
+        
         tomorrowViewModel.uncompletedTasks.observe(this) { uncompleted ->
             tasksAdapter.submitList(uncompleted)
 
@@ -180,13 +180,13 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
         tomorrowViewModel.completedTasks.observe(this) { completed ->
             completedTasksAdapter.submitList(completed)
 
-            // Cập nhật số lượng trên Header
+            
             val completedCount = completed.size
             val arrow = if (binding.completedTasksList.visibility == View.VISIBLE) "▲" else "▼"
             binding.completedTasksHeader.text = "Đã hoàn thành ($completedCount) $arrow"
         }
 
-        // 3. OBSERVE các chỉ số thống kê
+        
         tomorrowViewModel.uncompletedCount.observe(this) { count ->
             binding.taskNeedCompleteTV.text = count.toString()
         }
@@ -194,10 +194,10 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
             binding.estimatedTimeTv.text = time
         }
 
-        // (Thêm observer cho thời gian đã trôi qua nếu có)
+        
     }
 
-    // --- HÀM HELPER ---
+    
     private fun hideKeyboard() {
         val view = this.currentFocus
         if (view != null) {

@@ -25,6 +25,7 @@ import androidx.core.view.updatePadding
 import com.example.focusmate.R
 import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.ui.auth.AuthActivity
+import com.example.focusmate.ui.todolist.ProjectDetailActivity
 import com.example.focusmate.ui.todolist.TodoListTodayActivity
 import com.example.focusmate.ui.todolist.TodoListTomorrowActivity
 import com.example.focusmate.ui.weeklist.WeekListActivity
@@ -42,7 +43,6 @@ class MainScreenActivity : AppCompatActivity() {
     ) { result ->
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
             Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
-            // Refresh lại dữ liệu sau khi đăng nhập
             viewModel.checkUserStatus()
         }
     }
@@ -77,8 +77,8 @@ class MainScreenActivity : AppCompatActivity() {
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(
-                Color.TRANSPARENT, // Màu nền status bar
-                Color.TRANSPARENT  // Màu scrim (mờ)
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
             ),
             navigationBarStyle = SystemBarStyle.light(
                 Color.TRANSPARENT,
@@ -93,30 +93,23 @@ class MainScreenActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(mainScreenRoot) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
 
-            // A. XỬ LÝ HEADER (Đẩy nội dung xuống)
             val headerLayout = findViewById<View>(R.id.headerLayout)
-            // Layout gốc đang có padding="16dp".
-            // Ta cần giữ 16dp đó và cộng thêm chiều cao Status Bar.
             val originalPaddingTop = 16.dpToPx()
 
             headerLayout.updatePadding(
                 top = originalPaddingTop + bars.top
             )
 
-            // B. XỬ LÝ NÚT TRÒN Ở DƯỚI (Đẩy lên tránh thanh điều hướng)
             val pomodoroCard = findViewById<View>(R.id.pomodoroCardView)
-            val originalMarginBottom = 32.dpToPx() // Layout gốc margin bottom 32dp
+            val originalMarginBottom = 32.dpToPx()
 
             pomodoroCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = originalMarginBottom + bars.bottom
             }
 
-            // C. (Tùy chọn) Xử lý RecyclerView để item cuối không bị che
-            // Nếu danh sách dài, item cuối sẽ bị nút tròn che mất.
-            // Ta thêm padding dưới cùng cho list bằng chiều cao nav bar + chiều cao nút tròn + khoảng cách
             val recyclerView = findViewById<View>(R.id.menuRecyclerView)
             recyclerView.updatePadding(
-                bottom = bars.bottom + 100.dpToPx() // 100dp là khoảng trừ hao cho nút tròn
+                bottom = bars.bottom + 100.dpToPx()
             )
             
             insets
@@ -126,7 +119,6 @@ class MainScreenActivity : AppCompatActivity() {
         setupClickListeners()
         observeViewModel()
 
-        // Kiểm tra trạng thái ban đầu
         viewModel.checkUserStatus()
     }
 
@@ -149,22 +141,25 @@ class MainScreenActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
 
-                    // Chuyển logic "Tuần này" từ khối else thứ hai vào đây
                     "Tuần này" -> {
                         val intent = Intent(this, WeekListActivity::class.java)
                         startActivity(intent)
                     }
 
-                    // "Đã lên kế hoạch" cũng là một mục menu cụ thể
                     "Đã lên kế hoạch" -> {
                         Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
                     }
 
-                    // === KHỐI ELSE CUỐI CÙNG (Xử lý tất cả các trường hợp còn lại) ===
                     else -> {
-                        // Đây là nơi xử lý click vào các project cụ thể (tên của project)
-                        Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
-                        // Ví dụ: val projectId = findProjectIdByTitle(menuItem.title)
+                        if (menuItem.id != null) {
+                            val intent = Intent(this, ProjectDetailActivity::class.java).apply {
+                                putExtra("EXTRA_PROJECT_ID", menuItem.id)
+                                putExtra("EXTRA_PROJECT_NAME", menuItem.title)
+                            }
+                            startActivity(intent)
+                        } else {
+                            Toast.makeText(this, "Lỗi: Không tìm thấy ID dự án", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             },
@@ -175,7 +170,7 @@ class MainScreenActivity : AppCompatActivity() {
         binding.menuRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.menuRecyclerView.adapter = adapter
 
-        // Quan sát danh sách Project từ ViewModel
+
         viewModel.menuItems.observe(this) { items ->
             adapter.submitList(items)
         }
@@ -186,9 +181,8 @@ class MainScreenActivity : AppCompatActivity() {
             startActivity(Intent(this, PomodoroActivity::class.java))
         }
 
-        // Xử lý Click vào tên User/Đăng nhập
+
         binding.loginText.setOnClickListener {
-            // Kiểm tra thông qua ViewModel hoặc Text hiện tại
             if (binding.loginText.text == "Đăng Nhập | Đăng Ký") {
                 authLauncher.launch(Intent(this, AuthActivity::class.java))
             } else {
@@ -196,7 +190,6 @@ class MainScreenActivity : AppCompatActivity() {
             }
         }
 
-        // Xử lý Click vào Avatar -> Hiện Menu Đăng xuất
         binding.profileImage.setOnClickListener { view ->
             if (binding.loginText.text != "Đăng Nhập | Đăng Ký") {
                 showLogoutMenu(view)
@@ -207,7 +200,6 @@ class MainScreenActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        // Quan sát thông tin User để cập nhật UI (Thay thế cho hàm checkCurrentUser cũ)
         viewModel.currentUserInfo.observe(this) { name ->
             binding.loginText.text = name
         }
@@ -218,12 +210,9 @@ class MainScreenActivity : AppCompatActivity() {
         val popup = PopupMenu(this, anchorView)
         popup.menu.add("Đăng xuất")
 
-        // Thêm icon hoặc các option khác nếu cần (VD: Cài đặt tài khoản)
 
         popup.setOnMenuItemClickListener { menuItem ->
             if (menuItem.title == "Đăng xuất") {
-                // --- LOGIC ĐĂNG XUẤT AN TOÀN ---
-                // Gọi sang ViewModel để xử lý Data + Auth
                 viewModel.signOut()
 
                 Toast.makeText(this, "Đã đăng xuất thành công!", Toast.LENGTH_SHORT).show()

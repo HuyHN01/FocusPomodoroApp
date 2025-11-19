@@ -11,7 +11,7 @@ data class FocusSound(
 
 object FocusSoundList {
     val sounds = listOf(
-        FocusSound(0, "Không", 0), // No sound
+        FocusSound(0, "Không", 0), 
         FocusSound(1, "Tíc Tắc", R.raw.sound_tic_tac),
         FocusSound(2, "Đêm ngược", R.raw.sound_dem_nguoc),
         FocusSound(3, "Gió và đề kêu", R.raw.sound_gio_va_de_keu),
@@ -24,5 +24,5 @@ object FocusSoundList {
         FocusSound(10, "Lửa cháy bập bùng", R.raw.sound_lua_chay_bap_bung)
     )
 
-    const val DEFAULT_SOUND_ID = 0 // "Không"
+    const val DEFAULT_SOUND_ID = 0 
 }

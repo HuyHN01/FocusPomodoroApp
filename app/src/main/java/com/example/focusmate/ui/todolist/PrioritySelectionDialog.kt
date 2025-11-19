@@ -11,7 +11,7 @@ import com.example.focusmate.data.local.entity.TaskPriority
 import com.example.focusmate.databinding.DialogPrioritySelectionBinding
 
 class PrioritySelectionDialog(
-    private val onPrioritySelected: (TaskPriority) -> Unit // Callback trả về kết quả
+    private val onPrioritySelected: (TaskPriority) -> Unit 
 ) : DialogFragment() {
 
     private lateinit var binding: DialogPrioritySelectionBinding
@@ -23,7 +23,7 @@ class PrioritySelectionDialog(
     ): View {
         binding = DialogPrioritySelectionBinding.inflate(inflater, container, false)
 
-        // Làm nền dialog trong suốt để thấy bo góc của CardView
+        
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         return binding.root
@@ -32,25 +32,25 @@ class PrioritySelectionDialog(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Chọn Cao
+        
         binding.itemPriorityHigh.setOnClickListener {
             onPrioritySelected(TaskPriority.HIGH)
             dismiss()
         }
 
-        // 2. Chọn Trung Bình
+        
         binding.itemPriorityMedium.setOnClickListener {
             onPrioritySelected(TaskPriority.MEDIUM)
             dismiss()
         }
 
-        // 3. Chọn Thấp
+        
         binding.itemPriorityLow.setOnClickListener {
             onPrioritySelected(TaskPriority.LOW)
             dismiss()
         }
 
-        // 4. Chọn Không
+        
         binding.itemPriorityNone.setOnClickListener {
             onPrioritySelected(TaskPriority.NONE)
             dismiss()

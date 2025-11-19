@@ -13,7 +13,7 @@ import com.example.focusmate.data.local.entity.TaskEntity
 import com.example.focusmate.data.local.entity.TaskPriority
 import com.example.focusmate.data.local.entity.TaskStatus
 import com.example.focusmate.databinding.ItemTaskBinding
-import com.example.focusmate.databinding.ItemWeekHeaderBinding // Đảm bảo em đã tạo file xml header này
+import com.example.focusmate.databinding.ItemWeekHeaderBinding 
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -31,7 +31,7 @@ class WeekTaskAdapter(
         const val TYPE_TASK = 1
     }
 
-    // Xác định loại view dựa trên data
+    
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
             is WeekListItem.Header -> TYPE_HEADER
@@ -45,7 +45,7 @@ class WeekTaskAdapter(
             val binding = ItemWeekHeaderBinding.inflate(inflater, parent, false)
             HeaderViewHolder(binding)
         } else {
-            // Inflate layout Task (Tái sử dụng layout cũ)
+            
             val binding = ItemTaskBinding.inflate(inflater, parent, false)
             TaskViewHolder(binding)
         }
@@ -59,11 +59,11 @@ class WeekTaskAdapter(
         }
     }
 
-    // --- VIEWHOLDER CHO HEADER ---
+    
     inner class HeaderViewHolder(private val binding: ItemWeekHeaderBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: WeekListItem.Header) {
-            // Giả sử trong item_week_header.xml em đặt id là tvHeaderTitle
+            
             binding.tvHeaderTitle.text = item.title
         }
     }
@@ -96,14 +96,14 @@ class WeekTaskAdapter(
             val context = binding.root.context
             binding.taskTitleTextView.text = task.title
 
-            // 1. Chuẩn bị text Pomo
+            
             val pomoText = "${task.estimatedPomodoros} Pomodoro"
 
-            // 2. Màu sắc
-            val defaultColor = ContextCompat.getColor(context, R.color.black) // Hoặc màu xám đậm tùy theme
+            
+            val defaultColor = ContextCompat.getColor(context, R.color.black) 
             val overdueColor = ContextCompat.getColor(context, R.color.priority_high)
 
-            // 3. Logic hiển thị ngày và quá hạn
+            
             if (task.dueDate != null) {
                 val dateText = formatTimestampToShortDate(task.dueDate!!)
                 binding.pomodoroCountTextView.text = "$pomoText • $dateText"
@@ -118,7 +118,7 @@ class WeekTaskAdapter(
                 binding.pomodoroCountTextView.setTextColor(defaultColor)
             }
 
-            // 4. Xử lý hoàn thành / chưa hoàn thành
+            
             if (task.status == TaskStatus.COMPLETED) {
                 binding.taskCompleteIcon.setImageResource(R.drawable.green_checkmark_icon)
                 binding.taskCompleteIcon.clearColorFilter()
@@ -131,7 +131,7 @@ class WeekTaskAdapter(
                     binding.taskTitleTextView.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
                 binding.taskPlayIcon.visibility = View.VISIBLE
 
-                // Tô màu cờ ưu tiên
+                
                 val priorityColor = when (task.priority) {
                     TaskPriority.HIGH -> ContextCompat.getColor(context, R.color.priority_high)
                     TaskPriority.MEDIUM -> ContextCompat.getColor(context, R.color.priority_medium)
@@ -144,7 +144,7 @@ class WeekTaskAdapter(
     }
 }
 
-// --- 3. DIFF CALLBACK (So sánh dữ liệu) ---
+
 class WeekListDiffCallback : DiffUtil.ItemCallback<WeekListItem>() {
     override fun areItemsTheSame(oldItem: WeekListItem, newItem: WeekListItem): Boolean {
         return if (oldItem is WeekListItem.TaskItem && newItem is WeekListItem.TaskItem) {
@@ -161,7 +161,7 @@ class WeekListDiffCallback : DiffUtil.ItemCallback<WeekListItem>() {
     }
 }
 
-// --- 4. CÁC HÀM TIỆN ÍCH (Helper Functions) ---
+
 private fun getStartOfDay(calendar: Calendar): Calendar {
     calendar.set(Calendar.HOUR_OF_DAY, 0)
     calendar.set(Calendar.MINUTE, 0)

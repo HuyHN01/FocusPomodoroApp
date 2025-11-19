@@ -8,6 +8,6 @@ interface AddTaskListener {
         pomodoros: Int,
         priority: TaskPriority,
         dueDate: Long?,
-        projectId: String?
+        projectId: String? = null
     )
 }
