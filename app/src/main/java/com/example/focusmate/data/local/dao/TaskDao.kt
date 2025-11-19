@@ -51,6 +51,7 @@ interface TaskDao {
 
     @Update
     suspend fun updateTask(task: TaskEntity)
-
+    @Query("SELECT * FROM tasks WHERE userId = :userId")
+    fun getAllTasks(userId: String): LiveData<List<TaskEntity>>
 
 }

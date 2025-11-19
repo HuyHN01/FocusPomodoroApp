@@ -216,7 +216,8 @@ class TodoListTodayActivity : AppCompatActivity(){
                         title = title,
                         estimatedPomodoros = 1,
                         priority = TaskPriority.NONE,
-                        dueDate = null
+                        projectId = "inbox_id_placeholder",
+                        dueDate = System.currentTimeMillis()
                     )
                     binding.addTaskEditText.text.clear()
                 }
