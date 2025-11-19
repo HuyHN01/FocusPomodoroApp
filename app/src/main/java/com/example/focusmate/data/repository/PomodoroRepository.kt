@@ -37,6 +37,8 @@ object PomodoroRepository {
     private val _focusSoundVolume = MutableLiveData<Float>(0.7f)
     val focusSoundVolume: LiveData<Float> = _focusSoundVolume
 
+    var currentTaskId: String? = null
+
     fun startTimer() {
         when (_state.value) {
             TimerState.RUNNING, TimerState.BREAK_RUNNING -> {

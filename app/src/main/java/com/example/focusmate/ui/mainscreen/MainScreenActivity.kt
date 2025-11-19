@@ -2,9 +2,13 @@ package com.example.focusmate.ui.mainscreen
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,11 +18,16 @@ import com.example.focusmate.databinding.MainScreenBinding
 import com.example.focusmate.ui.MainScreenViewModel
 import com.example.focusmate.ui.pomodoro.PomodoroActivity
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import com.example.focusmate.R
 import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.ui.auth.AuthActivity
 import com.example.focusmate.ui.todolist.TodoListTodayActivity
 import com.example.focusmate.ui.todolist.TodoListTomorrowActivity
+import com.example.focusmate.ui.weeklist.WeekListActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
@@ -65,7 +74,53 @@ class MainScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = MainScreenBinding.inflate(layoutInflater)
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(
+                Color.TRANSPARENT, // Màu nền status bar
+                Color.TRANSPARENT  // Màu scrim (mờ)
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            )
+        )
+
         setContentView(binding.root)
+
+        val mainScreenRoot = findViewById<View>(R.id.mainScreen)
+
+        ViewCompat.setOnApplyWindowInsetsListener(mainScreenRoot) { _, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            // A. XỬ LÝ HEADER (Đẩy nội dung xuống)
+            val headerLayout = findViewById<View>(R.id.headerLayout)
+            // Layout gốc đang có padding="16dp".
+            // Ta cần giữ 16dp đó và cộng thêm chiều cao Status Bar.
+            val originalPaddingTop = 16.dpToPx()
+
+            headerLayout.updatePadding(
+                top = originalPaddingTop + bars.top
+            )
+
+            // B. XỬ LÝ NÚT TRÒN Ở DƯỚI (Đẩy lên tránh thanh điều hướng)
+            val pomodoroCard = findViewById<View>(R.id.pomodoroCardView)
+            val originalMarginBottom = 32.dpToPx() // Layout gốc margin bottom 32dp
+
+            pomodoroCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = originalMarginBottom + bars.bottom
+            }
+
+            // C. (Tùy chọn) Xử lý RecyclerView để item cuối không bị che
+            // Nếu danh sách dài, item cuối sẽ bị nút tròn che mất.
+            // Ta thêm padding dưới cùng cho list bằng chiều cao nav bar + chiều cao nút tròn + khoảng cách
+            val recyclerView = findViewById<View>(R.id.menuRecyclerView)
+            recyclerView.updatePadding(
+                bottom = bars.bottom + 100.dpToPx() // 100dp là khoảng trừ hao cho nút tròn
+            )
+            
+            insets
+        }
 
         setupRecyclerView()
         setupClickListeners()
@@ -101,6 +156,15 @@ class MainScreenActivity : AppCompatActivity() {
 
                     else -> {
                         Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        if (menuItem.title == "Tuần này") {
+                            val intent = Intent(this, WeekListActivity::class.java)
+                            startActivity(intent)
+                        }
+                        else {
+                            Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
+                        }
+                        // Xử lý click vào project cụ thể
                     }
                 }
             },
@@ -195,4 +259,6 @@ class MainScreenActivity : AppCompatActivity() {
             .setNegativeButton("Hủy", null)
             .show()
     }
+
+    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

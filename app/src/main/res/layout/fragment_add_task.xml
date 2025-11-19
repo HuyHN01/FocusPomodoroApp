@@ -126,6 +126,17 @@
                 android:contentDescription="Chọn độ ưu tiên"
                 android:padding="8dp"
                 android:src="@drawable/flag_svgrepo_com" />
+            <ImageView
+                android:id="@+id/icon_project"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Chọn độ ưu tiên"
+                android:padding="8dp"
+                android:src="@drawable/file_box_svgrepo_com"
+                app:tint="#1C23F4"
+                android:visibility="gone"
+                />
 
 
 

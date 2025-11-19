@@ -69,5 +69,8 @@ interface TaskDao {
         ORDER BY priority ASC, dueDate ASC
     """)
     fun getUncompletedTasksUntil(userId: String, endTime: Long): LiveData<List<TaskEntity>>
+  
+    @Query("SELECT * FROM tasks WHERE userId = :userId")
+    fun getAllTasks(userId: String): LiveData<List<TaskEntity>>
 
 }

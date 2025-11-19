@@ -1,8 +1,14 @@
 package com.example.focusmate.ui.auth
 
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import androidx.activity.enableEdgeToEdge
 //import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.commit
 import com.example.focusmate.R
 import com.example.focusmate.databinding.ActivityAuthBinding
@@ -12,9 +18,33 @@ class AuthActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.header_view)) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val statusBarHeight = bars.top
+
+            val headerView = findViewById<View>(R.id.header_view)
+            val originalHeaderHeight = 150
+
+            headerView.updateLayoutParams {
+                height = 170.dpToPx() + statusBarHeight
+            }
+
+            val logoImage = findViewById<View>(R.id.logo_image)
+            val originalMarginTop = 25.dpToPx()
+
+            logoImage.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = originalMarginTop + statusBarHeight
+            }
+
+            insets
+        }
+
+
 
         // load mac dinh Sign In
         if (savedInstanceState == null) {
@@ -56,12 +86,15 @@ class AuthActivity : AppCompatActivity() {
             binding.signInToggle.setBackgroundResource(R.drawable.bg_toggle_selected)
             binding.signInToggle.setTextColor(getColor(android.R.color.white))
             binding.signUpToggle.setBackgroundResource(android.R.color.transparent)
-            binding.signUpToggle.setTextColor(getColor(R.color.red))
+            binding.signUpToggle.setTextColor(getColor(R.color.dark_gray))
         } else {
             binding.signUpToggle.setBackgroundResource(R.drawable.bg_toggle_selected)
             binding.signUpToggle.setTextColor(getColor(android.R.color.white))
             binding.signInToggle.setBackgroundResource(android.R.color.transparent)
-            binding.signInToggle.setTextColor(getColor(R.color.red))
+            binding.signInToggle.setTextColor(getColor(R.color.dark_gray))
         }
     }
+
+    // Hàm tiện ích đổi dp sang pixel (để code gọn hơn)
+    fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

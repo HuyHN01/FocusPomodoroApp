@@ -2,12 +2,17 @@ package com.example.focusmate.ui.todolist
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.focusmate.databinding.ActivityTodolistBinding
@@ -16,6 +21,7 @@ import com.example.focusmate.data.local.entity.TaskPriority
 import com.example.focusmate.ui.pomodoro.PomodoroActivity
 import com.example.focusmate.ui.pomodoro.PomodoroViewModel
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 
 
 class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
@@ -46,6 +52,54 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
         binding = ActivityTodolistBinding.inflate(layoutInflater)
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                Color.TRANSPARENT,
+                Color.TRANSPARENT
+            )
+        )
+
+        // 2. XỬ LÝ INSETS
+
+        // A. Xử lý Header (Quan trọng nhất)
+        // Header đang set padding="16dp" trong XML. Lưu lại giá trị gốc.
+        val originalPaddingTop = 16.dpToPx()
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.updatePadding(
+                top = originalPaddingTop + bars.top
+            )
+            insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.scrollView) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(
+                bottom = bars.bottom
+            )
+            insets
+        }
+
+        // C. Xử lý Fragment nhập liệu (Khi nó hiện lên)
+        // Fragment này nằm bottom, cần đẩy lên tránh nút Home ảo
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.addTaskFragment) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            // Vì đây là Container, ta nên dùng Margin hoặc Padding tùy vào thiết kế Fragment bên trong.
+            // Ở đây dùng Padding an toàn hơn.
+            view.updatePadding(
+                bottom = bars.bottom
+            )
+            insets
+        }
+
         setContentView(binding.root)
 
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
@@ -178,7 +232,8 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
                         title = title,
                         estimatedPomodoros = 1,
                         priority = TaskPriority.NONE,
-                        dueDate = null
+                        projectId = "inbox_id_placeholder",
+                        dueDate = System.currentTimeMillis()
                     )
                     binding.addTaskEditText.text.clear()
                 }
@@ -203,4 +258,6 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
+
+    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

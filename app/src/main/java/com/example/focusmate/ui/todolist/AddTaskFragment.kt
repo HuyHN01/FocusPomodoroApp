@@ -1,6 +1,7 @@
 package com.example.focusmate.ui.todolist
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -47,7 +48,6 @@ class AddTaskFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         viewModel.tempSelectedPriority.observe(viewLifecycleOwner) { priority ->
             // Cập nhật màu của icon cờ
             val flagColorRes = when (priority) {
@@ -89,6 +89,12 @@ class AddTaskFragment : Fragment() {
             dateDialog.show(parentFragmentManager, "DatePickerDialog")
         }
 
+        binding.iconProject.setOnClickListener {
+
+            ProjectPickerDialogFragment().show(parentFragmentManager, "ProjectPicker")
+
+        }
+
         binding.completeText.setOnClickListener {
             val taskTitle = requireActivity()
                 .findViewById<EditText>(R.id.add_task_edit_text)
@@ -98,12 +104,14 @@ class AddTaskFragment : Fragment() {
             if (taskTitle.isNotEmpty()) {
                 // Lấy priority hiện tại từ ViewModel
                 val currentPriority = viewModel.tempSelectedPriority.value ?: TaskPriority.NONE
+                val currentProject = viewModel.tempSelectedProject.value
 
                 listener?.onTaskAddedFromFragment(
                     title = taskTitle,
                     pomodoros = selectedPomodoros,
                     priority = currentPriority,
-                    date = selectedDate
+                    dueDate = selectedDate,
+                    projectId = currentProject?.projectId
                 )
 
                 Toast.makeText(requireContext(), "Đã thêm: $taskTitle", Toast.LENGTH_SHORT).show()
@@ -112,6 +120,7 @@ class AddTaskFragment : Fragment() {
                 viewModel.setTempPriority(TaskPriority.NONE)
                 selectedDate = System.currentTimeMillis()
                 selectedPomodoros = 0
+                viewModel.setTempProject(null)
                 updatePomoIcons(selectedPomodoros)
                 binding.iconDate.setImageResource(R.drawable.sunny_24dp_1f1f1f_fill0_wght400_grad0_opsz24)
             }
@@ -173,5 +182,8 @@ class AddTaskFragment : Fragment() {
         _binding = null
         // Reset lần nữa phòng khi user thoát mà không lưu
         viewModel.setTempPriority(TaskPriority.NONE)
+        viewModel.setTempProject(null)
     }
+
+
 }

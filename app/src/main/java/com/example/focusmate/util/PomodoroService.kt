@@ -196,6 +196,9 @@ class PomodoroService : Service() {
 
     private fun buildNotification(): android.app.Notification {
         val intent = Intent(this, PomodoroActivity::class.java)
+
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
