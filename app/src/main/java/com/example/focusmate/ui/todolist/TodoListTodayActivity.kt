@@ -33,14 +33,15 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
     private lateinit var tasksAdapter: TasksAdapter // Cho task "Hôm nay"
     private lateinit var otherTasksAdapter: TasksAdapter // CHO TASK "KHÁC" (MỚI)
     private lateinit var completedTasksAdapter: TasksAdapter
-    override fun onTaskAddedFromFragment(title: String, pomodoros: Int, priority: TaskPriority, date: Long?) {
-        // Activity Hôm Nay nhận lệnh -> Gọi ViewModel Hôm Nay
-        // dueDate = date (để null thì ViewModel tự xử là hôm nay, hoặc truyền date nếu user chọn)
+
+    override fun onTaskAddedFromFragment(title: String, pomodoros: Int, priority: TaskPriority, date: Long?, projectId: String?) {
+        // Sửa lỗi cú pháp và đảm bảo truyền đủ tham số
         taskViewModel.addNewTask(
             title = title,
             estimatedPomodoros = pomodoros,
             priority = priority,
-            dueDate = date
+            dueDate = date,
+            projectId = projectId // <-- Đã sửa lỗi thiếu tên tham số
         )
 
         // Xử lý ẩn bàn phím & giao diện

@@ -12,50 +12,57 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.focusmate.databinding.ActivityTodolisttomorrowBinding
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.focusmate.data.local.entity.TaskPriority
+import com.example.focusmate.data.local.entity.TaskStatus // Cần thiết cho logic lọc
 import com.example.focusmate.ui.pomodoro.PomodoroActivity
 import com.example.focusmate.ui.pomodoro.PomodoroViewModel
+import java.util.Calendar
 
 class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
 
     private lateinit var binding: ActivityTodolisttomorrowBinding
     private lateinit var tomorrowViewModel: TomorrowViewModel
     private lateinit var pomodoroViewModel: PomodoroViewModel
+
+    // Khai báo Adapters
     private lateinit var tasksAdapter: TasksAdapter
     private lateinit var completedTasksAdapter: TasksAdapter
-    override fun onTaskAddedFromFragment(title: String, pomodoros: Int, priority: TaskPriority, date: Long?) {
-        // Activity Ngày Mai nhận được lệnh -> Gọi ViewModel Ngày Mai
+
+    // === 1. XỬ LÝ KHI FRAGMENT TRẢ DỮ LIỆU VỀ ===
+    override fun onTaskAddedFromFragment(title: String, pomodoros: Int, priority: TaskPriority, dueDate: Long?, projectId: String?) {
         tomorrowViewModel.addNewTask(
             title = title,
             estimatedPomodoros = pomodoros,
-            priority = priority
+            priority = priority,
+            dueDate = dueDate,
+            projectId = projectId
         )
 
-        // Xử lý ẩn bàn phím (copy logic từ chỗ EditorAction xuống đây nếu cần)
+        binding.addTaskFragment.visibility = View.GONE
         binding.addTaskEditText.clearFocus()
         hideKeyboard()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
 
-        // Inflate layout
         binding = ActivityTodolisttomorrowBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 1. KHỞI TẠO VIEWMODEL
+        // Khởi tạo ViewModels
         tomorrowViewModel = ViewModelProvider(this)[TomorrowViewModel::class.java]
         pomodoroViewModel = ViewModelProvider(this)[PomodoroViewModel::class.java]
 
-        // 2. XỬ LÝ NÚT BACK (QUAN TRỌNG)
-        binding.backArrow.setOnClickListener {
-            finish() // Đóng màn hình quay về Main
-        }
+        setupAdapters() // Khởi tạo Adapters
+        setupRecyclerViews() // Gán Adapters vào RecyclerViews (Phần bị thiếu)
+        setupUIListeners() // Xử lý các sự kiện click
+        observeData() // Lắng nghe dữ liệu
+    }
 
-        // --- LƯU Ý: Đã xóa đoạn try-catch chỉnh visibility ---
-        // Lý do: File XML mới của bạn đã ẩn sẵn các phần thừa rồi,
-        // không cần code để ẩn nữa, xóa đi cho đỡ bị lỗi đỏ.
+    // --- CÁC HÀM SETUP ---
 
-        // 3. SETUP ADAPTERS
+    private fun setupAdapters() {
+        // Task List (Chưa hoàn thành)
         tasksAdapter = TasksAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -72,6 +79,7 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
             }
         )
 
+        // Completed List (Đã hoàn thành)
         completedTasksAdapter = TasksAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -80,56 +88,31 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
                 startActivity(intent)
             },
             onCompleteClick = { task -> tomorrowViewModel.toggleTaskCompletion(task.taskId) },
-            onPlayClick = { task ->
-                val intent = Intent(this, PomodoroActivity::class.java).apply {
-                    putExtra("EXTRA_TASK_ID", task.taskId)
-                }
-                startActivity(intent)
-            }
+            onPlayClick = {  }
         )
+    }
 
-        // 4. SETUP RECYCLERVIEW
+    private fun setupRecyclerViews() {
+        // Gán Layout Manager và Adapter cho List CHƯA HOÀN THÀNH
         binding.tasksList.apply {
             layoutManager = LinearLayoutManager(this@TodoListTomorrowActivity)
             adapter = tasksAdapter
+            isNestedScrollingEnabled = false // Quan trọng
         }
+
+        // Gán Layout Manager và Adapter cho List ĐÃ HOÀN THÀNH
         binding.completedTasksList.apply {
             layoutManager = LinearLayoutManager(this@TodoListTomorrowActivity)
             adapter = completedTasksAdapter
+            isNestedScrollingEnabled = false
         }
+    }
 
-        // 5. OBSERVE DỮ LIỆU (QUAN TRỌNG)
-        tomorrowViewModel.uncompletedTasks.observe(this) { uncompleted ->
-            tasksAdapter.submitList(uncompleted)
+    private fun setupUIListeners() {
+        // Xử lý nút Back
+        binding.backArrow.setOnClickListener { finish() }
 
-            // --- [SỬA] BỎ COMMENT ĐOẠN NÀY ĐỂ HIỆN HÌNH EMPTY ---
-            if (uncompleted.isEmpty()) {
-                binding.emptyStateLayout.visibility = View.VISIBLE
-                binding.tasksContainer.visibility = View.GONE
-            } else {
-                binding.emptyStateLayout.visibility = View.GONE
-                binding.tasksContainer.visibility = View.VISIBLE
-            }
-            // ---------------------------------------------------
-        }
-
-        tomorrowViewModel.completedTasks.observe(this) { completed ->
-            completedTasksAdapter.submitList(completed)
-        }
-
-        // --- [THÊM] CẬP NHẬT SỐ LƯỢNG TASK LÊN MÀN HÌNH ---
-        tomorrowViewModel.uncompletedCount.observe(this) { count ->
-            // Cập nhật số to màu đỏ (Task cần làm)
-            binding.taskNeedCompleteTV.text = count.toString()
-        }
-        tomorrowViewModel.estimatedTimeFormatted.observe(this) { time ->
-            // Cập nhật TextView 00:00 (thời gian ước tính)
-            // Đảm bảo ID trong layout của bạn đúng là 'estimatedTimeTv'
-            // (Nếu trong layout bạn đặt là 'estimated_time_tv' thì sửa code bên dưới cho khớp)
-            binding.estimatedTimeTv.text = time
-        }
-
-        // Header ẩn/hiện task hoàn thành
+        // Xử lý nút ẩn/hiện danh sách hoàn thành
         binding.completedTasksHeader.setOnClickListener {
             if (binding.completedTasksList.visibility == View.VISIBLE) {
                 binding.completedTasksList.visibility = View.GONE
@@ -140,18 +123,20 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
             }
         }
 
-        // 6. XỬ LÝ THÊM TASK MỚI
+        // A. Xử lý Thêm Nhanh (QUICK ADD)
         binding.addTaskEditText.setOnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val title = binding.addTaskEditText.text.toString().trim()
                 if (title.isNotEmpty()) {
-                    // Thêm vào ngày mai
                     tomorrowViewModel.addNewTask(
                         title = title,
                         estimatedPomodoros = 1,
-                        priority = TaskPriority.NONE
+                        priority = TaskPriority.NONE,
+                        dueDate = null, // Gửi null để ViewModel tự tính ngày mai
+                        projectId = null
                     )
                     binding.addTaskEditText.text.clear()
+                    binding.addTaskEditText.clearFocus()
                 }
                 true
             } else {
@@ -159,19 +144,75 @@ class TodoListTomorrowActivity : AppCompatActivity(), AddTaskListener {
             }
         }
 
+        // B. Xử lý Focus (Mở Full Add Fragment)
         binding.addTaskEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
+                val tomorrowTimestamp = getTomorrowTimestamp()
+                val addTaskFragment = AddTaskFragment.newInstance(tomorrowTimestamp)
+
+                supportFragmentManager.beginTransaction()
+                    .replace(binding.addTaskFragment.id, addTaskFragment)
+                    .commit()
+
                 binding.addTaskFragment.visibility = View.VISIBLE
             } else {
                 binding.addTaskFragment.visibility = View.GONE
             }
         }
     }
+
+    // --- HÀM OBSERVE DỮ LIỆU ---
+    private fun observeData() {
+        // 1. OBSERVE task CHƯA HOÀN THÀNH
+        tomorrowViewModel.uncompletedTasks.observe(this) { uncompleted ->
+            tasksAdapter.submitList(uncompleted)
+
+
+            if (uncompleted.isEmpty()) {
+                binding.emptyStateLayout.visibility = View.VISIBLE
+                binding.tasksContainer.visibility = View.GONE
+            } else {
+                binding.emptyStateLayout.visibility = View.GONE
+                binding.tasksContainer.visibility = View.VISIBLE
+            }
+        }
+
+        tomorrowViewModel.completedTasks.observe(this) { completed ->
+            completedTasksAdapter.submitList(completed)
+
+            // Cập nhật số lượng trên Header
+            val completedCount = completed.size
+            val arrow = if (binding.completedTasksList.visibility == View.VISIBLE) "▲" else "▼"
+            binding.completedTasksHeader.text = "Đã hoàn thành ($completedCount) $arrow"
+        }
+
+        // 3. OBSERVE các chỉ số thống kê
+        tomorrowViewModel.uncompletedCount.observe(this) { count ->
+            binding.taskNeedCompleteTV.text = count.toString()
+        }
+        tomorrowViewModel.estimatedTimeFormatted.observe(this) { time ->
+            binding.estimatedTimeTv.text = time
+        }
+
+        // (Thêm observer cho thời gian đã trôi qua nếu có)
+    }
+
+    // --- HÀM HELPER ---
     private fun hideKeyboard() {
         val view = this.currentFocus
         if (view != null) {
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
+    }
+
+    private fun getTomorrowTimestamp(): Long {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
     }
 }

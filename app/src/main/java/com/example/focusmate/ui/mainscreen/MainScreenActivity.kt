@@ -149,22 +149,22 @@ class MainScreenActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
 
-                    // Các mục chưa làm
-                    "Tuần này", "Đã lên kế hoạch" -> {
+                    // Chuyển logic "Tuần này" từ khối else thứ hai vào đây
+                    "Tuần này" -> {
+                        val intent = Intent(this, WeekListActivity::class.java)
+                        startActivity(intent)
+                    }
+
+                    // "Đã lên kế hoạch" cũng là một mục menu cụ thể
+                    "Đã lên kế hoạch" -> {
                         Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
                     }
 
+                    // === KHỐI ELSE CUỐI CÙNG (Xử lý tất cả các trường hợp còn lại) ===
                     else -> {
+                        // Đây là nơi xử lý click vào các project cụ thể (tên của project)
                         Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
-                    } else {
-                        if (menuItem.title == "Tuần này") {
-                            val intent = Intent(this, WeekListActivity::class.java)
-                            startActivity(intent)
-                        }
-                        else {
-                            Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
-                        }
-                        // Xử lý click vào project cụ thể
+                        // Ví dụ: val projectId = findProjectIdByTitle(menuItem.title)
                     }
                 }
             },
