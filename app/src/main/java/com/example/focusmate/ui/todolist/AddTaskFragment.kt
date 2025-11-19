@@ -21,7 +21,8 @@ class AddTaskFragment : Fragment() {
 
     private var _binding: FragmentAddTaskBinding? = null
     private val binding get() = _binding!!
-    private var selectedDate: Long? = System.currentTimeMillis()
+//    private var selectedDate: Long? = System.currentTimeMillis()
+    private var selectedDate: Long? = null
     private var selectedPomodoros: Int = 1
     private lateinit var pomoIcons: List<ImageView>
     private val viewModel: TaskViewModel by activityViewModels()
@@ -43,11 +44,26 @@ class AddTaskFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAddTaskBinding.inflate(inflater, container, false)
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        arguments?.let {
+            val targetTime = it.getLong(ARG_TARGET_DATE, 0L)
+            if (targetTime != 0L) {
+                selectedDate = targetTime
+            }
+        }
+        selectedDate?.let {
+            updateDateIcon(it) // Gọi hàm cập nhật icon ngay sau khi có ngày
+        }
+
+        // 2. Nếu không có argument (hoặc targetTime = 0) thì mặc định là hôm nay
+        if (selectedDate == null) {
+            selectedDate = System.currentTimeMillis()
+        }
         viewModel.tempSelectedPriority.observe(viewLifecycleOwner) { priority ->
             // Cập nhật màu của icon cờ
             val flagColorRes = when (priority) {
@@ -185,5 +201,15 @@ class AddTaskFragment : Fragment() {
         viewModel.setTempProject(null)
     }
 
+    companion object {
+        private const val ARG_TARGET_DATE = "target_date_timestamp"
+        fun newInstance(targetDateTimestamp: Long): AddTaskFragment {
+            val fragment = AddTaskFragment()
+            val args = Bundle()
+            args.putLong(ARG_TARGET_DATE, targetDateTimestamp)
+            fragment.arguments = args
+            return fragment
+        }
+    }
 
 }

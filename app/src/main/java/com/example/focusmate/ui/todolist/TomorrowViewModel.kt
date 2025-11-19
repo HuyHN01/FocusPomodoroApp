@@ -36,6 +36,10 @@ class TomorrowViewModel(application: Application) : AndroidViewModel(application
     private val _tempSelectedPriority = MutableLiveData<TaskPriority>(TaskPriority.NONE)
     val tempSelectedPriority: LiveData<TaskPriority> = _tempSelectedPriority
 
+    // LẤY LIVE DATA TỪ REPOSITORY ĐÃ TÍNH TOÁN (Đã có sẵn trong Init)
+    private val startOfTomorrow: Long
+    private val endOfTomorrow: Long
+
     init {
         val db = AppDatabase.getDatabase(application)
         repository = TaskRepository(db.taskDao())
@@ -51,68 +55,66 @@ class TomorrowViewModel(application: Application) : AndroidViewModel(application
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
-        val startOfTomorrow = cal.timeInMillis
+        startOfTomorrow = cal.timeInMillis
 
         // 23:59:59 Ngày mai
         cal.set(Calendar.HOUR_OF_DAY, 23)
         cal.set(Calendar.MINUTE, 59)
         cal.set(Calendar.SECOND, 59)
-        val endOfTomorrow = cal.timeInMillis
+        cal.set(Calendar.MILLISECOND, 999) // Thêm 999ms để đảm bảo lấy hết giây cuối cùng
+        endOfTomorrow = cal.timeInMillis
 
         // --- GỌI REPOSITORY LẤY ĐÚNG NGÀY MAI ---
-        // Lưu ý: Bạn cần đảm bảo TaskRepository đã có hàm getTasksForDateRange
         uncompletedTasks = repository.getTasksForDateRange(currentUserId, startOfTomorrow, endOfTomorrow, false)
         completedTasks = repository.getTasksForDateRange(currentUserId, startOfTomorrow, endOfTomorrow, true)
 
         // Setup bộ đếm
         uncompletedCount.addSource(uncompletedTasks) { uncompletedCount.value = it.size }
         completedCount.addSource(completedTasks) { completedCount.value = it.size }
-        // [THÊM] LOGIC TÍNH TỔNG THỜI GIAN POMODORO
+
+        // LOGIC TÍNH TỔNG THỜI GIAN POMODORO
         estimatedTimeFormatted.addSource(uncompletedTasks) { tasks ->
-            // Tính tổng số Pomodoro của các task chưa làm
             val totalPomodoros = tasks.sumOf { it.estimatedPomodoros }
-            // 1 Pomodoro = 25 phút
             val totalMinutes = totalPomodoros * 25
-            // Định dạng thành HH:mm
             estimatedTimeFormatted.value = formatMinutesToHHMM(totalMinutes)
         }
     }
-    // [THÊM] Hàm tiện ích đổi phút sang giờ:phút
+
+    // [GIỮ NGUYÊN] Hàm tiện ích đổi phút sang giờ:phút
     private fun formatMinutesToHHMM(totalMinutes: Int): String {
         val hours = totalMinutes / 60
         val minutes = totalMinutes % 60
         return String.format("%02d:%02d", hours, minutes)
     }
-    // --- HÀM THÊM TASK CHO NGÀY MAI ---
-    fun addNewTask(title: String, estimatedPomodoros: Int, priority: TaskPriority) {
+
+    // --- HÀM THÊM TASK CHO NGÀY MAI (Đã sửa lỗi dueDate) ---
+    fun addNewTask(title: String, estimatedPomodoros: Int, priority: TaskPriority, dueDate: Long? = null,
+                   projectId: String? = null) {
         viewModelScope.launch {
-            // Tính lại 0h00 ngày mai để lưu dueDate
-            val cal = Calendar.getInstance()
-            cal.add(Calendar.DAY_OF_YEAR, 1)
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            val tomorrowDate = cal.timeInMillis
+            // Tính toán finalDueDate: Nếu Fragment không truyền (dueDate=null) -> Tự động gán là startOfTomorrow
+            // Nếu Fragment đã truyền (dueDate != null) -> Giữ nguyên giá trị từ Fragment
+            val finalDueDate = dueDate ?: startOfTomorrow
 
             repository.addTask(
                 title = title,
                 estimatedPomodoros = estimatedPomodoros,
                 userId = currentUserId,
-                projectId = null,
+                projectId = projectId, // Dùng projectId từ Fragment
                 priority = priority,
-                dueDate = tomorrowDate // <-- TỰ ĐỘNG GÁN NGÀY MAI
+                dueDate = finalDueDate
             )
         }
     }
 
-    // --- CÁC HÀM XỬ LÝ LOGIC CƠ BẢN ---
+    // --- CÁC HÀM XỬ LÝ LOGIC CƠ BẢN (Giữ nguyên) ---
 
     fun toggleTaskCompletion(taskId: String) {
         viewModelScope.launch {
             val task = repository.getTaskById(taskId)
             if (task != null) {
                 val newStatus = if (task.status == TaskStatus.PENDING) TaskStatus.COMPLETED else TaskStatus.PENDING
+
+                // [SỬA LẠI] Gọi hàm update status trong Repository (cần đảm bảo Repository có hàm này)
                 repository.updateTaskStatus(taskId, newStatus)
             }
         }
@@ -133,7 +135,7 @@ class TomorrowViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // Các hàm update (để hỗ trợ TaskDetailActivity nếu cần)
+    // Các hàm update (Giữ nguyên)
     fun updateCurrentTask(newTitle: String, newEstimatedPomodoros: Int, newNote: String?) {
         _currentTask.value?.let { task ->
             val updated = task.copy(title = newTitle, estimatedPomodoros = newEstimatedPomodoros, note = newNote, lastModified = System.currentTimeMillis())
