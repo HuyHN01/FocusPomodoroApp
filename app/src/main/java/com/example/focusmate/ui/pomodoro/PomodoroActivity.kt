@@ -4,13 +4,20 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.example.focusmate.R
@@ -20,6 +27,7 @@ import com.example.focusmate.util.PomodoroService
 import com.example.focusmate.util.PomodoroSoundPlayer
 import com.example.focusmate.util.SoundEvent
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.collection.LLRBNode
 
 class PomodoroActivity : AppCompatActivity() {
     private var currentTaskId: String? = null
@@ -48,11 +56,59 @@ class PomodoroActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                Color.TRANSPARENT
+            ),
+            navigationBarStyle = SystemBarStyle.dark(
+                Color.TRANSPARENT
+            )
+
+        )
+
         binding = ActivityPomodoroBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Khóa portrait
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        val rootLayout = findViewById<View>(R.id.root_layout)
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            // --- XỬ LÝ PHẦN TRÊN (STATUS BAR) ---
+
+            // A. Nút Back (Đang có margin top 32dp)
+            val btnBack = findViewById<View>(R.id.btn_back)
+            btnBack.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                // Logic: Margin gốc (32dp) + Chiều cao Status Bar
+                topMargin = 32.dpToPx() + bars.top
+            }
+
+            // B. Dòng chữ "Vui lòng chọn..." (Đang có margin top 80dp)
+            val tvStatus = findViewById<View>(R.id.tv_status)
+            tvStatus.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = 80.dpToPx() + bars.top
+            }
+
+            // C. Fragment Container (Nếu cần nó né status bar)
+            val fragmentContainer = findViewById<View>(R.id.pomodoro_task_fragment_container)
+            fragmentContainer.setPadding(0, bars.top, 0, 0)
+
+
+            // --- XỬ LÝ PHẦN DƯỚI (NAVIGATION BAR) ---
+
+            // D. Thanh menu dưới cùng (Đang có margin bottom 32dp)
+            val bottomNav = findViewById<View>(R.id.ll_bottom_nav)
+            bottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                // Logic: Margin gốc (32dp) + Chiều cao Navigation Bar (thanh vuốt/nút điều hướng)
+                bottomMargin = 32.dpToPx() + bars.bottom
+            }
+
+            // Trả về insets (để hệ thống tiếp tục xử lý nếu cần)
+            insets
+        }
 
         soundPlayer = PomodoroSoundPlayer(this)
 
@@ -292,4 +348,6 @@ class PomodoroActivity : AppCompatActivity() {
         // NOTE: Không stop service ở đây vì ta muốn timer chạy ngay cả khi Activity bị destroy
         // Service sẽ tự stop khi user nhấn Stop trong notification
     }
+
+    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

@@ -35,7 +35,7 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:text="Đăng Nhập | Đăng ký"
-            android:textColor="@android:color/holo_red_dark"
+            android:textColor="@color/primary_color_mid"
             android:textStyle="bold" />
 
         <ImageView
@@ -102,7 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:src="@drawable/gradient_background"
+                android:src="@drawable/nature_4"
                 tools:ignore="ContentDescription" />
 
             <TextView
