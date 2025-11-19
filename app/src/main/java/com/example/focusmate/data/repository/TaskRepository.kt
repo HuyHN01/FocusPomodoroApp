@@ -138,7 +138,10 @@ class TaskRepository(private val taskDao: TaskDao) {
             }
         }
     }
-
+    fun getTasksForDateRange(userId: String, startTime: Long, endTime: Long, isCompleted: Boolean): LiveData<List<TaskEntity>> {
+        val status = if (isCompleted) TaskStatus.COMPLETED else TaskStatus.PENDING
+        return taskDao.getTasksByDateRange(userId, status, startTime, endTime)
+    }
     fun syncTasks(userId: String, scope: CoroutineScope) {
         // Không đồng bộ cho khách
         if (userId == com.example.focusmate.util.Constants.GUEST_USER_ID) return

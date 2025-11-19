@@ -52,5 +52,22 @@ interface TaskDao {
     @Update
     suspend fun updateTask(task: TaskEntity)
 
+    @Query("""
+        SELECT * FROM tasks 
+        WHERE userId = :userId 
+        AND status = :status 
+        AND dueDate >= :startTime AND dueDate <= :endTime 
+        ORDER BY priority ASC, dueDate ASC
+    """)
+    fun getTasksByDateRange(userId: String, status: TaskStatus, startTime: Long, endTime: Long): LiveData<List<TaskEntity>>
+
+    @Query("""
+        SELECT * FROM tasks 
+        WHERE userId = :userId 
+        AND status = 'PENDING' 
+        AND dueDate <= :endTime 
+        ORDER BY priority ASC, dueDate ASC
+    """)
+    fun getUncompletedTasksUntil(userId: String, endTime: Long): LiveData<List<TaskEntity>>
 
 }

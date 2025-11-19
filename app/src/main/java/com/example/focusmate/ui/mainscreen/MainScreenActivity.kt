@@ -18,6 +18,7 @@ import com.example.focusmate.R
 import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.ui.auth.AuthActivity
 import com.example.focusmate.ui.todolist.TodoListTodayActivity
+import com.example.focusmate.ui.todolist.TodoListTomorrowActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
@@ -77,15 +78,28 @@ class MainScreenActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         val adapter = MenuAdapter(
             onItemClicked = { menuItem ->
-                if (menuItem.title == "Thêm Dự Án") {
-                    val intent = Intent(this, AddProjectActivity::class.java)
-                    addProjectLauncher.launch(intent)
-                } else {
-                    if (menuItem.title == "Hôm nay") {
+                when (menuItem.title) {
+                    "Thêm Dự Án" -> {
+                        val intent = Intent(this, AddProjectActivity::class.java)
+                        addProjectLauncher.launch(intent)
+                    }
+
+                    "Hôm nay" -> {
                         val intent = Intent(this, TodoListTodayActivity::class.java)
                         startActivity(intent)
-                    } else {
-                        // Xử lý click vào project cụ thể
+                    }
+
+                    "Ngày mai" -> {
+                        val intent = Intent(this, TodoListTomorrowActivity::class.java)
+                        startActivity(intent)
+                    }
+
+                    // Các mục chưa làm
+                    "Tuần này", "Đã lên kế hoạch" -> {
+                        Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
+                    }
+
+                    else -> {
                         Toast.makeText(this, "Clicked on ${menuItem.title}", Toast.LENGTH_SHORT).show()
                     }
                 }

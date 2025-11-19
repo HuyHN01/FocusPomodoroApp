@@ -1,5 +1,6 @@
 package com.example.focusmate.ui.todolist
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,12 +21,21 @@ class AddTaskFragment : Fragment() {
     private var _binding: FragmentAddTaskBinding? = null
     private val binding get() = _binding!!
     private var selectedDate: Long? = System.currentTimeMillis()
-    private var selectedPomodoros: Int = 0
+    private var selectedPomodoros: Int = 1
     private lateinit var pomoIcons: List<ImageView>
     private val viewModel: TaskViewModel by activityViewModels()
 
-    // Xóa biến 'selectedPriority' cũ, vì ViewModel sẽ quản lý
+    // 1. KHAI BÁO LISTENER
+    private var listener: AddTaskListener? = null
 
+    // 2. GẮN LISTENER VÀO ACTIVITY
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is AddTaskListener) {
+            listener = context
+        } else {
+        }
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -89,11 +99,11 @@ class AddTaskFragment : Fragment() {
                 // Lấy priority hiện tại từ ViewModel
                 val currentPriority = viewModel.tempSelectedPriority.value ?: TaskPriority.NONE
 
-                viewModel.addNewTask(
+                listener?.onTaskAddedFromFragment(
                     title = taskTitle,
-                    estimatedPomodoros = selectedPomodoros,
+                    pomodoros = selectedPomodoros,
                     priority = currentPriority,
-                    dueDate = selectedDate
+                    date = selectedDate
                 )
 
                 Toast.makeText(requireContext(), "Đã thêm: $taskTitle", Toast.LENGTH_SHORT).show()
@@ -106,16 +116,12 @@ class AddTaskFragment : Fragment() {
                 binding.iconDate.setImageResource(R.drawable.sunny_24dp_1f1f1f_fill0_wght400_grad0_opsz24)
             }
 
-            // ... (code ẩn fragment và xóa text vẫn đúng) ...
-            requireActivity()
-                .findViewById<View>(R.id.addTaskFragment)
-                .visibility = View.GONE
-            requireActivity()
-                .findViewById<EditText>(R.id.add_task_edit_text)
-                .text.clear()
-            requireActivity()
-                .findViewById<EditText>(R.id.add_task_edit_text)
-                .clearFocus()
+            val editText = requireActivity().findViewById<EditText>(R.id.add_task_edit_text)
+            editText.text.clear()
+            editText.clearFocus()
+
+            // Ẩn bàn phím (nếu cần thiết gọi thêm ở đây)
+            requireActivity().findViewById<View>(R.id.addTaskFragment).visibility = View.GONE
         }
     }
     private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {

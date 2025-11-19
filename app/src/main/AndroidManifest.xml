@@ -43,6 +43,11 @@
             android:exported="true">
         </activity>
         <activity
+            android:name=".ui.todolist.TodoListTomorrowActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="true">
+        </activity>
+        <activity
             android:name=".ui.pomodoro.FullscreenTimerActivity"
             android:exported="false" />
         <activity
