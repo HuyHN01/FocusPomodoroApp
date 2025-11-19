@@ -117,7 +117,7 @@ class MainScreenActivity : AppCompatActivity() {
             recyclerView.updatePadding(
                 bottom = bars.bottom + 100.dpToPx() // 100dp là khoảng trừ hao cho nút tròn
             )
-
+            
             insets
         }
 
