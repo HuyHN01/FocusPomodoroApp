@@ -4,254 +4,232 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F0F0F0"
-    tools:context=".ui.todolist.TodoListTomorrowActivity"> <androidx.core.widget.NestedScrollView
-    android:id="@+id/scroll_view"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:fillViewport="true"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintBottom_toBottomOf="parent">
+    android:background="#F8F9FA"
+    tools:context=".ui.todolist.TodoListTomorrowActivity">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="@color/white"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/header_layout"
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/back_arrow"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:background="@color/white">
+            android:contentDescription="Back"
+            android:src="@drawable/arrow_back_ios_24px"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/back_arrow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/arrow_back_ios_24px"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:contentDescription="@string/back" />
+        <TextView
+            android:id="@+id/header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Ngày mai"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/back_arrow"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/header_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ngày mai" android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@id/back_arrow"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginStart="30dp" />
+        <ImageView
+            android:id="@+id/options_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/options_menu_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:contentDescription="Tùy chọn" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_layout">
 
         <LinearLayout
-            android:id="@+id/stats_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2" android:padding="10dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/radius_custom_todolist">
+            android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/stats_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:layout_width="wrap_content"
+                android:layout_margin="16dp"
+                android:background="@drawable/radius_custom_todolist"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:weightSum="2">
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="00:00"
-                    android:textColor="@color/red_pomodoro"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="HH"
+                            android:textSize="10sp"
+                            android:layout_marginEnd="8dp"
+                            android:textColor="#DDD"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MM"
+                            android:textSize="10sp"
+                            android:textColor="#DDD"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/estimated_time_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00:00"
+                        android:textColor="#FF5252"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thời gian ước tính"
+                        android:textColor="#9E9E9E"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Thời gian ước tính"
-                    android:textSize="12sp"
-                    android:gravity="center" />
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/task_need_complete_TV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="0"
+                        android:textColor="#FF5252"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Công việc cần hoàn thành"
+                        android:textColor="#9E9E9E"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/add_task_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:id="@+id/task_need_complete_TV"
-                    android:layout_width="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:background="@drawable/radius_custom_todolist"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/add_24px"
+                    app:tint="#9E9E9E" />
+
+                <EditText
+                    android:id="@+id/add_task_edit_text"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="@color/red_pomodoro"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Công việc cần hoàn thành"
-                    android:textSize="12sp"
-                    android:gravity="center" />
+                    android:layout_marginStart="12dp"
+                    android:background="@null"
+                    android:hint="Thêm một công việc..."
+                    android:imeOptions="actionDone"
+                    android:inputType="textCapSentences"
+                    android:textColor="#000000"
+                    android:textColorHint="#9E9E9E"
+                    android:textSize="16sp" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/empty_state_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
+                android:layout_marginTop="40dp"
                 android:gravity="center"
-                android:visibility="gone"> <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="00:00"
-                android:textColor="@color/red_pomodoro"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Thời gian đã trôi qua"
-                    android:textSize="12sp"
-                    android:gravity="center" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center"
-                android:visibility="gone"> <TextView
-                android:id="@+id/task_completed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textColor="@color/red_pomodoro"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Công việc đã hoàn thành"
-                    android:textSize="12sp"
-                    android:gravity="center" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/add_task_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="16dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/radius_custom_todolist">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/add_24px" />
-            <EditText
-                android:id="@+id/add_task_edit_text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:hint="Thêm một công việc..."
-                android:background="@android:color/transparent"
-                android:inputType="textCapSentences"
-                android:textSize="16sp"
-                android:imeOptions="actionDone"
-                android:padding="4dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/empty_state_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:paddingTop="48dp"
-            android:paddingBottom="48dp"
-            android:visibility="gone" tools:visibility="visible"> <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:contentDescription="Không có nhiệm vụ" />
-
-            <TextView
+                android:visibility="visible"> <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:alpha="0.5"/> <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Không có nhiệm vụ nào"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/darker_gray" />
+                android:textColor="#424242"
+                android:textSize="16sp" />
 
-            <TextView
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="40dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="Nhấn vào hộp nhập liệu ở trên để thêm một nhiệm vụ mới"
+                    android:textColor="#9E9E9E"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tasks_container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Nhấn vào hộp nhập liệu ở trên để thêm nhiệm vụ mới"
-                android:textColor="@android:color/darker_gray"
-                android:gravity="center"
-                android:paddingHorizontal="40dp"/>
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:id="@+id/tasks_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="0dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nhiệm vụ"
-                android:textColor="#A6A4A4"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="10dp" />
-            <androidx.recyclerview.widget.RecyclerView
+                android:orientation="vertical"
+                android:visibility="gone"> <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/tasks_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
                 android:nestedScrollingEnabled="false" />
-            <TextView
-                android:id="@+id/completed_tasks_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:gravity="center"
-                android:text="Ẩn đi những công việc đã hoàn thành ▲"
-                android:textSize="12sp"
-                android:clickable="true"
-                android:focusable="true" />
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/completed_tasks_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:visibility="visible"
-                android:nestedScrollingEnabled="false" />
+
+                <TextView
+                    android:id="@+id/completed_tasks_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="Ẩn đi những công việc đã hoàn thành ▲"
+                    android:textColor="#9E9E9E"
+                    android:textSize="12sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/completed_tasks_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+            </LinearLayout>
+
         </LinearLayout>
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/addTaskFragment"

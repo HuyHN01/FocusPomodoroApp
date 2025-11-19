@@ -1,10 +1,12 @@
 package com.example.focusmate.ui.todolist
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +24,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 
 
-class TodoListTodayActivity : AppCompatActivity(){
+class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
     private lateinit var binding: ActivityTodolistBinding
     private lateinit var taskViewModel: TaskViewModel
     private lateinit var pomodoroViewModel: PomodoroViewModel
@@ -31,7 +33,21 @@ class TodoListTodayActivity : AppCompatActivity(){
     private lateinit var tasksAdapter: TasksAdapter // Cho task "Hôm nay"
     private lateinit var otherTasksAdapter: TasksAdapter // CHO TASK "KHÁC" (MỚI)
     private lateinit var completedTasksAdapter: TasksAdapter
+    override fun onTaskAddedFromFragment(title: String, pomodoros: Int, priority: TaskPriority, date: Long?) {
+        // Activity Hôm Nay nhận lệnh -> Gọi ViewModel Hôm Nay
+        // dueDate = date (để null thì ViewModel tự xử là hôm nay, hoặc truyền date nếu user chọn)
+        taskViewModel.addNewTask(
+            title = title,
+            estimatedPomodoros = pomodoros,
+            priority = priority,
+            dueDate = date
+        )
 
+        // Xử lý ẩn bàn phím & giao diện
+        binding.addTaskEditText.clearFocus()
+        hideKeyboard()
+        binding.addTaskFragment.visibility = View.GONE
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
@@ -233,6 +249,13 @@ class TodoListTodayActivity : AppCompatActivity(){
             } else {
                 binding.addTaskFragment.visibility = View.GONE
             }
+        }
+    }
+    private fun hideKeyboard() {
+        val view = this.currentFocus
+        if (view != null) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
 
