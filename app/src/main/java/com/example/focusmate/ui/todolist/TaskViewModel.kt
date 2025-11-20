@@ -58,7 +58,13 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         authRepository = AuthRepository(application)
         currentUserId = authRepository.getCurrentUserId()
         allProjects = projectRepository.getAllProjects(currentUserId)
-        
+        val inboxProject = ProjectEntity(
+            projectId = "inbox_id_placeholder", // ID mặc định
+            userId = currentUserId,
+            name = "Nhiệm vụ",
+
+        )
+        setTempProject(inboxProject)
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
@@ -275,7 +281,12 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     fun startAddTask() {
-        _tempSelectedProject.value = null
+        val inboxProject = ProjectEntity(
+            projectId = "inbox_id_placeholder", // ID mặc định
+            userId = currentUserId,
+            name = "Nhiệm vụ",
+        )
+        _tempSelectedProject.value = inboxProject
         _tempSelectedPriority.value = TaskPriority.NONE
     }
 }
