@@ -15,7 +15,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.example.focusmate.R
 import com.example.focusmate.databinding.DialogProjectPickerBinding
-import com.example.focusmate.data.local.entity.ProjectEntity // <-- THÊM IMPORT NÀY
+import com.example.focusmate.data.local.entity.ProjectEntity 
 import com.example.focusmate.ui.MainScreenViewModel
 import com.example.focusmate.ui.mainscreen.AddProjectActivity
 
@@ -45,8 +45,8 @@ class ProjectPickerDialogFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val tempProject = viewModel.tempSelectedProject.value
-        val currentProjectId = viewModel.currentTask.value?.projectId ?:"inbox_id_placeholder" // Sửa: projectId
-//        val currentProjectId = tempProject?.projectId ?:"inbox_id_placeholder" // Sửa: projectId
+        val currentProjectId = viewModel.currentTask.value?.projectId ?:"inbox_id_placeholder" 
+
 
         projectAdapter = ProjectSelectionAdapter(currentProjectId) { selectedProject ->
 
@@ -75,7 +75,7 @@ class ProjectPickerDialogFragment : DialogFragment() {
 
         binding.btnAddProject.setOnClickListener {
             val intent = Intent(requireContext(), AddProjectActivity::class.java)
-            // Dùng cái biến launcher em vừa khai báo để mở Activity
+            
             addProjectLauncher.launch(intent)
         }
 
@@ -95,7 +95,7 @@ class ProjectPickerDialogFragment : DialogFragment() {
             .setPositiveButton("Tạo") { dialog, _ ->
                 val newName = editText.text.toString().trim()
                 if (newName.isNotEmpty()) {
-                    // Gọi ViewModel để tạo dự án mới
+                    
                     viewModel.addNewProject(newName)
                 }
                 dialog.dismiss()

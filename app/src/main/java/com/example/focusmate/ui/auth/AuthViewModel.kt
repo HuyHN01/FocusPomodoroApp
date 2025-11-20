@@ -1,4 +1,4 @@
-// File: ui/auth/AuthViewModel.kt
+
 package com.example.focusmate.ui.auth
 
 import android.app.Application
@@ -12,10 +12,10 @@ import com.example.focusmate.data.repository.AuthResultWrapper
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
-// Sealed class của em đã tốt, thầy đổi Success để chứa FirebaseUser
+
 sealed class AuthResult {
     data object Loading : AuthResult()
-    data class Success(val user: FirebaseUser) : AuthResult() // Trả về FirebaseUser
+    data class Success(val user: FirebaseUser) : AuthResult() 
     data class Error(val message: String) : AuthResult()
 }
 
@@ -25,7 +25,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _authResult = MutableLiveData<AuthResult>()
     val authResult: LiveData<AuthResult> = _authResult
 
-    // Thêm một LiveData để kiểm tra trạng thái đăng nhập ban đầu
+    
     private val _userLoggedIn = MutableLiveData<FirebaseUser?>()
     val userLoggedIn: LiveData<FirebaseUser?> = _userLoggedIn
 
@@ -38,7 +38,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
 
     init {
-        // Kiểm tra ngay khi ViewModel được tạo
+        
         _userLoggedIn.value = repository.getCurrentFirebaseUser()
     }
 
@@ -77,10 +77,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun signInWithGoogle(idToken: String) {
         viewModelScope.launch {
             _authResult.value = AuthResult.Loading
-            // Gọi xuống Repository
+            
             val result = repository.signInWithGoogle(idToken)
 
-            // Xử lý kết quả trả về UI
+            
             when (result) {
                 is AuthResultWrapper.Success -> {
                     _authResult.value = AuthResult.Success(result.data)
@@ -94,7 +94,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     fun resendVerificationEmail() {
         viewModelScope.launch {
-            // _verificationResult.value = Loading... (nếu muốn hiển thị loading)
+            
             val result = repository.sendVerificationEmail()
             _verificationResult.value = result
         }
@@ -102,7 +102,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     fun resetPassword(email: String) {
         viewModelScope.launch {
-            // Có thể thêm state Loading nếu muốn, nhưng với dialog thì thường xử lý nhanh
+            
             val result = repository.sendPasswordResetEmail(email)
             _resetPasswordResult.value = result
         }

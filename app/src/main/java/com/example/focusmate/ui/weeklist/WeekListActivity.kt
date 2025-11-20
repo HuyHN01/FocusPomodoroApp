@@ -28,7 +28,7 @@ class WeekListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Tái sử dụng layout cũ
+        
         binding = ActivityTodolistBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -49,12 +49,12 @@ class WeekListActivity : AppCompatActivity() {
         binding.addTaskLayout.setOnClickListener {
 
             binding.addTaskFragment.visibility = View.VISIBLE
-            viewModel.startAddTask() // Reset dữ liệu thêm mới
+            viewModel.startAddTask() 
         }
     }
 
     private fun setupRecyclerViews() {
-        // --- LIST CHƯA HOÀN THÀNH (Pending) ---
+        
         pendingAdapter = WeekTaskAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -96,7 +96,7 @@ class WeekListActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@WeekListActivity)
             adapter = completedAdapter
             isNestedScrollingEnabled = false
-            visibility = View.GONE // Mặc định ẩn
+            visibility = View.GONE 
         }
     }
 
@@ -105,7 +105,7 @@ class WeekListActivity : AppCompatActivity() {
 
         viewModel.allTasks.observe(this) { allTasks ->
 
-            // === LỌC TASK CHỈ TRONG TUẦN HIỆN TẠI ===
+            
             val weekTasks = allTasks.filter { task ->
 
                 val isDueInWeek = task.dueDate != null && task.dueDate in startOfWeek..endOfWeek
@@ -143,17 +143,17 @@ class WeekListActivity : AppCompatActivity() {
         }
     }
 
-    // --- CÁC HÀM XỬ LÝ LOGIC NHÓM NGÀY ---
+    
 
     private fun groupTasksByDate(tasks: List<TaskEntity>): List<WeekListItem> {
         if (tasks.isEmpty()) return emptyList()
 
-        // Sắp xếp theo ngày đến hạn (xa nhất xuống dưới)
+        
         val sortedTasks = tasks.sortedBy { it.dueDate ?: Long.MAX_VALUE }
         val resultList = mutableListOf<WeekListItem>()
         val dateMap = mutableMapOf<String, MutableList<TaskEntity>>()
 
-        // Gom nhóm
+        
         for (task in sortedTasks) {
             val dateKey = getHeaderTitle(task.dueDate)
             if (!dateMap.containsKey(dateKey)) {
@@ -173,7 +173,7 @@ class WeekListActivity : AppCompatActivity() {
     }
 
     private fun getHeaderTitle(timestamp: Long?): String {
-        if (timestamp == null) return "Chưa đặt lịch" // Hoặc "Sau này"
+        if (timestamp == null) return "Chưa đặt lịch" 
 
         val taskDate = Calendar.getInstance().apply { timeInMillis = timestamp }
         val today = Calendar.getInstance()

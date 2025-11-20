@@ -8,29 +8,25 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.focusmate.data.local.entity.TaskEntity
-import com.example.focusmate.data.local.entity.TaskStatus // Import Enum mới
+import com.example.focusmate.data.local.entity.TaskStatus 
 
 @Dao
 interface TaskDao {
 
-    // SỬA LỖI 1: Thay thế 2 hàm get... bằng 1 hàm getTasksByStatus
+    
     @Query("SELECT * FROM tasks WHERE status = :status AND userId = :userId ORDER BY createdAt DESC")
     fun getTasksByStatus(userId: String, status: TaskStatus): LiveData<List<TaskEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: TaskEntity)
 
-    // SỬA LỖI 2: Thay thế hàm toggle... bằng 2 hàm update mới
+    
 
-    /**
-     * Cập nhật trạng thái (PENDING/COMPLETED) cho một Task
-     */
+    
     @Query("UPDATE tasks SET status = :newStatus WHERE taskId = :taskId")
     suspend fun updateTaskStatus(taskId: String, newStatus: TaskStatus)
 
-    /**
-     * Cập nhật thời gian hoàn thành
-     */
+    
     @Query("UPDATE tasks SET completedAt = :completedAt WHERE taskId = :taskId")
     suspend fun updateCompletedAt(taskId: String, completedAt: Long?)
 
@@ -42,7 +38,7 @@ interface TaskDao {
     @Query("DELETE FROM tasks")
     suspend fun clearAll()
 
-    // SỬA LỖI 3: Sửa 'id' thành 'taskId' để khớp Entity
+    
     @Query("SELECT * FROM tasks WHERE taskId = :taskId LIMIT 1")
     suspend fun getTaskById(taskId: String): TaskEntity?
 
@@ -52,14 +48,14 @@ interface TaskDao {
     @Update
     suspend fun updateTask(task: TaskEntity)
 
-//    @Query("""
-//        SELECT * FROM tasks
-//        WHERE userId = :userId
-//        AND status = :status
-//        AND dueDate >= :startTime AND dueDate <= :endTime
-//        ORDER BY priority ASC, dueDate ASC
-//    """)
-//    fun getTasksByDateRange(userId: String, status: TaskStatus, startTime: Long, endTime: Long): LiveData<List<TaskEntity>>
+
+
+
+
+
+
+
+
 @Query("""
     SELECT * FROM tasks 
     WHERE userId = :userId 
@@ -81,4 +77,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE userId = :userId")
     fun getAllTasks(userId: String): LiveData<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks WHERE userId = :userId AND projectId = :projectId AND status = 'PENDING' ORDER BY createdAt DESC")
+    fun getUncompletedTasksByProject(userId: String, projectId: String): LiveData<List<TaskEntity>>
+
+    @Query("SELECT * FROM tasks WHERE userId = :userId AND projectId = :projectId AND status = 'COMPLETED' ORDER BY completedAt DESC")
+    fun getCompletedTasksByProject(userId: String, projectId: String): LiveData<List<TaskEntity>>
 }

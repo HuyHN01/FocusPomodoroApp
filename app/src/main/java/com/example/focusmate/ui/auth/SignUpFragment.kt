@@ -21,7 +21,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
     private val viewModel: AuthViewModel by viewModels()
     private lateinit var googleSignInClient: GoogleSignInClient
 
-    // 1. Copy Launcher từ SignInFragment sang
+    
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -31,7 +31,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 val account = task.getResult(ApiException::class.java)
                 val idToken = account.idToken
                 if (idToken != null) {
-                    // Gửi Token sang ViewModel (Dùng chung hàm signInWithGoogle)
+                    
                     viewModel.signInWithGoogle(idToken)
                 }
             } catch (e: ApiException) {
@@ -48,17 +48,17 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
         val confirmPasswordInput = view.findViewById<TextInputEditText>(R.id.confirm_password_input)
         val signUpButton = view.findViewById<AppCompatButton>(R.id.sign_up_button)
 
-        // 2. Ánh xạ nút Google
+        
         val googleButton = view.findViewById<View>(R.id.ic_google)
 
-        // 3. Cấu hình Google Client (Y hệt SignInFragment)
+        
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
-        // Xử lý nút Đăng ký thường
+        
         signUpButton.setOnClickListener {
             val email = emailInput.text.toString().trim()
             val password = passwordInput.text.toString().trim()
@@ -76,29 +76,29 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
             }
         }
 
-        // 4. Xử lý nút Google Click
+        
         googleButton.setOnClickListener {
             signInGoogle()
         }
 
-        // 5. Quan sát kết quả (Phần này quan trọng nhất)
+        
         viewModel.authResult.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is AuthResult.Loading -> {
-                    // Show loading...
+                    
                 }
                 is AuthResult.Success -> {
-                    // LOGIC PHÂN BIỆT:
-                    // Nếu user đăng nhập bằng Google -> isEmailVerified luôn là TRUE.
-                    // Nếu user đăng ký bằng Email/Pass -> isEmailVerified là FALSE (do ta chưa bấm link).
+                    
+                    
+                    
 
                     if (result.user.isEmailVerified) {
-                        // Trường hợp: Đăng ký bằng Google thành công -> Vào thẳng app
+                        
                         Toast.makeText(context, "Đăng nhập Google thành công!", Toast.LENGTH_SHORT).show()
                         requireActivity().setResult(AppCompatActivity.RESULT_OK)
                         requireActivity().finish()
                     } else {
-                        // Trường hợp: Đăng ký thường -> Hiện Dialog bắt check mail
+                        
                         showVerificationDialog()
                     }
                 }

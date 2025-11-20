@@ -29,22 +29,22 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
     private lateinit var taskViewModel: TaskViewModel
     private lateinit var pomodoroViewModel: PomodoroViewModel
 
-    // --- 1. KHAI BÁO 3 ADAPTER ---
-    private lateinit var tasksAdapter: TasksAdapter // Cho task "Hôm nay"
-    private lateinit var otherTasksAdapter: TasksAdapter // CHO TASK "KHÁC" (MỚI)
+    
+    private lateinit var tasksAdapter: TasksAdapter 
+    private lateinit var otherTasksAdapter: TasksAdapter 
     private lateinit var completedTasksAdapter: TasksAdapter
 
     override fun onTaskAddedFromFragment(title: String, pomodoros: Int, priority: TaskPriority, date: Long?, projectId: String?) {
-        // Sửa lỗi cú pháp và đảm bảo truyền đủ tham số
+        
         taskViewModel.addNewTask(
             title = title,
             estimatedPomodoros = pomodoros,
             priority = priority,
             dueDate = date,
-            projectId = projectId // <-- Đã sửa lỗi thiếu tên tham số
+            projectId = projectId 
         )
 
-        // Xử lý ẩn bàn phím & giao diện
+        
         binding.addTaskEditText.clearFocus()
         hideKeyboard()
         binding.addTaskFragment.visibility = View.GONE
@@ -65,10 +65,10 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
             )
         )
 
-        // 2. XỬ LÝ INSETS
+        
 
-        // A. Xử lý Header (Quan trọng nhất)
-        // Header đang set padding="16dp" trong XML. Lưu lại giá trị gốc.
+        
+        
         val originalPaddingTop = 16.dpToPx()
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.headerLayout) { view, insets ->
@@ -88,13 +88,13 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
             insets
         }
 
-        // C. Xử lý Fragment nhập liệu (Khi nó hiện lên)
-        // Fragment này nằm bottom, cần đẩy lên tránh nút Home ảo
+        
+        
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.addTaskFragment) { view, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // Vì đây là Container, ta nên dùng Margin hoặc Padding tùy vào thiết kế Fragment bên trong.
-            // Ở đây dùng Padding an toàn hơn.
+            
+            
             view.updatePadding(
                 bottom = bars.bottom
             )
@@ -106,7 +106,7 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
         pomodoroViewModel = ViewModelProvider(this)[PomodoroViewModel::class.java]
 
-        // --- 2. XỬ LÝ CLICK CÁC HEADER ---
+        
         binding.completedTasksHeader.setOnClickListener {
             if (binding.completedTasksList.isVisible) {
                 binding.completedTasksList.visibility = View.GONE
@@ -120,13 +120,13 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
             finish()
         }
         taskViewModel.timeElapsedFormatted.observe(this) { formattedTime ->
-            binding.tvTotalTimeElapsed.text = formattedTime // Dùng ID mới ở Bước 1
+            binding.tvTotalTimeElapsed.text = formattedTime 
         }
 
 
-        // --- 3. KHỞI TẠO 3 ADAPTER ---
+        
 
-        // Adapter 1: Task "Hôm nay" (Code cũ của em)
+        
         tasksAdapter = TasksAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -145,7 +145,7 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
             }
         )
 
-        // Adapter 2: Task "Hoàn thành" (Code cũ của em)
+        
         completedTasksAdapter = TasksAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -164,7 +164,7 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
             }
         )
 
-        // Adapter 3: Task "Khác" (MỚI - Copy y hệt)
+        
         otherTasksAdapter = TasksAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -183,40 +183,40 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
             }
         )
 
-        // --- 4. SETUP 3 RECYCLERVIEW ---
-        binding.tasksList.apply { // List "Hôm nay"
+        
+        binding.tasksList.apply { 
             layoutManager = LinearLayoutManager(this@TodoListTodayActivity)
             adapter = tasksAdapter
         }
-        binding.completedTasksList.apply { // List "Hoàn thành"
+        binding.completedTasksList.apply { 
             layoutManager = LinearLayoutManager(this@TodoListTodayActivity)
             adapter = completedTasksAdapter
         }
 
 
-        // --- 5. SỬA LẠI CÁC OBSERVER ---
+        
 
-        // Observer "Thời gian" (Code cũ của em - Đã đúng)
+        
         taskViewModel.estimatedTimeFormatted.observe(this) { formattedTime ->
             binding.tvTotalEstimatedTime.text = formattedTime
         }
 
-        // Sửa lỗi cú pháp và logic
+        
         taskViewModel.uncompletedTasks.observe(this) { uncompletedToday ->
             tasksAdapter.submitList(uncompletedToday)
         }
 
-        // Thêm observer mới cho "Công việc khác"
-//        taskViewModel.otherPendingTasks.observe(this) { otherTasks ->
-//            otherTasksAdapter.submitList(otherTasks)
-//        }
+        
 
-        // Observer "Hoàn thành" (Giữ nguyên)
+
+
+
+        
         taskViewModel.completedTasks.observe(this) { completed ->
             completedTasksAdapter.submitList(completed)
         }
 
-        // Các observer đếm số lượng (Giữ nguyên)
+        
         taskViewModel.uncompletedCount.observe(this, Observer { count ->
             binding.taskNeedCompleteTV.text = count.toString()
         })
@@ -224,7 +224,7 @@ class TodoListTodayActivity : AppCompatActivity(), AddTaskListener{
             binding.taskCompleted.text = count.toString()
         })
 
-        // Thêm task nhanh (Giữ nguyên)
+        
         binding.addTaskEditText.setOnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val title = binding.addTaskEditText.text.toString().trim()

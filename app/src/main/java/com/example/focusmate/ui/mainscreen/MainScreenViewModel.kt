@@ -20,18 +20,18 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
     private val repository: ProjectRepository
     private val authRepository: AuthRepository
 
-    // Biến lưu UserId hiện tại (Không được final vì sẽ thay đổi khi login/logout)
+    
     private var currentUserId: String
 
-    // LiveData quản lý danh sách hiển thị trên UI
+    
     private val _menuItems = MediatorLiveData<List<MenuItem>>()
     val menuItems: LiveData<List<MenuItem>> = _menuItems
 
-    // LiveData lưu thông tin User để hiển thị lên Header (Tên/Email)
+    
     private val _currentUserInfo = MutableLiveData<String>()
     val currentUserInfo: LiveData<String> = _currentUserInfo
 
-    // Biến giữ LiveData từ DB để có thể removeSource khi đổi user
+    
     private var currentProjectSource: LiveData<List<ProjectEntity>>? = null
 
     private val staticMenuItems: List<MenuItem> = listOf(
@@ -50,64 +50,54 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
         authRepository = AuthRepository(application)
         repository = ProjectRepository(projectDao)
 
-        // Khởi tạo giá trị ban đầu
+        
         currentUserId = authRepository.getCurrentUserId()
 
-        // Tải dữ liệu lần đầu
+        
         reloadData()
     }
 
-    /**
-     * Hàm trung tâm để tải lại dữ liệu.
-     * Được gọi khi:
-     * 1. Mở ứng dụng (init)
-     * 2. Đăng nhập thành công
-     * 3. Đăng xuất thành công
-     */
+    
     fun reloadData() {
-        // 1. Cập nhật ID mới nhất từ AuthRepository (Có thể là UID hoặc GUEST_USER)
+        
         currentUserId = authRepository.getCurrentUserId()
 
-        // 2. Cập nhật thông tin hiển thị User (Tên/Email)
+        
         updateUserInfo()
 
-        // 3. Đồng bộ dữ liệu mẫu (nếu là Guest hoặc User mới)
+        
         repository.syncProjects(currentUserId, viewModelScope)
 
-        // 4. "Chuyển kênh" lắng nghe Database
-        // Bước A: Nếu đang lắng nghe kênh cũ (User cũ), hãy gỡ bỏ nó
+        
+        
         currentProjectSource?.let {
             _menuItems.removeSource(it)
         }
 
-        // Bước B: Tạo kênh mới với ID mới
+        
         val newSource = repository.getAllProjects(currentUserId)
         currentProjectSource = newSource
 
-        // Bước C: Lắng nghe kênh mới và cập nhật UI
+        
         _menuItems.addSource(newSource) { projects ->
             combineLists(projects)
         }
     }
 
-    /**
-     * Xử lý Logic Đăng xuất
-     */
+    
     fun signOut() {
         viewModelScope.launch {
-            // 1. Gọi Repo đăng xuất (Xóa cache, ngắt kết nối Firebase)
+            
             authRepository.signOut()
 
-            // 2. Quan trọng: Tải lại dữ liệu với tư cách là Guest
+            
             reloadData()
         }
     }
 
-    /**
-     * Gọi hàm này sau khi Login thành công từ Activity
-     */
+    
     fun checkUserStatus() {
-        // Chỉ cần gọi reloadData để refresh toàn bộ
+        
         reloadData()
     }
 
@@ -154,14 +144,14 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
 
     fun addProject(projectName: String, colorString: String) {
         viewModelScope.launch {
-            // Lấy danh sách hiện tại để tính order
-            // Lưu ý: Phải lấy từ currentProjectSource.value thay vì projectsFromDb cũ
+            
+            
             val currentList = currentProjectSource?.value
             val newOrder = currentList?.size ?: 0
 
             val newProject = ProjectEntity(
                 projectId = UUID.randomUUID().toString(),
-                userId = currentUserId, // Luôn dùng ID hiện tại (đã cập nhật)
+                userId = currentUserId, 
                 name = projectName,
                 color = colorString,
                 order = newOrder,
@@ -175,7 +165,7 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
     fun deleteProject(menuItem: MenuItem) {
         if (menuItem.id == null) return
 
-        // Tìm trong danh sách hiện tại
+        
         val projectEntity = currentProjectSource?.value?.find { it.projectId == menuItem.id }
 
         if (projectEntity != null) {

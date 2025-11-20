@@ -23,10 +23,10 @@ class ProjectRepository(private val projectDao: ProjectDao) {
     }
 
     suspend fun insert(project: ProjectEntity) {
-        // 1. LOCAL
+        
         projectDao.insertProject(project)
 
-        // 2. REMOTE
+        
         if (project.userId != Constants.GUEST_USER_ID) {
             try {
                 firestore.collection("users").document(project.userId)
@@ -41,10 +41,10 @@ class ProjectRepository(private val projectDao: ProjectDao) {
     }
 
     suspend fun update(project: ProjectEntity) {
-        // 1. LOCAL
+        
         projectDao.updateProject(project)
 
-        // 2. REMOTE
+        
         if (project.userId != Constants.GUEST_USER_ID) {
             try {
                 firestore.collection("users").document(project.userId)
@@ -59,10 +59,10 @@ class ProjectRepository(private val projectDao: ProjectDao) {
     }
 
     suspend fun delete(project: ProjectEntity) {
-        // 1. LOCAL
+        
         projectDao.deleteProject(project)
 
-        // 2. REMOTE
+        
         if (project.userId != Constants.GUEST_USER_ID) {
             try {
                 firestore.collection("users").document(project.userId)
@@ -77,10 +77,10 @@ class ProjectRepository(private val projectDao: ProjectDao) {
     }
 
     fun syncProjects(userId: String, scope: CoroutineScope) {
-        // Nếu là khách thì không đồng bộ
+        
         if (userId == Constants.GUEST_USER_ID) return
 
-        // Lắng nghe collection 'projects' của user này
+        
         firestore.collection("users").document(userId).collection("projects")
             .addSnapshotListener { snapshots, error ->
                 if (error != null) {
@@ -89,25 +89,25 @@ class ProjectRepository(private val projectDao: ProjectDao) {
                 }
 
                 if (snapshots != null) {
-                    // Chuyển sang IO Thread để ghi vào Room
+                    
                     scope.launch(Dispatchers.IO) {
                         for (dc in snapshots.documentChanges) {
-                            // Chuyển đổi Document Firestore thành ProjectEntity
+                            
                             val project = dc.document.toObject(ProjectEntity::class.java)
 
                             when (dc.type) {
                                 DocumentChange.Type.ADDED -> {
-                                    // Cloud có cái mới -> Thêm vào Room
+                                    
                                     projectDao.insertProject(project)
                                     Log.d(TAG, "Sync: Added project ${project.name} from Cloud")
                                 }
                                 DocumentChange.Type.MODIFIED -> {
-                                    // Cloud đã sửa -> Cập nhật Room
+                                    
                                     projectDao.updateProject(project)
                                     Log.d(TAG, "Sync: Modified project ${project.name} from Cloud")
                                 }
                                 DocumentChange.Type.REMOVED -> {
-                                    // Cloud đã xóa -> Xóa khỏi Room
+                                    
                                     projectDao.deleteProject(project)
                                     Log.d(TAG, "Sync: Removed project ${project.name} from Cloud")
                                 }

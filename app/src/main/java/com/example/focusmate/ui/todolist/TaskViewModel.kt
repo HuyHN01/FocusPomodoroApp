@@ -18,7 +18,7 @@ import java.util.Calendar
 
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
-    // 1. Biến UI
+    
 
     private val _tempSelectedProject = MutableLiveData<ProjectEntity?>(null)
     val tempSelectedProject: LiveData<ProjectEntity?> = _tempSelectedProject
@@ -29,17 +29,17 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _currentTask = MutableStateFlow<TaskEntity?>(null)
     val currentTask: StateFlow<TaskEntity?> = _currentTask.asStateFlow()
 
-    // 2. Kho dữ liệu
+    
     private val repository: TaskRepository
     private val authRepository: AuthRepository
     private val currentUserId: String
     val allTasks: LiveData<List<TaskEntity>>
 
-    // 3. LiveData chính (ĐÃ DỌN SẠCH)
-    val uncompletedTasks: LiveData<List<TaskEntity>> // Chỉ (Hôm nay + Quá hạn)
+    
+    val uncompletedTasks: LiveData<List<TaskEntity>> 
     val completedTasks: LiveData<List<TaskEntity>>
     val timeElapsedFormatted = MediatorLiveData<String>()
-    // 4. LiveData phụ (Mediator)
+    
     val uncompletedCount = MediatorLiveData<Int>()
     val completedCount = MediatorLiveData<Int>()
     val estimatedTimeFormatted = MediatorLiveData<String>()
@@ -47,7 +47,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     val allProjects: LiveData<List<ProjectEntity>>
 
     init {
-        // Khởi tạo
+        
         val db = AppDatabase.getDatabase(application)
         val taskDao = db.taskDao()
         val projectDao = db.projectDao()
@@ -58,25 +58,25 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         authRepository = AuthRepository(application)
         currentUserId = authRepository.getCurrentUserId()
         allProjects = projectRepository.getAllProjects(currentUserId)
-        // Tính toán 23:59:59 của Hôm nay
+        
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
-        val startOfDay = calendar.timeInMillis // 00:00 hôm nay
+        val startOfDay = calendar.timeInMillis 
 
         calendar.add(Calendar.DAY_OF_YEAR, 1)
         calendar.add(Calendar.MILLISECOND, -1)
-        val endOfDay = calendar.timeInMillis // 23:59 hôm nay
-        // Lấy dữ liệu (ĐÃ SỬA)
+        val endOfDay = calendar.timeInMillis 
+        
         uncompletedTasks = repository.getUncompletedTasks(currentUserId, endOfDay)
         completedTasks = repository.getTasksCompletedToday(currentUserId, startOfDay, endOfDay)
         repository.syncTasks(currentUserId, viewModelScope)
 
-        //Them cho WeekActivity
+        
         allTasks = repository.getAllTasks(currentUserId)
-        //Ket thuc
+        
         uncompletedCount.addSource(uncompletedTasks) { list ->
             uncompletedCount.value = list.size
         }
@@ -90,13 +90,13 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         timeElapsedFormatted.addSource(completedTasks) { tasksCompletedToday ->
-            // 1. Tính tổng số Pomo ĐÃ HOÀN THÀNH
+            
             val totalCompletedPomodoros = tasksCompletedToday.sumOf { it.completedPomodoros }
 
-            // 2. Nhân với 25 phút
-            val totalMinutes = totalCompletedPomodoros * 25 // 1 Pomo = 25 phút
+            
+            val totalMinutes = totalCompletedPomodoros * 25 
 
-            // 3. Gán giá trị
+            
             timeElapsedFormatted.value = formatMinutesToHHMM(totalMinutes)
         }
 
@@ -111,7 +111,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         return String.format("%02d:%02d", hours, minutes)
     }
 
-    // 5. CÁC HÀM HÀNH ĐỘNG (ĐÃ SỬA LỖI TYPE)
+    
 
     fun addNewTask(
         title: String,
@@ -133,34 +133,34 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // SỬA LỖI: Đổi taskId từ String về Int (để khớp Entity)
+    
     fun toggleTaskCompletion(taskId: String) {
         viewModelScope.launch {
-            val task = repository.getTaskById(taskId) // Dùng Int
+            val task = repository.getTaskById(taskId) 
             if (task != null) {
                 val newStatus = if (task.status == TaskStatus.PENDING) {
                     TaskStatus.COMPLETED
                 } else {
                     TaskStatus.PENDING
                 }
-                repository.updateTaskStatus(taskId, newStatus) // Dùng Int
+                repository.updateTaskStatus(taskId, newStatus) 
                 val completedAtTime = if (newStatus == TaskStatus.COMPLETED) System.currentTimeMillis() else null
                 val updatedTask = task.copy(
                     status = newStatus,
                     completedAt = completedAtTime
                 )
 
-                // BÁO CHO GIAO DIỆN BIẾT
+                
                 _currentTask.value = updatedTask
             }
 
         }
     }
 
-    // SỬA LỖI: Đổi taskId từ String về Int (để khớp Entity)
+    
     fun loadTaskById(taskId: String) {
         viewModelScope.launch {
-            _currentTask.value = repository.getTaskById(taskId) // Dùng Int
+            _currentTask.value = repository.getTaskById(taskId) 
         }
     }
 
@@ -237,11 +237,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val task = repository.getTaskById(taskId)
             if (task != null) {
-                // Tạo bản sao task với Pomo đã +1
+                
                 val updatedTask = task.copy(
                     completedPomodoros = task.completedPomodoros + 1
                 )
-                // Cập nhật lại vào CSDL
+                
                 repository.updateTask(updatedTask)
             }
         }
@@ -250,24 +250,24 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun addNewProject(projectName: String) {
         viewModelScope.launch {
             val newProject = ProjectEntity(
-                // projectId sẽ tự tạo bằng UUID
-                userId = currentUserId, // Dùng userId thật
+                
+                userId = currentUserId, 
                 name = projectName,
-                color = "#FFFFFF" // Em có thể cho chọn màu sau
-                // order, createdAt... sẽ dùng giá trị mặc định
+                color = "#FFFFFF" 
+                
             )
             projectRepository.insert(newProject)
         }
     }
     fun updateTaskProject(newProjectId: String?) {
         _currentTask.value?.let { currentTask ->
-            // 1. Tạo bản sao Task với projectId mới
+            
             val updatedTask = currentTask.copy(
                 projectId = newProjectId,
                 lastModified = System.currentTimeMillis()
             )
 
-            // 2. Lưu vào DB và cập nhật UI
+            
             viewModelScope.launch {
                 repository.updateTask(updatedTask)
                 _currentTask.value = updatedTask

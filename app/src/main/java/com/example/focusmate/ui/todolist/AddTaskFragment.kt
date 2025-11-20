@@ -21,16 +21,16 @@ class AddTaskFragment : Fragment() {
 
     private var _binding: FragmentAddTaskBinding? = null
     private val binding get() = _binding!!
-//    private var selectedDate: Long? = System.currentTimeMillis()
+
     private var selectedDate: Long? = null
     private var selectedPomodoros: Int = 1
     private lateinit var pomoIcons: List<ImageView>
     private val viewModel: TaskViewModel by activityViewModels()
 
-    // 1. KHAI BÁO LISTENER
+    
     private var listener: AddTaskListener? = null
 
-    // 2. GẮN LISTENER VÀO ACTIVITY
+    
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is AddTaskListener) {
@@ -57,15 +57,15 @@ class AddTaskFragment : Fragment() {
             }
         }
         selectedDate?.let {
-            updateDateIcon(it) // Gọi hàm cập nhật icon ngay sau khi có ngày
+            updateDateIcon(it) 
         }
 
-        // 2. Nếu không có argument (hoặc targetTime = 0) thì mặc định là hôm nay
+        
         if (selectedDate == null) {
             selectedDate = System.currentTimeMillis()
         }
         viewModel.tempSelectedPriority.observe(viewLifecycleOwner) { priority ->
-            // Cập nhật màu của icon cờ
+            
             val flagColorRes = when (priority) {
                 TaskPriority.HIGH -> R.color.priority_high
                 TaskPriority.MEDIUM -> R.color.priority_medium
@@ -88,7 +88,7 @@ class AddTaskFragment : Fragment() {
 
         pomoIcons.forEachIndexed { index, imageView ->
             imageView.setOnClickListener {
-                selectedPomodoros = index + 1 // index (0-4) + 1 = số Pomo (1-5)
+                selectedPomodoros = index + 1 
                 updatePomoIcons(selectedPomodoros)
             }
         }
@@ -118,7 +118,7 @@ class AddTaskFragment : Fragment() {
                 .trim()
 
             if (taskTitle.isNotEmpty()) {
-                // Lấy priority hiện tại từ ViewModel
+                
                 val currentPriority = viewModel.tempSelectedPriority.value ?: TaskPriority.NONE
                 val currentProject = viewModel.tempSelectedProject.value
 
@@ -132,7 +132,7 @@ class AddTaskFragment : Fragment() {
 
                 Toast.makeText(requireContext(), "Đã thêm: $taskTitle", Toast.LENGTH_SHORT).show()
 
-                // 4. RESET LẠI PRIORITY VỀ NONE CHO LẦN SAU
+                
                 viewModel.setTempPriority(TaskPriority.NONE)
                 selectedDate = System.currentTimeMillis()
                 selectedPomodoros = 0
@@ -145,7 +145,7 @@ class AddTaskFragment : Fragment() {
             editText.text.clear()
             editText.clearFocus()
 
-            // Ẩn bàn phím (nếu cần thiết gọi thêm ở đây)
+            
             requireActivity().findViewById<View>(R.id.addTaskFragment).visibility = View.GONE
         }
     }
@@ -154,15 +154,15 @@ class AddTaskFragment : Fragment() {
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
     }
 
-    // 2. Hàm cập nhật Icon dựa trên ngày
+    
     private fun updateDateIcon(timestamp: Long) {
         val selectedCal = Calendar.getInstance()
         selectedCal.timeInMillis = timestamp
 
-        val todayCal = Calendar.getInstance() // Thời gian hiện tại
+        val todayCal = Calendar.getInstance() 
 
         val tomorrowCal = Calendar.getInstance()
-        tomorrowCal.add(Calendar.DAY_OF_YEAR, 1) // Thời gian ngày mai
+        tomorrowCal.add(Calendar.DAY_OF_YEAR, 1) 
 
         if (isSameDay(selectedCal, todayCal)) {
             binding.iconDate.setImageResource(R.drawable.wb_sunny_24px)
@@ -196,7 +196,7 @@ class AddTaskFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        // Reset lần nữa phòng khi user thoát mà không lưu
+        
         viewModel.setTempPriority(TaskPriority.NONE)
         viewModel.setTempProject(null)
     }
