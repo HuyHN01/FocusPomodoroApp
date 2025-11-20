@@ -50,11 +50,15 @@ class ProjectPickerDialogFragment : DialogFragment() {
 
         projectAdapter = ProjectSelectionAdapter(currentProjectId) { selectedProject ->
 
-            if (selectedProject.projectId == "inbox_id_placeholder") {
-                viewModel.updateTaskProject(null)
-            } else {
-                viewModel.updateTaskProject(selectedProject.projectId)
-            }
+//            if (selectedProject.projectId == "inbox_id_placeholder") {
+//                viewModel.updateTaskProject(null)
+//            } else {
+//                viewModel.updateTaskProject(selectedProject.projectId)
+//            }
+
+
+            viewModel.updateTaskProject(selectedProject.projectId)
+
             dismiss()
         }
         binding.rvProjects.adapter = projectAdapter
