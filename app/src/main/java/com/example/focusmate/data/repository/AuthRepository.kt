@@ -45,7 +45,7 @@ class AuthRepository(context: Context) {
                     
                 }
 
-                
+                firebaseAuth.signOut()
                 
                 AuthResultWrapper.Success(firebaseUser)
             } else {
