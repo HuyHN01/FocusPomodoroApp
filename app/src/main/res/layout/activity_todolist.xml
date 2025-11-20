@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F0F0F0"
+    android:layout_marginTop="20dp"
     tools:context=".ui.pomodoro.PomodoroActivity">
 
     <!-- Toàn bộ phần nội dung chính cho phép cuộn -->
@@ -126,6 +127,7 @@
                         android:textSize="20sp"
                         android:textStyle="bold" />
                     <TextView
+                        android:id="@+id/tv_total_time_elapsedtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Thời gian đã trôi qua"
@@ -149,6 +151,7 @@
                         android:textSize="20sp"
                         android:textStyle="bold" />
                     <TextView
+                        android:id="@+id/task_completedText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Công việc đã hoàn thành"

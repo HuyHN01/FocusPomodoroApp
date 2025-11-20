@@ -135,16 +135,20 @@ class TaskDetailActivity : AppCompatActivity() {
                     }
                 }
                 taskViewModel.allProjects.observe(this) { projects ->
-                    
-                    val currentProject = projects.find { it.projectId == task.projectId }
 
-                    if (currentProject != null) {
-                        binding.tvProjectValue.text = currentProject.name
-                    } else {
-                        
+                    if (task.projectId == "inbox_id_placeholder") {
                         binding.tvProjectValue.text = "Nhiệm vụ"
-                        binding.iconProject.imageTintList = ColorStateList.valueOf(Color.GRAY)
                     }
+                    else {
+                        val currentProject = projects.find { it.projectId == task.projectId }
+
+                        if (currentProject != null) {
+                            binding.tvProjectValue.text = currentProject.name
+                        } else {
+                            binding.tvProjectValue.text = "Nhiệm vụ"
+                        }
+                    }
+
                 }
 
                 isObserving = false

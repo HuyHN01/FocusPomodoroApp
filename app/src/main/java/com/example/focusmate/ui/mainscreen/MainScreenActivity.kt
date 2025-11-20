@@ -25,6 +25,8 @@ import androidx.core.view.updatePadding
 import com.example.focusmate.R
 import com.example.focusmate.data.model.MenuItem
 import com.example.focusmate.ui.auth.AuthActivity
+import com.example.focusmate.ui.completedlist.CompletedHistoryActivity
+import com.example.focusmate.ui.plannedlist.PlannedListActivity
 import com.example.focusmate.ui.todolist.ProjectDetailActivity
 import com.example.focusmate.ui.todolist.TodoListTodayActivity
 import com.example.focusmate.ui.todolist.TodoListTomorrowActivity
@@ -131,6 +133,14 @@ class MainScreenActivity : AppCompatActivity() {
                         addProjectLauncher.launch(intent)
                     }
 
+                    "Nhiệm vụ" -> {
+                        val intent = Intent(this, ProjectDetailActivity::class.java).apply {
+                            putExtra("EXTRA_PROJECT_ID", "inbox_id_placeholder")
+                            putExtra("EXTRA_PROJECT_NAME", "Nhiệm vụ")
+                        }
+                        startActivity(intent)
+                    }
+
                     "Hôm nay" -> {
                         val intent = Intent(this, TodoListTodayActivity::class.java)
                         startActivity(intent)
@@ -147,7 +157,13 @@ class MainScreenActivity : AppCompatActivity() {
                     }
 
                     "Đã lên kế hoạch" -> {
-                        Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this, PlannedListActivity::class.java)
+                        startActivity(intent)
+                    }
+
+                    "Đã hoàn thành" -> {
+                        val intent = Intent(this, CompletedHistoryActivity::class.java)
+                        startActivity(intent)
                     }
 
                     else -> {

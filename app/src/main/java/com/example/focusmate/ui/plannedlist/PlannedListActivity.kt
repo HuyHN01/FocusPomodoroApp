@@ -1,4 +1,4 @@
-package com.example.focusmate.ui.weeklist
+package com.example.focusmate.ui.plannedlist
 
 import android.content.Context
 import android.content.Intent
@@ -13,17 +13,21 @@ import com.example.focusmate.data.local.entity.TaskEntity
 import com.example.focusmate.data.local.entity.TaskPriority
 import com.example.focusmate.data.local.entity.TaskStatus
 import com.example.focusmate.databinding.ActivityTodolistBinding
+import com.example.focusmate.databinding.ActivityTodolisttomorrowBinding // <--- Đổi Binding theo tên file XML của bạn
 import com.example.focusmate.ui.pomodoro.PomodoroActivity
-import com.example.focusmate.ui.todolist.AddTaskListener // Import Listener
+import com.example.focusmate.ui.todolist.AddTaskListener
 import com.example.focusmate.ui.todolist.TaskDetailActivity
 import com.example.focusmate.ui.todolist.TaskViewModel
+import com.example.focusmate.ui.weeklist.WeekListItem
+import com.example.focusmate.ui.weeklist.WeekTaskAdapter
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class WeekListActivity : AppCompatActivity(), AddTaskListener {
+class PlannedListActivity : AppCompatActivity(), AddTaskListener {
 
-    private lateinit var binding: ActivityTodolistBinding
+    // Binding này tương ứng với file xml bạn copy (ví dụ: activity_planned_list.xml)
+    private lateinit var binding: ActivityTodolisttomorrowBinding
     private val viewModel: TaskViewModel by viewModels()
 
     private lateinit var pendingAdapter: WeekTaskAdapter
@@ -47,16 +51,17 @@ class WeekListActivity : AppCompatActivity(), AddTaskListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityTodolistBinding.inflate(layoutInflater)
+        binding = ActivityTodolisttomorrowBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setupUI()
         setupRecyclerViews()
         observeData()
+
     }
 
     private fun setupUI() {
-        binding.headerTitle.text = "Tuần này"
+        binding.headerTitle.text = "Đã lên kế hoạch"
 
         binding.backArrow.setOnClickListener { finish() }
 
@@ -64,19 +69,28 @@ class WeekListActivity : AppCompatActivity(), AddTaskListener {
             toggleCompletedList()
         }
 
+        binding.completedTasksHeader.visibility = View.GONE
+
+        binding.addTaskLayout.setOnClickListener {
+            binding.addTaskFragment.visibility = View.VISIBLE
+            viewModel.startAddTask()
+        }
+
         binding.addTaskEditText.setOnEditorActionListener { v, actionId, event ->
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val title = binding.addTaskEditText.text.toString().trim()
                 if (title.isNotEmpty()) {
+                    // Thêm task mới (mặc định là hôm nay nếu add nhanh)
                     viewModel.addNewTask(
                         title = title,
                         estimatedPomodoros = 1,
                         priority = TaskPriority.NONE,
                         projectId = "inbox_id_placeholder",
-                        dueDate = System.currentTimeMillis() // Ngày hôm nay
+                        dueDate = System.currentTimeMillis()
                     )
                     binding.addTaskEditText.text.clear()
                     binding.addTaskEditText.clearFocus()
+                    hideKeyboard()
                 }
                 true
             } else {
@@ -84,24 +98,18 @@ class WeekListActivity : AppCompatActivity(), AddTaskListener {
             }
         }
 
-        binding.addTaskLayout.setOnClickListener {
-            binding.addTaskFragment.visibility = View.VISIBLE
-            viewModel.startAddTask()
-        }
-
+        // 6. Xử lý Focus EditText -> Mở Fragment
         binding.addTaskEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                viewModel.startAddTask()
                 binding.addTaskFragment.visibility = View.VISIBLE
+                viewModel.startAddTask()
             } else {
-                // Khi mất focus, ẩn Fragment đi
                 binding.addTaskFragment.visibility = View.GONE
             }
         }
     }
 
     private fun setupRecyclerViews() {
-
         pendingAdapter = WeekTaskAdapter(
             onTaskClick = { task ->
                 val intent = Intent(this, TaskDetailActivity::class.java).apply {
@@ -109,9 +117,7 @@ class WeekListActivity : AppCompatActivity(), AddTaskListener {
                 }
                 startActivity(intent)
             },
-            onCompleteClick = { task ->
-                viewModel.toggleTaskCompletion(task.taskId)
-            },
+            onCompleteClick = { task -> viewModel.toggleTaskCompletion(task.taskId) },
             onPlayClick = { task ->
                 val intent = Intent(this, PomodoroActivity::class.java).apply {
                     putExtra("EXTRA_TASK_ID", task.taskId)
@@ -120,7 +126,7 @@ class WeekListActivity : AppCompatActivity(), AddTaskListener {
             }
         )
         binding.tasksList.apply {
-            layoutManager = LinearLayoutManager(this@WeekListActivity)
+            layoutManager = LinearLayoutManager(this@PlannedListActivity)
             adapter = pendingAdapter
             isNestedScrollingEnabled = false
         }
@@ -132,74 +138,56 @@ class WeekListActivity : AppCompatActivity(), AddTaskListener {
                 }
                 startActivity(intent)
             },
-            onCompleteClick = { task ->
-                viewModel.toggleTaskCompletion(task.taskId)
-            },
-            onPlayClick = {
-
-            }
+            onCompleteClick = { task -> viewModel.toggleTaskCompletion(task.taskId) },
+            onPlayClick = {}
         )
         binding.completedTasksList.apply {
-            layoutManager = LinearLayoutManager(this@WeekListActivity)
+            layoutManager = LinearLayoutManager(this@PlannedListActivity)
             adapter = completedAdapter
             isNestedScrollingEnabled = false
-            visibility = View.GONE
+            visibility = View.GONE // Mặc định ẩn
         }
     }
 
     private fun observeData() {
-        val (startOfWeek, endOfWeek) = getCurrentWeekRange()
-
         viewModel.allTasks.observe(this) { allTasks ->
 
+            val plannedTasks = allTasks.filter { it.dueDate != null }
 
-            val weekTasks = allTasks.filter { task ->
+            val pendingTasks = plannedTasks.filter { it.status == TaskStatus.PENDING }
+            val completedTasks = plannedTasks.filter { it.status == TaskStatus.COMPLETED }
 
-                val isDueInWeek = task.dueDate != null && task.dueDate in startOfWeek..endOfWeek
-                val isOverdueAndPending = task.dueDate != null && task.dueDate < startOfWeek && task.status == TaskStatus.PENDING
+            updateStats(plannedTasks)
 
-                isDueInWeek || isOverdueAndPending
+            if (plannedTasks.isEmpty()) {
+                binding.emptyStateLayout.visibility = View.VISIBLE
+                binding.tasksContainer.visibility = View.GONE
+            } else {
+                binding.emptyStateLayout.visibility = View.GONE
+                binding.tasksContainer.visibility = View.VISIBLE
             }
 
-            val pendingTasks = weekTasks.filter { it.status == TaskStatus.PENDING }
-            val completedTasks = weekTasks.filter { it.status == TaskStatus.COMPLETED }
-
-            updateStats(weekTasks)
-
             val groupedPending = groupTasksByDate(pendingTasks)
-            pendingAdapter.submitList(groupedPending)
+            pendingAdapter.submitList(groupedPending) {
+                binding.tasksList.requestLayout()
+            }
 
             val groupedCompleted = groupTasksByDate(completedTasks)
-            completedAdapter.submitList(groupedCompleted)
+            completedAdapter.submitList(groupedCompleted) {
+                binding.completedTasksList.requestLayout()
+            }
 
             val arrow = if (isCompletedListVisible) "▼" else "▲"
             binding.completedTasksHeader.text = "Đã hoàn thành (${completedTasks.size}) $arrow"
         }
     }
 
-    private fun toggleCompletedList() {
-        isCompletedListVisible = !isCompletedListVisible
-        if (isCompletedListVisible) {
-            binding.completedTasksList.visibility = View.VISIBLE
-            val count = completedAdapter.currentList.count { it is WeekListItem.TaskItem }
-            binding.completedTasksHeader.text = "Đã hoàn thành ($count) ▼"
-        } else {
-            binding.completedTasksList.visibility = View.GONE
-            val count = completedAdapter.currentList.count { it is WeekListItem.TaskItem }
-            binding.completedTasksHeader.text = "Đã hoàn thành ($count) ▲"
-        }
-    }
-
-    // --- CÁC HÀM XỬ LÝ LOGIC NHÓM NGÀY ---
-
     private fun groupTasksByDate(tasks: List<TaskEntity>): List<WeekListItem> {
         if (tasks.isEmpty()) return emptyList()
 
-
-        val sortedTasks = tasks.sortedBy { it.dueDate ?: Long.MAX_VALUE }
+        val sortedTasks = tasks.sortedBy { it.dueDate }
         val resultList = mutableListOf<WeekListItem>()
         val dateMap = mutableMapOf<String, MutableList<TaskEntity>>()
-
 
         for (task in sortedTasks) {
             val dateKey = getHeaderTitle(task.dueDate)
@@ -211,9 +199,7 @@ class WeekListActivity : AppCompatActivity(), AddTaskListener {
 
         for ((headerTitle, taskList) in dateMap) {
             val totalMinutes = taskList.sumOf { it.estimatedPomodoros } * 25
-
             resultList.add(WeekListItem.Header("$headerTitle • ${totalMinutes}ph"))
-
             resultList.addAll(taskList.map { WeekListItem.TaskItem(it) })
         }
         return resultList
@@ -232,7 +218,8 @@ class WeekListActivity : AppCompatActivity(), AddTaskListener {
             isSameDay(taskDate, tomorrow) -> "Ngày mai"
             isSameDay(taskDate, yesterday) -> "Hôm qua"
             else -> {
-                val sdf = SimpleDateFormat("EEEE, dd 'thg' MM", Locale("vi", "VN"))
+                // Format: Thứ Sáu, 22 thg 11, 2025
+                val sdf = SimpleDateFormat("EEEE, dd 'thg' MM, yyyy", Locale("vi", "VN"))
                 sdf.format(taskDate.time)
             }
         }
@@ -243,33 +230,24 @@ class WeekListActivity : AppCompatActivity(), AddTaskListener {
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
     }
 
+    private fun toggleCompletedList() {
+        isCompletedListVisible = !isCompletedListVisible
+        binding.completedTasksList.visibility = if (isCompletedListVisible) View.VISIBLE else View.GONE
+        val count = completedAdapter.currentList.count { it is WeekListItem.TaskItem }
+        val arrow = if (isCompletedListVisible) "▼" else "▲"
+        binding.completedTasksHeader.text = "Đã hoàn thành ($count) $arrow"
+    }
+
     private fun updateStats(tasks: List<TaskEntity>) {
         val totalTasks = tasks.size
-        val completedTasks = tasks.count { it.status == TaskStatus.COMPLETED }
+        val completed = tasks.count { it.status == TaskStatus.COMPLETED }
         val totalPomo = tasks.sumOf { it.estimatedPomodoros }
-        val estimatedMinutes = totalPomo * 25
+        val minutes = totalPomo * 25
 
-        binding.taskNeedCompleteTV.text = "${totalTasks - completedTasks}"
-        binding.taskCompleted.text = "$completedTasks"
-        binding.tvTotalEstimatedTime.text = String.format("%02d:%02d", estimatedMinutes / 60, estimatedMinutes % 60)
-    }
-    private fun getCurrentWeekRange(): Pair<Long, Long> {
-        val calendar = Calendar.getInstance()
-        calendar.firstDayOfWeek = Calendar.MONDAY
-        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        val startOfWeek = calendar.timeInMillis
-        calendar.add(Calendar.DAY_OF_YEAR, 7)
-        calendar.add(Calendar.MILLISECOND, -1)
-        val endOfWeek = calendar.timeInMillis
-
-        return Pair(startOfWeek, endOfWeek)
+        binding.taskNeedCompleteTV.text = "${totalTasks - completed}"
+        binding.estimatedTimeTv.text = String.format("%02d:%02d", minutes / 60, minutes % 60)
     }
 
-    // Hàm ẩn/hiện bàn phím (Nếu cần thiết)
     private fun hideKeyboard() {
         val view = this.currentFocus
         if (view != null) {
