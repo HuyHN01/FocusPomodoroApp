@@ -82,4 +82,8 @@ interface TaskDao {
 
     @Query("SELECT * FROM tasks WHERE userId = :userId AND projectId = :projectId AND status = 'COMPLETED' ORDER BY completedAt DESC")
     fun getCompletedTasksByProject(userId: String, projectId: String): LiveData<List<TaskEntity>>
+    @Query("SELECT * FROM tasks WHERE userId = :userId AND status = 'PENDING'")
+    fun getAllPendingTasks(userId: String): LiveData<List<TaskEntity>>
+    @Query("SELECT * FROM tasks WHERE userId = :userId AND status = 'PENDING'")
+    fun getAllPendingTasksRaw(userId: String): LiveData<List<TaskEntity>>
 }

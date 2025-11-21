@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import com.example.focusmate.data.local.dao.ProjectDao
 import com.example.focusmate.data.local.entity.ProjectEntity
+import com.example.focusmate.data.local.entity.ProjectWithStats
 import com.example.focusmate.util.Constants
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.firestore
@@ -21,7 +22,9 @@ class ProjectRepository(private val projectDao: ProjectDao) {
     fun getAllProjects(userId: String): LiveData<List<ProjectEntity>> {
         return projectDao.getAllProjects(userId)
     }
-
+    fun getProjectsWithStats(userId: String): LiveData<List<ProjectWithStats>> {
+        return projectDao.getProjectsWithStats(userId)
+    }
     suspend fun insert(project: ProjectEntity) {
         
         projectDao.insertProject(project)

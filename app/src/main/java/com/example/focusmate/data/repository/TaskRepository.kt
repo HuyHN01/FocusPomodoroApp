@@ -42,6 +42,12 @@ class TaskRepository(private val taskDao: TaskDao) {
     fun getAllTasks(userId: String) : LiveData<List<TaskEntity>> {
         return taskDao.getAllTasks(userId)
     }
+    fun getAllPendingTasks(userId: String): LiveData<List<TaskEntity>> {
+        return taskDao.getAllPendingTasks(userId)
+    }
+    fun getAllPendingTasksRaw(userId: String): LiveData<List<TaskEntity>> {
+        return taskDao.getAllPendingTasksRaw(userId)
+    }
     suspend fun addTask(
         title: String,
         estimatedPomodoros: Int,

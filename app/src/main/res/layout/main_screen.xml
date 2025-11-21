@@ -44,6 +44,7 @@
             android:layout_height="24dp"
             android:layout_marginStart="8dp"
             android:src="@drawable/group_24px"
+            app:tint="@android:color/darker_gray"
             tools:ignore="ContentDescription" />
 
         <ImageView
@@ -52,6 +53,7 @@
             android:layout_height="24dp"
             android:layout_marginStart="16dp"
             android:src="@drawable/potted_plant_24px"
+            app:tint="@android:color/darker_gray"
             tools:ignore="ContentDescription" />
 
         <ImageView
@@ -60,6 +62,7 @@
             android:layout_height="24dp"
             android:layout_marginStart="16dp"
             android:src="@drawable/trophy_24px"
+            app:tint="@android:color/darker_gray"
             tools:ignore="ContentDescription" />
 
         <ImageView
@@ -68,6 +71,7 @@
             android:layout_height="24dp"
             android:layout_marginStart="16dp"
             android:src="@drawable/finance_mode_24px"
+            app:tint="@android:color/darker_gray"
             tools:ignore="ContentDescription" />
 
     </LinearLayout>
