@@ -283,10 +283,34 @@ class TaskDetailActivity : AppCompatActivity() {
                 true
             }
             R.id.action_delete -> {
-                taskViewModel.deleteTask()
+                showDeleteConfirmationDialog()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun showDeleteConfirmationDialog() {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+
+        builder.setTitle("Xóa công việc?")
+        builder.setMessage("Bạn có chắc chắn muốn xóa công việc này không?")
+        builder.setIcon(R.drawable.delete_2_svgrepo_com)
+        builder.setPositiveButton("Xóa") { dialog, _ ->
+            taskViewModel.deleteTask()
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("Hủy") { dialog, _ ->
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
+        dialog.show()
+        val btnDelete = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+        val btnCancel = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE)
+
+        btnDelete.setTextColor(Color.RED)
+        btnCancel.setTextColor(Color.GRAY)
+
     }
 }
