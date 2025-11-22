@@ -8,9 +8,15 @@ import com.example.focusmate.data.local.entity.UserEntity
 
 @Dao
 interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertUser(user: UserEntity)
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun cacheUser(user: UserEntity)
 
-    @Query("SELECT * FROM users WHERE email = :email AND password = :password LIMIT 1")
-    suspend fun login(email: String, password: String): UserEntity?
+    
+    @Query("SELECT * FROM users WHERE uid = :uid LIMIT 1")
+    suspend fun getCachedUser(uid: String): UserEntity?
+
+    
+    @Query("DELETE FROM users")
+    suspend fun clearCachedUser()
 }

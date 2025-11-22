@@ -9,13 +9,19 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp">
+        android:layout_marginTop="24dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeColor="@color/primary_color_mid"
+        app:hintTextColor="@color/primary_color_mid">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/email_or_username_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nhập email hoặc tên người dùng"
+            android:hint="Email"
             android:inputType="textEmailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -23,7 +29,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:passwordToggleEnabled="true"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="16dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeColor="@color/primary_color_mid"
+        app:hintTextColor="@color/primary_color_mid">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password_input"
@@ -52,7 +64,7 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:text="Quên mật khẩu?"
-            android:textColor="#F44336"
+            android:textColor="@color/primary_color_end"
             android:textSize="12sp" />
     </RelativeLayout>
 
@@ -65,5 +77,58 @@
         android:text="Đăng Nhập"
         android:textColor="@android:color/white"
         android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="@android:color/darker_gray" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-HOẶC-"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@android:color/darker_gray" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="@android:color/darker_gray" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_facebook"
+            android:layout_marginEnd="20dp"/>
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_twitter"
+            android:layout_marginEnd="20dp"/>
+        <ImageView
+            android:id="@+id/ic_google"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_google"/>
+
+    </LinearLayout>
 
 </LinearLayout>

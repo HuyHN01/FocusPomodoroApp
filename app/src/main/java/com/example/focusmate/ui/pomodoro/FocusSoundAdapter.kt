@@ -23,11 +23,11 @@ class FocusSoundAdapter(
                 val previousSelected = selectedSoundId
                 selectedSoundId = sound.id
 
-                // Notify adapter to update UI
+                
                 notifyItemChanged(sounds.indexOfFirst { it.id == previousSelected })
                 notifyItemChanged(sounds.indexOfFirst { it.id == selectedSoundId })
 
-                // Callback
+                
                 onSoundSelected(sound)
             }
         }

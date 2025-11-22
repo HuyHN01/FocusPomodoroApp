@@ -39,17 +39,51 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.todolist.TodoListTodayActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".ui.todolist.TodoListTomorrowActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".ui.todolist.ProjectDetailActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="true">
+        </activity>
+        <activity
             android:name=".ui.pomodoro.FullscreenTimerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.todolist.TaskDetailActivity"
             android:exported="false" />
         <activity
             android:name=".ui.pomodoro.PomodoroActivity"
             android:exported="true">
         </activity>
-
         <activity
-            android:name=".ui.todolist.TodoListTodayActivity"
+            android:name=".ui.weeklist.WeekListActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".ui.plannedlist.PlannedListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.completedlist.CompletedHistoryActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.auth.AuthActivity"
+            android:exported="true">
+
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            -->
+        </activity>
     </application>
 
 </manifest>
