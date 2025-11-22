@@ -9,31 +9,41 @@
     <View
         android:id="@+id/header_view"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="170dp"
         android:background="@drawable/bg_header_curved"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <View
+        android:id="@+id/imgLogoGlow"
+        android:layout_width="92dp"
+        android:layout_height="92dp"
+        android:background="@drawable/circle_white_opacity"
+        app:layout_constraintBottom_toBottomOf="@+id/logo_image"
+        app:layout_constraintEnd_toEndOf="@+id/logo_image"
+        app:layout_constraintStart_toStartOf="@+id/logo_image"
+        app:layout_constraintTop_toTopOf="@+id/logo_image" />
+
     <ImageView
         android:id="@+id/logo_image"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="40dp"
-        android:src="@drawable/ic_placeholder_logo"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="25dp"
+        android:src="@drawable/ic_focusmate_app"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@android:color/white" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/app_name_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="FocusMate"
+        android:text="@string/app_name"
         android:textColor="@android:color/white"
         android:textSize="34sp"
         android:textStyle="bold"
+        android:fontFamily="@font/nunito_extra_bold"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/logo_image"
         app:layout_constraintStart_toStartOf="parent"
@@ -44,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        app:cardCornerRadius="28dp"
+        app:cardCornerRadius="32dp"
         app:cardElevation="24dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -75,7 +85,7 @@
                     android:padding="12dp"
                     android:text="Đăng Nhập"
                     android:textColor="@android:color/white"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/sign_up_toggle"
@@ -85,7 +95,7 @@
                     android:gravity="center"
                     android:padding="12dp"
                     android:text="Đăng Ký"
-                    android:textColor="#F44336"
+                    android:textColor="@color/dark_gray"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -97,57 +107,6 @@
                 android:layout_marginTop="16dp"
                 android:animateLayoutChanges="true"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:layout_marginTop="24dp"
-                android:orientation="horizontal">
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1"
-                    android:background="@android:color/darker_gray" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="-HOẶC-"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:textColor="@android:color/darker_gray" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1"
-                    android:background="@android:color/darker_gray" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_marginTop="24dp"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/ic_facebook"
-                    android:layout_marginEnd="20dp"/>
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/ic_twitter"
-                    android:layout_marginEnd="20dp"/>
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/ic_google"/>
-
-            </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

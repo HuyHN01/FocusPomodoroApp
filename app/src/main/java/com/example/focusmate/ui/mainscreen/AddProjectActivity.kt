@@ -16,12 +16,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.focusmate.R
+import android.graphics.Color
 
 class AddProjectActivity : AppCompatActivity() {
     private lateinit var edtProjectName: EditText
     private lateinit var colorGrid: GridLayout
     private lateinit var tvDone: TextView
     private lateinit var btnBack: ImageButton
+    private var isEditMode = false
+    private var editingProjectId: String? = null
 
     private var selectedColor: Int? = null
     private lateinit var projectIcon: ImageView
@@ -45,16 +48,34 @@ class AddProjectActivity : AppCompatActivity() {
         btnBack = findViewById(R.id.btnBack)
         renderColorOptions()
 
+        if (intent.hasExtra("project_id_string")) {
+            isEditMode = true
+            editingProjectId = intent.getStringExtra("project_id_string")
+            val name = intent.getStringExtra("project_name")
+            val colorString = intent.getStringExtra("project_color_string")
+
+            edtProjectName.setText(name)
+            if (colorString != null) {
+                try {
+                    val colorInt = Color.parseColor(colorString)
+                    selectedColor = colorInt
+                    projectIcon.setColorFilter(colorInt)
+                } catch (e: Exception) {}
+            }
+        }
         tvDone.setOnClickListener {
             val name = edtProjectName.text.toString().trim()
-            if (name.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập tên dự án", Toast.LENGTH_SHORT).show()
-            } else if (selectedColor == null) {
-                Toast.makeText(this, "Vui lòng chọn màu", Toast.LENGTH_SHORT).show()
+            if (name.isEmpty() || selectedColor == null) {
             } else {
+                val colorString = String.format("#%06X", 0xFFFFFF and selectedColor!!)
+
                 val intent = Intent().apply {
                     putExtra("project_name", name)
-                    putExtra("project_color", selectedColor!!)
+                    putExtra("project_color_string", colorString)
+
+                    if (isEditMode) {
+                        putExtra("project_id_string", editingProjectId)
+                    }
                 }
                 setResult(Activity.RESULT_OK, intent)
                 finish()
@@ -68,7 +89,7 @@ class AddProjectActivity : AppCompatActivity() {
 
     private fun renderColorOptions() {
         colorGrid.removeAllViews()
-        val size = (resources.displayMetrics.density * 70).toInt() // 48dp
+        val size = (resources.displayMetrics.density * 70).toInt()
 
         for (color in colors) {
             val btn = ImageButton(this).apply {

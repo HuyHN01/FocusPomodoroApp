@@ -4,28 +4,45 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
+import com.example.focusmate.R
+import com.example.focusmate.data.repository.PomodoroRepository
 import com.example.focusmate.databinding.ActivityPomodoroBinding
+import com.example.focusmate.ui.todolist.TaskViewModel
 import com.example.focusmate.util.PomodoroService
 import com.example.focusmate.util.PomodoroSoundPlayer
+import com.example.focusmate.util.SoundEvent
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.collection.LLRBNode
 
 class PomodoroActivity : AppCompatActivity() {
+    private var currentTaskId: String? = null
+    private lateinit var taskViewModel: TaskViewModel
+    
 
     private lateinit var binding: ActivityPomodoroBinding
     private val viewModel: PomodoroViewModel by viewModels()
 
-    private val defaultTotalTime = 25 * 60 // 25 phút
+    private val defaultTotalTime = 25 * 60 
 
     private lateinit var soundPlayer: PomodoroSoundPlayer
 
-    // Request notification permission for Android 13+
+    
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -40,22 +57,135 @@ class PomodoroActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                Color.TRANSPARENT
+            ),
+            navigationBarStyle = SystemBarStyle.dark(
+                Color.TRANSPARENT
+            )
+
+        )
+
         binding = ActivityPomodoroBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Khóa portrait
+        
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        val rootLayout = findViewById<View>(R.id.root_layout)
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            
+
+            
+            val btnBack = findViewById<View>(R.id.btn_back)
+            btnBack.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                
+                topMargin = 32.dpToPx() + bars.top
+            }
+
+            
+            val tvStatus = findViewById<View>(R.id.tv_status)
+            tvStatus.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = 80.dpToPx() + bars.top
+            }
+
+            
+            val fragmentContainer = findViewById<View>(R.id.pomodoro_task_fragment_container)
+            fragmentContainer.setPadding(0, bars.top, 0, 0)
+
+
+            
+
+            
+            val bottomNav = findViewById<View>(R.id.ll_bottom_nav)
+            bottomNav.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                
+                bottomMargin = 32.dpToPx() + bars.bottom
+            }
+
+            
+            insets
+        }
 
         soundPlayer = PomodoroSoundPlayer(this)
 
-        // Request notification permission if needed
+        
         checkNotificationPermission()
 
-        // Start foreground service
+        
         PomodoroService.startService(this)
 
         observeViewModel()
         setupListeners()
+
+
+        taskViewModel = ViewModelProvider(this).get(TaskViewModel::class.java)
+
+        
+
+        
+        val intentTaskId = intent.getStringExtra("EXTRA_TASK_ID")
+
+        if (intentTaskId != null) {
+            
+            currentTaskId = intentTaskId
+            PomodoroRepository.currentTaskId = intentTaskId
+        } else {
+            
+            
+            currentTaskId = PomodoroRepository.currentTaskId
+        }
+
+        
+        currentTaskId?.let { taskId ->
+            taskViewModel.loadTaskById(taskId)
+        }
+
+        setupObserver()
+    }
+
+    private fun setupObserver() {
+        
+        taskViewModel.currentTask.asLiveData().observe(this) { task ->
+            if (task != null) {
+                
+                binding.tvStatus.visibility = View.GONE
+                binding.pomodoroTaskFragmentContainer.visibility = View.VISIBLE
+
+                
+                loadTaskFragment(task.title)
+
+                
+                if (viewModel.state.value == TimerState.IDLE) {
+                    viewModel.startTimer()
+                }
+
+            } else {
+                
+
+                
+                
+                
+
+                
+                
+                binding.tvStatus.visibility = View.VISIBLE
+                binding.pomodoroTaskFragmentContainer.visibility = View.GONE
+            }
+        }
+    }
+
+    
+    private fun loadTaskFragment(taskTitle: String) {
+        val fragment = PomodoroTaskFragment.newInstance(taskTitle)
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.pomodoro_task_fragment_container, fragment)
+            .commit()
     }
 
     private fun checkNotificationPermission() {
@@ -65,10 +195,10 @@ class PomodoroActivity : AppCompatActivity() {
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED -> {
-                    // Permission already granted
+                    
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
-                    // Show rationale and request permission
+                    
                     Snackbar.make(
                         binding.root,
                         "Ứng dụng cần quyền thông báo để hoạt động ở chế độ nền",
@@ -78,7 +208,7 @@ class PomodoroActivity : AppCompatActivity() {
                     }.show()
                 }
                 else -> {
-                    // Request permission directly
+                    
                     requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
@@ -86,22 +216,22 @@ class PomodoroActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        // thời gian
+        
         viewModel.timeLeft.observe(this) { seconds ->
             val minutes = seconds / 60
             val sec = seconds % 60
             binding.tvTimer.text = String.format("%02d:%02d", minutes, sec)
 
-            // cập nhật progress max theo session total (hỗ trợ +1 min)
+            
             viewModel.sessionTotal.observe(this) { total ->
                 binding.cpvTimerProgress.setMaxProgress(total.toFloat())
             }
-            // set progress
+            
             val total = viewModel.sessionTotal.value ?: defaultTotalTime
             binding.cpvTimerProgress.setProgress((total - seconds).toFloat())
         }
 
-        // trạng thái
+        
         viewModel.state.observe(this) { state ->
             when (state) {
                 TimerState.IDLE -> {
@@ -129,7 +259,7 @@ class PomodoroActivity : AppCompatActivity() {
                     binding.btnSkipBreak.visibility = View.GONE
                 }
                 TimerState.BREAK_READY -> {
-                    // show start break and skip
+                    
                     binding.btnStart.visibility = View.GONE
                     binding.btnPause.visibility = View.GONE
                     binding.btnResume.visibility = View.GONE
@@ -138,7 +268,7 @@ class PomodoroActivity : AppCompatActivity() {
                     binding.btnSkipBreak.visibility = View.GONE
                 }
                 TimerState.BREAK_RUNNING -> {
-                    // show pause + skip (per requirement)
+                    
                     binding.btnStart.visibility = View.GONE
                     binding.btnPause.visibility = View.GONE
                     binding.btnResume.visibility = View.GONE
@@ -160,38 +290,56 @@ class PomodoroActivity : AppCompatActivity() {
         viewModel.soundEvent.observe(this) {event ->
             event?.let {
                 soundPlayer.playSound(it)
+
+                
+                if (it == SoundEvent.END_FOCUS && currentTaskId != null) {
+
+                    currentTaskId?.let { id ->
+
+                        taskViewModel.incrementCompletedPomodoros(id)
+                    }
+                }
                 viewModel.resetSoundEvent()
             }
+
         }
     }
 
     private fun setupListeners() {
-        binding.btnStart.setOnClickListener { viewModel.startTimer() }         // start pomodoro
+        binding.btnBack.setOnClickListener {
+            
+            
+            finish()
+
+            
+            
+        }
+        binding.btnStart.setOnClickListener { viewModel.startTimer() }         
         binding.btnPause.setOnClickListener { viewModel.pauseTimer() }
         binding.btnResume.setOnClickListener { viewModel.resumeTimer() }
         binding.btnStop.setOnClickListener { viewModel.resetTimer() }
 
-        binding.btnStartBreak.setOnClickListener { viewModel.startBreak() }    // start break
-        binding.btnSkipBreak.setOnClickListener { viewModel.skipBreak() }      // skip break
+        binding.btnStartBreak.setOnClickListener { viewModel.startBreak() }    
+        binding.btnSkipBreak.setOnClickListener { viewModel.skipBreak() }      
 
         binding.llMeditation.setOnClickListener {
-            //setActiveTab(binding.llMeditation)
-            // TODO: mở chế độ Meditation
+            
+            
         }
 
         binding.llTimer.setOnClickListener {
-            //setActiveTab(binding.llTimer)
-            // TODO: mở chế độ Timer
+            
+            
         }
 
         binding.llFocus.setOnClickListener {
-            //setActiveTab(binding.llFocus)
+            
             openFullscreenTimer()
         }
 
         binding.llMusic.setOnClickListener {
-            //setActiveTab(binding.llMusic)
-            // TODO: mở chế độ Music
+            
+            
             openFocusSoundDialog()
         }
     }
@@ -227,7 +375,9 @@ class PomodoroActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         soundPlayer.release()
-        // NOTE: Không stop service ở đây vì ta muốn timer chạy ngay cả khi Activity bị destroy
-        // Service sẽ tự stop khi user nhấn Stop trong notification
+        
+        
     }
+
+    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

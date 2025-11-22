@@ -37,6 +37,8 @@ object PomodoroRepository {
     private val _focusSoundVolume = MutableLiveData<Float>(0.7f)
     val focusSoundVolume: LiveData<Float> = _focusSoundVolume
 
+    var currentTaskId: String? = null
+
     fun startTimer() {
         when (_state.value) {
             TimerState.RUNNING, TimerState.BREAK_RUNNING -> {
@@ -61,10 +63,10 @@ object PomodoroRepository {
     private fun startPomodoro() {
         timer?.cancel()
         sessionTotalTime = DEFAULT_POMODORO
-        currentTime = sessionTotalTime //=DEFAULT_POMODORO = 25
-        _sessionTotal.value = sessionTotalTime // = 25
-        _timeLeft.value = currentTime //= 25
-        _state.value = TimerState.RUNNING //Khi Pomodoro chạy -> trạng thái = Running
+        currentTime = sessionTotalTime 
+        _sessionTotal.value = sessionTotalTime 
+        _timeLeft.value = currentTime 
+        _state.value = TimerState.RUNNING 
         startCountDown(isBreak = false)
 
         _soundEvent.value = SoundEvent.START_FOCUS
@@ -131,7 +133,7 @@ object PomodoroRepository {
         when (_state.value) {
             TimerState.RUNNING -> _state.value = TimerState.PAUSED
             TimerState.BREAK_RUNNING -> _state.value = TimerState.BREAK_PAUSED
-            else -> { /* nothing */ }
+            else -> {  }
         }
     }
 
@@ -165,7 +167,7 @@ object PomodoroRepository {
             }
 
             override fun onFinish() {
-                // ensure 0 is posted
+                
                 currentTime = 0
                 _timeLeft.postValue(0)
                 if (isBreak) {

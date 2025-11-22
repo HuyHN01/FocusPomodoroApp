@@ -50,10 +50,10 @@ class CircularProgressView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Draw background circle
+        
         canvas.drawOval(oval, backgroundPaint)
 
-        // Draw progress arc
+        
         if (progress > 0) {
             val sweepAngle = (progress / maxProgress) * 360f
             canvas.drawArc(oval, -90f, sweepAngle, false, progressPaint)

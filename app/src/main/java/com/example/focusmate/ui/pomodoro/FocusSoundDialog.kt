@@ -56,19 +56,19 @@ class FocusSoundDialog (
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Khởi tạo tài nguyên
+        
         focusSoundPlayer = FocusSoundPlayer(requireContext())
 
         setupViews()
         setupListeners()
-        setupOnBackPressedCallback() // Đăng ký xử lý nút Back
+        setupOnBackPressedCallback() 
     }
 
     private fun setupViews() {
-        // Setup SeekBar
+        
         binding.seekBarVolume.progress = (currentVolume * 100).toInt()
 
-        // Setup RecyclerView
+        
         adapter = FocusSoundAdapter(
             sounds = FocusSoundList.sounds,
             selectedSoundId = currentSoundId
